@@ -16,7 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../component/common/Ta
 import { Grid, GridCol, GridRow } from "../component/common/Grid";
 import { Table } from "../component/common/Table";
 import { Badge } from "../component/common/Badge";
-import RadioBox from "@/component/common/RadioBox";
+import RadioBox from "@/component/common/RadioBox"
 // import { ErrorMessage, Field, Form, Formik } from 'formik';
 
 export default function Home() {
