@@ -189,6 +189,7 @@ export default function EditableProductTable({
           "当店通常価格",
           "メーカー希望小売価格",
           "クーポン利用で",
+          "単品合計価格",
         ];
         const newRows: ProductRow[] = [];
 
@@ -481,6 +482,9 @@ export default function EditableProductTable({
                       </Table.Option>
                       <Table.Option value="クーポン利用で">
                         クーポン利用で
+                      </Table.Option>
+                      <Table.Option value="単品合計価格">
+                        単品合計価格
                       </Table.Option>
                     </Table.SelectBox>
 

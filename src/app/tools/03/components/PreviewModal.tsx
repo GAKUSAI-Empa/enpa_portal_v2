@@ -151,6 +151,18 @@ function PreviewModal({
               </div>
               <span className="text-sm text-gray-600">
                 {currentProgress} / {currentTotal} 件処理済み
+                {/* --- 修正案 (START) --- */}
+                {(() => {
+                  // isJobFinished đã được tính ở trên
+                  if (isJobFinished && jobStatus?.startTime && jobStatus?.endTime) {
+                    const duration = (jobStatus.endTime - jobStatus.startTime).toFixed(2);
+                    return (
+                      <span className="ml-2">(処理時間: {duration}秒)</span>
+                    );
+                  }
+                  return null;
+                })()}
+                {/* --- 修正案 (END) --- */}
               </span>
             </div>
             {/* プログレスバー */}
