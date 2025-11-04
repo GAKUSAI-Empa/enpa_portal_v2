@@ -9,7 +9,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/component/common/Tab
 import { TextBox } from '@/component/common/TextBox'
 import SliderImagereview from '@/component/tools/07/SliderImage'
 import { CheckBoxGroup } from '@/component/common/CheckBox'
-import React, { useState } from 'react'
+import { useRef, useState } from "react";
+import React, { useEffect } from 'react'
+import { useHeader } from '@/app/context/HeaderContext'
 import RadioBox from '@/component/common/RadioBox'
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -17,13 +19,18 @@ import * as Yup from 'yup';
 const cn = (...classes: (string | boolean | null | undefined)[]) => classes.filter(Boolean).join(' ');
 const page = () => {
 
+    const { setTitle } = useHeader();
+
+    useEffect(() => {
+        setTitle("レビュー評価バナー自動掲載");
+    }, [setTitle]);
+
     const [imagePositionPc, setImagePositionPc] = useState<string[]>([]); // Mặc định là k tich chon
     const [imagePositionSp, setImagePositionSp] = useState<string[]>([]);
 
     const [selectedImages, setSelectedImages] = useState<string[] | null>(null);
     return (
         <>
-            <h1 className="text-2xl mb-4 font-bold text-gray-800">レビュー評価バナー自動掲載</h1>
             <Tabs defaultTab="tab1">
 
                 <TabsContent value="tab1">
@@ -153,28 +160,6 @@ const page = () => {
                             設定を保存
                         </Button>
                     </div>
-
-                    {selectedImages && (
-                        <div
-                            className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
-                            onClick={() => setSelectedImages(null)}
-                        >
-                            <div
-                                className="flex flex-col md:flex-row items-center justify-center gap-4"
-                                onClick={(e) => e.stopPropagation()}
-                            >
-                                {selectedImages.map((imgSrc, index) => (
-                                    <img
-                                        key={index}
-                                        src={imgSrc}
-                                        alt={`Template Preview ${index + 1}`}
-                                        className="max-w-[45vw] max-h-[80vh] object-contain rounded-md"
-                                    />
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
                 </TabsContent>
                 <TabsContent value="tab2">
 
