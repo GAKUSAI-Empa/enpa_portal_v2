@@ -79,7 +79,8 @@ export function useJobPolling({
     }
 
     try {
-      const response = await fetch(`/api/tools/03/jobs/${targetJobId}/status`);
+      const API_URL = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${API_URL}/tools/03/jobs/${targetJobId}/status`);
 
       if (
         !latestIsOpenRef.current ||
