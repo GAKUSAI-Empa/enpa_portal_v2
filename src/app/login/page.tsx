@@ -47,6 +47,7 @@ const page = () => {
       } else {
         const session = await getSession();
         toast.success('おはよう' + session?.user.username);
+        console.log(session?.user.accessToken);
         router.push('/');
       }
 
