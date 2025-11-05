@@ -32,7 +32,7 @@ export const authOptions: AuthOptions = {
 
           return null;
         } catch (e: any) {
-          throw new Error(e.response?.data?.detail || 'Can not login');
+          throw new Error(e.response?.data?.detail || 'サーバーに接続できません');
         }
       },
     }),

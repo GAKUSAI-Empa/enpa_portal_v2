@@ -1,5 +1,6 @@
 import { AxiosResponse } from 'axios';
-import defaultAxios from '@/lib/axios/axiosAuth';
+import axios from 'axios';
+const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_DOMAIN;
 
 export const APIUserLogin = async (
   username: string = '',
@@ -12,10 +13,16 @@ export const APIUserLogin = async (
   };
 
   try {
+    const defaultAxios = axios.create({
+      baseURL: BASE_URL,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
     const response = await defaultAxios.post(url, body);
     console.log(response);
     return response;
   } catch (error) {
-    throw error; // Rethrow the error so it can be caught by the caller if needed
+    throw error;
   }
 };

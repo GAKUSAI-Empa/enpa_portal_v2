@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { getSession, signIn } from 'next-auth/react';
+import { getSession, signIn, useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { TextBox } from '@/component/common/TextBox';
 import { Card, CardContent, CardHeader } from '@/component/common/Card';
@@ -11,13 +11,20 @@ import { FormikProvider, useFormik } from 'formik';
 import * as Yup from 'yup';
 import { IconLoader2 } from '@tabler/icons-react';
 import { toast } from 'sonner';
+import { Alert } from '@/component/common/Alert';
 
 const page = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const { data: session } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const isError = searchParams && searchParams.get('error') === 'CredentialsSignin' ? true : false;
   const isSessionExpired = searchParams ? searchParams.get('isSessionExpired') === 'true' : false;
+
+  useEffect(() => {
+    if (session) {
+      router.push('/account');
+    }
+  }, [session]);
 
   const formik = useFormik({
     initialValues: {
@@ -38,9 +45,8 @@ const page = () => {
       if (res && res.error) {
         toast.error(res.error);
       } else {
-        toast.success('Login success');
         const session = await getSession();
-        console.log(session?.user);
+        toast.success('おはよう' + session?.user.username);
         router.push('/');
       }
 
@@ -50,92 +56,101 @@ const page = () => {
 
   return (
     <FormikProvider value={formik}>
-      <div className="flex flex-col items-center justify-center min-h-screen bg-white">
-        {/* Form */}
-        <div className="w-full max-w-lg">
-          {/* Logo */}
-          <div className="flex items-center justify-center mb-8 w-full">
-            <div className="flex-1 flex justify-end pr-2">
-              <Image
-                width={0}
-                height={60}
-                src="/img/logo/emportal_logo.png"
-                alt="Logo"
-                className="object-contain"
-                style={{ width: 'auto' }}
-              />
+      <div className="flex flex-col justify-center w-full h-screen lg:flex-row">
+        <div className="flex flex-col items-center justify-center h-full flex-1 bg-white">
+          {/* Form */}
+          <div className="w-full max-w-md">
+            {/* Logo */}
+            <div className="flex items-center justify-center mb-8 w-full">
+              <div className="flex-1 flex justify-end pr-2">
+                <Image
+                  width={0}
+                  height={60}
+                  src="/img/logo/emportal_logo.png"
+                  alt="Logo"
+                  className="object-contain"
+                  style={{ width: 'auto' }}
+                />
+              </div>
+              <div className="flex-[4] flex justify-start pl-2">
+                <Image
+                  width={0}
+                  height={60}
+                  src="/img/logo/emportal_logo_text.png"
+                  alt="Logo Text"
+                  className="object-contain"
+                  style={{ width: 'auto' }}
+                />
+              </div>
             </div>
-            <div className="flex-[4] flex justify-start pl-2">
-              <Image
-                width={0}
-                height={60}
-                src="/img/logo/emportal_logo_text.png"
-                alt="Logo Text"
-                className="object-contain"
-                style={{ width: 'auto' }}
-              />
-            </div>
+
+            {isSessionExpired && (
+              <Alert variant="warning">Session expired. please login again</Alert>
+            )}
+
+            <form onSubmit={formik.handleSubmit}>
+              <div className="flex flex-col mb-3">
+                {/* Username */}
+                <TextBox
+                  id="username"
+                  name="username"
+                  type="text"
+                  isRequired={true}
+                  label={'ユーザー名'}
+                  value={formik.values.username}
+                  placeholder="EnpaPortal"
+                  direction="vertical"
+                  onChange={formik.handleChange}
+                  error={formik.errors.username}
+                  touched={formik.touched.username}
+                />
+                {/* Password */}
+                <TextBox
+                  id="password"
+                  name="password"
+                  type="password"
+                  isRequired={true}
+                  label={'パスワード'}
+                  value={formik.values.password}
+                  placeholder=""
+                  direction="vertical"
+                  onChange={formik.handleChange}
+                  error={formik.errors.password}
+                  touched={formik.touched.password}
+                />
+              </div>
+              <div className="flex items-center justify-center">
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  size="lg"
+                  className="w-80 py-2 bg-white rounded-full border border-primary text-primary hover:bg-primary hover:text-white transition disabled:text-white"
+                  onClick={formik.submitForm}
+                >
+                  {isLoading ? <IconLoader2 className="animate-spin" /> : <>ログイン</>}
+                </Button>
+              </div>
+              {/* Extra links */}
+              <div className="flex flex-col items-center">
+                <Link href="#" className="text-sm text-blue-600 hover:underline  my-6">
+                  特定商取引法に基づく表記
+                </Link>
+                <Button
+                  size="lg"
+                  className="w-80 py-2 bg-white rounded-full border border-primary text-primary hover:bg-primary hover:text-white transition"
+                >
+                  新規申し込み
+                </Button>
+              </div>
+            </form>
           </div>
 
-          <form onSubmit={formik.handleSubmit}>
-            <div className="flex flex-col mb-3">
-              {/* Username */}
-              <TextBox
-                id="username"
-                name="username"
-                type="text"
-                isRequired={true}
-                label={'ユーザー名'}
-                value={formik.values.username}
-                placeholder="EnpaPortal"
-                direction="vertical"
-                onChange={formik.handleChange}
-                error={formik.errors.username}
-                touched={formik.touched.username}
-              />
-              {/* Password */}
-              <TextBox
-                id="password"
-                name="password"
-                type="text"
-                isRequired={true}
-                label={'パスワード'}
-                value={formik.values.password}
-                placeholder=""
-                direction="vertical"
-                onChange={formik.handleChange}
-                error={formik.errors.password}
-                touched={formik.touched.password}
-              />
-            </div>
-            <div className="flex items-center justify-center">
-              <Button
-                type="submit"
-                disabled={isLoading}
-                size="lg"
-                className="w-80 py-2 bg-white rounded-full border border-primary text-primary hover:bg-primary hover:text-white transition disabled:text-white"
-                onClick={formik.submitForm}
-              >
-                {isLoading ? <IconLoader2 className="animate-spin" /> : <>ログイン</>}
-              </Button>
-            </div>
-            {/* Extra links */}
-            <div className="flex flex-col items-center">
-              <Link href="#" className="text-sm text-blue-600 hover:underline  my-6">
-                特定商取引法に基づく表記
-              </Link>
-              <Button
-                size="lg"
-                className="w-80 py-2 bg-white rounded-full border border-primary text-primary hover:bg-primary hover:text-white transition"
-              >
-                新規申し込み
-              </Button>
-            </div>
-          </form>
+          {/* Footer */}
+          <footer className="mt-8 text-xs text-gray-400">©EMPOWERMENT TOWN PORTAL</footer>
         </div>
-
-        {/* Footer */}
-        <footer className="mt-8 text-xs text-gray-400">©EMPOWERMENT TOWN PORTAL</footer>
+        <div className="items-center hidden w-full h-full lg:w-1/2">
+          <h1>aaaa</h1>
+        </div>
       </div>
     </FormikProvider>
   );
