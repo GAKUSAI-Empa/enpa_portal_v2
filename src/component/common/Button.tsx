@@ -25,7 +25,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         type="button"
         className={cn(
-          "rounded-md",
+          "flex items-center justify-center rounded-md",
           sizeClass[size],
           colorClass[color],
           className

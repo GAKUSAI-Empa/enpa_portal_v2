@@ -1,774 +1,563 @@
-"use client";
+// src/app/tools/03/page.tsx
+'use client';
 
-import React, { useId, useState, useEffect, useRef } from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-} from "../../../component/common/Card";
-import { Button } from "../../../component/common/Button";
-import { Table } from "../../../component/common/Table";
-import { TextBox } from "../../../component/common/TextBox";
-import { NumberBox } from "../../../component/common/NumberBox";
-import SelectBox from "../../../component/common/SelectBox";
-import { IconAlertCircle, IconTrash } from "@tabler/icons-react";
-import { cn } from "../../../lib/utils";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useHeader } from '@/app/context/HeaderContext';
+import { Card, CardContent, CardHeader } from '@/component/common/Card';
+import { Button } from '@/component/common/Button';
+import { Alert } from '@/component/common/Alert';
+import { IconLoader2, IconRefresh } from '@tabler/icons-react';
+import { Toaster, toast } from 'sonner';
+import debounce from 'lodash/debounce';
 
-// --- Dữ liệu cho template ---
-const templates = [
-  {
-    id: 1,
-    name: "テンプレートA",
-    imgs: ["/img/tool3/sample001-A_2nd.jpg", "/img/tool3/sample002-A_2nd.jpg"],
-  },
-  {
-    id: 2,
-    name: "テンプレートB",
-    imgs: ["/img/tool3/sample003-B_2nd.jpg", "/img/tool3/sample004-B_2nd.jpg"],
-  },
-  {
-    id: 3,
-    name: "テンプレートC",
-    imgs: ["/img/tool3/sample005-C_2nd.jpg", "/img/tool3/sample006-C_2nd.jpg"],
-  },
-  {
-    id: 4,
-    name: "テンプレートD",
-    imgs: ["/img/tool3/sample007-D_2nd.jpg", "/img/tool3/sample008-D_2nd.jpg"],
-  },
-  {
-    id: 5,
-    name: "テンプレートE",
-    imgs: ["/img/tool3/sample009-E_2nd.jpg", "/img/tool3/sample010-E_2nd.jpg"],
-  },
-  {
-    id: 6,
-    name: "テンプレートF",
-    imgs: ["/img/tool3/sample011-F_2nd.jpg", "/img/tool3/sample012-F_2nd.jpg"],
-  },
-];
+// コンポーネントとロジックの分離
+import EditableProductTable from './components/EditableProductTable';
+import PreviewModal from './components/PreviewModal';
+import RestoreSessionPopup from './components/RestoreSessionPopup';
+import ResetConfirmPopup from './components/ResetConfirmPopup';
+import { useJobPolling } from './hooks/useJobPolling';
+import { validateRows } from './lib/validation';
+import { createNewProductRow } from './lib/utils';
+import { templates } from './constants';
+import type { ProductRow, AllErrors, BackendJobStatus } from './types';
 
-// --- Định nghĩa kiểu dữ liệu cho một dòng sản phẩm ---
-type ProductRow = {
-  id: string;
-  productCode: string;
-  template: string;
-  startDate: string;
-  endDate: string;
-  priceType: string;
-  customPriceType: string;
-  regularPrice: string;
-  salePrice: string;
-  saleText: string;
-  discount: string;
-  discountType: "percent" | "yen" | "";
-  mobileStartDate: string;
-  mobileEndDate: string;
-};
+// Sonner toast ID の型
+type SonnerToastId = string | number;
 
-// --- Định nghĩa kiểu cho lỗi ---
-type RowErrors = {
-  productCode?: string;
-  startDate?: string;
-  endDate?: string;
-  regularPrice?: string;
-  salePrice?: string;
-  saleText?: string;
-};
-type AllErrors = { [key: string]: RowErrors };
+// localStorage のキー
+const LOCAL_STORAGE_KEY = 'tool03_session_data_v2';
 
-// --- Hàm tạo một dòng sản phẩm mới ---
-const createNewProductRow = (id: string): ProductRow => ({
-  id: `${id}-${Date.now()}`,
-  productCode: "",
-  template: templates[0].name,
-  startDate: "",
-  endDate: "",
-  priceType: "当店通常価格",
-  customPriceType: "",
-  regularPrice: "",
-  salePrice: "",
-  saleText: "",
-  discount: "",
-  discountType: "percent",
-  mobileStartDate: "",
-  mobileEndDate: "",
-});
+// --- LAZY LOAD (START) ---
+// 一度に表示する画像数
+const BATCH_SIZE = 10;
+// --- LAZY LOAD (END) ---
 
-// --- Component hiển thị lỗi ---
-const ErrorDisplay = ({ message }: { message?: string }) => {
-  if (!message) return null;
-  return (
-    <div className="group relative flex items-center pr-2">
-      <IconAlertCircle size={16} className="text-red-500 cursor-pointer" />
-      <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-max max-w-xs bg-gray-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-        {message}
-      </div>
-    </div>
-  );
-};
-
-// --- Component Bảng Nhập Liệu ---
-interface EditableProductTableProps {
-  rows: ProductRow[];
-  setRows: React.Dispatch<React.SetStateAction<ProductRow[]>>;
-  errors: AllErrors;
-  showErrors: boolean;
-}
-
-function EditableProductTable({
-  rows,
-  setRows,
-  errors,
-  showErrors,
-}: EditableProductTableProps) {
-  const baseId = useId();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const calculateDiscountDisplay = (
-    regularPriceStr: string,
-    salePriceStr: string,
-    type: "percent" | "yen" | ""
-  ): string => {
-    const regularPrice = parseFloat(regularPriceStr);
-    const salePrice = parseFloat(salePriceStr);
-    if (
-      type &&
-      !isNaN(regularPrice) &&
-      !isNaN(salePrice) &&
-      regularPrice > salePrice
-    ) {
-      if (type === "percent") {
-        const percentage = Math.round(
-          ((regularPrice - salePrice) / regularPrice) * 100
-        );
-        return `${percentage}%OFF`;
-      } else {
-        const difference = regularPrice - salePrice;
-        return `${difference.toLocaleString()}円OFF`;
-      }
-    }
-    return "";
-  };
-
-  const handleInputChange = (
-    id: string,
-    field: keyof ProductRow,
-    value: string
-  ) => {
-    let processedValue: string | number = value;
-    if (field === "regularPrice" || field === "salePrice") {
-      // Allow only numbers and a single dot
-      processedValue = value.replace(/[^0-9.]/g, "").replace(/(\..*)\./g, "$1");
-    }
-
-    setRows((prev) =>
-      prev.map((row) => {
-        if (row.id !== id) return row;
-        const updatedRow = { ...row, [field]: processedValue };
-        if (
-          ["regularPrice", "salePrice", "discountType"].includes(
-            field as string
-          )
-        ) {
-          updatedRow.discount = calculateDiscountDisplay(
-            updatedRow.regularPrice,
-            updatedRow.salePrice,
-            updatedRow.discountType
-          );
-        }
-        return updatedRow;
-      })
-    );
-  };
-
-  const addRow = () => {
-    setRows((prev) => [...prev, createNewProductRow(baseId)]);
-  };
-  const addMultipleRows = (count: number) => {
-    const newRows = Array.from({ length: count }, (_, i) =>
-      createNewProductRow(`${baseId}-${i}`)
-    );
-    setRows((prev) => [...prev, ...newRows]);
-  };
-
-  const deleteRow = (id: string) => {
-    setRows((prev) => {
-      if (prev.length > 1) {
-        return prev.filter((row) => row.id !== id);
-      }
-      return prev;
-    });
-  };
-
-  const handleImportCSV = () => {
-    fileInputRef.current?.click();
-  };
-
-  const parseJapaneseDate = (dateStr: string): string => {
-    if (!dateStr || !dateStr.includes("月")) return "";
-    const match = dateStr.match(/(\d{1,2})月(\d{1,2})日(\d{1,2}):(\d{1,2})/);
-    if (!match) return "";
-    const [, month, day, hour, minute] = match.map(Number);
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth() + 1;
-    const year = month < currentMonth ? currentYear + 1 : currentYear;
-    const formattedMonth = String(month).padStart(2, "0");
-    const formattedDay = String(day).padStart(2, "0");
-    const formattedHour = String(hour).padStart(2, "0");
-    const formattedMinute = String(minute).padStart(2, "0");
-    return `${year}-${formattedMonth}-${formattedDay}T${formattedHour}:${formattedMinute}`;
-  };
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const text = e.target?.result as string;
-      if (!text) return;
-      const lines = text.trim().split(/\r\n|\n/);
-      const headers = lines[0]
-        .split(",")
-        .map((h) => h.trim().replace(/"/g, ""));
-      const headerMapping: { [key: string]: keyof ProductRow | string } = {
-        商品管理番号: "productCode",
-        テンプレート: "template",
-        開始日時: "startDate",
-        終了日時: "endDate",
-        二重価格: "priceType",
-        価格: "regularPrice",
-        セール価格: "salePrice",
-        セール文言: "saleText",
-        割引表示: "discountType",
-        楽天モバイル開始日時: "mobileStartDate",
-        楽天モバイル終了日時: "mobileEndDate",
-      };
-      const standardPriceTypes = [
-        "当店通常価格",
-        "メーカー希望小売価格",
-        "クーポン利用で",
-      ];
-      const newRows: ProductRow[] = lines
-        .slice(1)
-        .map((line, lineIndex) => {
-          const values = line.split(",").map((v) => v.trim().replace(/"/g, ""));
-          const rowData = createNewProductRow(`${baseId}-csv-${lineIndex}`);
-          headers.forEach((header, index) => {
-            const key = headerMapping[header];
-            const value = values[index];
-            if (!key || value === undefined) return;
-            if (key === "priceType") {
-              if (standardPriceTypes.includes(value)) rowData.priceType = value;
-              else {
-                rowData.priceType = "custom";
-                rowData.customPriceType = value;
-              }
-            } else if (
-              [
-                "startDate",
-                "endDate",
-                "mobileStartDate",
-                "mobileEndDate",
-              ].includes(key as string)
-            ) {
-              (rowData as any)[key] = parseJapaneseDate(value);
-            } else if (key === "discountType") {
-              rowData.discountType = value === "円" ? "yen" : "percent";
-            } else {
-              (rowData as any)[key] = value;
-            }
-          });
-          rowData.discount = calculateDiscountDisplay(
-            rowData.regularPrice,
-            rowData.salePrice,
-            rowData.discountType
-          );
-          return rowData;
-        })
-        .filter((row) => row.productCode);
-      if (newRows.length > 0) setRows(newRows);
-      else alert("CSVファイルの読み込みに失敗したか、内容が空です。");
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    };
-    reader.onerror = () => {
-      alert("ファイルの読み込み中にエラーが発生しました。");
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    };
-    reader.readAsText(file, "Shift_JIS");
-  };
-
-  if (rows.length === 0) return null;
-
-  const singleInputStyle =
-    "w-full h-full !p-2 !border-0 !rounded-none focus:!ring-1 focus:!ring-inset focus:!ring-primary";
-  const tieredInputStyle =
-    "w-full h-8 !p-1 !border-0 !rounded-none focus:!ring-1 focus:!ring-inset focus:!ring-primary";
-  const tieredInputFlexStyle =
-    "flex-grow h-8 !p-1 !border-0 !rounded-none focus:!ring-1 focus:!ring-inset focus:!ring-primary";
-
-  return (
-    <Card>
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFileChange}
-        accept=".csv"
-        style={{ display: "none" }}
-      />
-      <CardHeader
-        title="2. 商品情報入力"
-        description='は必須項目です。'
-        buttonGroup={
-          <>
-            <Button color="secondary" onClick={() => addRow()}>行を追加</Button>
-            <Button color="secondary" onClick={() => addMultipleRows(5)}>5行を追加</Button>
-            <Button color="grey" onClick={() => handleImportCSV()}>CSVで一括取り込む</Button>
-          </>
-        }
-      />
-      <CardContent className="pb-8">
-        <Table.Root className="w-full table-fixed">
-          <Table.Head>
-            <Table.Row>
-              <Table.Th width="w-[3%]" center>
-                #
-              </Table.Th>
-              <Table.Th width="w-[12%]">
-                商品管理番号<span className="text-red-500">*</span>
-              </Table.Th>
-              <Table.Th width="w-[12%]">テンプレート</Table.Th>
-              <Table.Th width="w-[13%]">
-                開始 / 終了日時<span className="text-red-500">*</span>
-              </Table.Th>
-              <Table.Th width="w-[11%]">二重価格</Table.Th>
-              <Table.Th width="w-[7%]">
-                価格<span className="text-red-500">*</span>
-              </Table.Th>
-              <Table.Th width="w-[7%]">
-                セール価格<span className="text-red-500">*</span>
-              </Table.Th>
-              <Table.Th width="w-[12%]">セール文言</Table.Th>
-              <Table.Th width="w-[9%]">
-                割引表示<span className="text-red-500">*</span>
-              </Table.Th>
-              <Table.Th width="w-[13%]">
-                楽天モバイル
-                <br />
-                開始 / 終了日時
-              </Table.Th>
-              <Table.Th width="w-[3%]" center>
-                削除
-              </Table.Th>
-            </Table.Row>
-          </Table.Head>
-          <Table.Body>
-            {rows.map((row, index) => {
-              const rowErrors = errors[row.id] || {};
-              const hasError = (fieldName: keyof RowErrors) =>
-                showErrors && rowErrors[fieldName];
-              return (
-                <Table.Row key={row.id}>
-                  <Table.Td center className="p-2 align-middle">
-                    {index + 1}
-                  </Table.Td>
-
-                  <Table.Td className="p-0 align-middle">
-                    <div
-                      className={cn(
-                        "flex items-center w-full h-full",
-                        hasError("productCode") && "border border-red-500"
-                      )}
-                    >
-                      <TextBox
-                        label=""
-                        id={`productCode-${row.id}`}
-                        name={`productCode-${row.id}`}
-                        placeholder="番号を入力"
-                        className={cn(singleInputStyle, "text-center truncate")}
-                        value={row.productCode}
-                        onChange={(e) =>
-                          handleInputChange(
-                            row.id,
-                            "productCode",
-                            e.target.value
-                          )
-                        }
-                      />
-                      {hasError("productCode") && (
-                        <ErrorDisplay message={rowErrors.productCode} />
-                      )}
-                    </div>
-                  </Table.Td>
-
-                  <Table.Td className="p-0 align-middle">
-                    <SelectBox
-                      label=""
-                      id={`template-${row.id}`}
-                      className={cn(singleInputStyle, "truncate")}
-                      options={templates.map((t) => ({
-                        value: t.name,
-                        label: t.name,
-                      }))}
-                      value={row.template}
-                      onChange={(e) =>
-                        handleInputChange(row.id, "template", e.target.value)
-                      }
-                    />
-                  </Table.Td>
-
-                  <Table.Td className="p-0 align-top">
-                    {/* 開始日時 */}
-                    <div className="w-full border-b border-gray-300">
-                      <TextBox
-                        type="datetime-local"
-                        label=""
-                        id={`startDate-${row.id}`}
-                        name={`startDate-${row.id}`}
-                        className={cn(
-                          tieredInputStyle,
-                          "truncate w-full",
-                          hasError("startDate") && "border border-red-500"
-                        )}
-                        value={row.startDate}
-                        onChange={(e) =>
-                          handleInputChange(row.id, "startDate", e.target.value)
-                        }
-                      />
-                      {hasError("startDate") && (
-                        <ErrorDisplay message={rowErrors.startDate} />
-                      )}
-                    </div>
-
-                    {/* 終了日時 */}
-                    <div className="w-full">
-                      <TextBox
-                        type="datetime-local"
-                        label=""
-                        id={`endDate-${row.id}`}
-                        name={`endDate-${row.id}`}
-                        className={cn(
-                          tieredInputStyle,
-                          "truncate w-full",
-                          hasError("endDate") && "border border-red-500"
-                        )}
-                        value={row.endDate}
-                        onChange={(e) =>
-                          handleInputChange(row.id, "endDate", e.target.value)
-                        }
-                      />
-                      {hasError("endDate") && (
-                        <ErrorDisplay message={rowErrors.endDate} />
-                      )}
-                    </div>
-                  </Table.Td>
-
-                  <Table.Td className="p-0 align-top">
-                    <SelectBox
-                      label=""
-                      id={`priceType-${row.id}`}
-                      className={cn(
-                        "w-full h-full !p-2 !border-0 !rounded-none focus:!ring-1 focus:!ring-inset focus:!ring-primary truncate",
-                        row.priceType === "custom" &&
-                        "!h-8 !py-1 border-b border-gray-300"
-                      )}
-                      options={[
-                        { value: "当店通常価格", label: "当店通常価格" },
-                        {
-                          value: "メーカー希望小売価格",
-                          label: "メーカー希望小売価格",
-                        },
-                        { value: "クーポン利用で", label: "クーポン利用で" },
-                        { value: "custom", label: "店舗自由記入" },
-                      ]}
-                      value={row.priceType}
-                      onChange={(e) =>
-                        handleInputChange(row.id, "priceType", e.target.value)
-                      }
-                    />
-                    {row.priceType === "custom" && (
-                      <TextBox
-                        label=""
-                        id={`customPrice-${row.id}`}
-                        name={`customPrice-${row.id}`}
-                        placeholder="自由記入"
-                        className={cn(tieredInputStyle, "truncate")}
-                        value={row.customPriceType}
-                        onChange={(e) =>
-                          handleInputChange(
-                            row.id,
-                            "customPriceType",
-                            e.target.value
-                          )
-                        }
-                      />
-                    )}
-                  </Table.Td>
-
-                  <Table.Td className="p-0 align-middle">
-                    <div
-                      className={cn(
-                        "flex items-center w-full h-full",
-                        hasError("regularPrice") && "border border-red-500"
-                      )}
-                    >
-                      <NumberBox
-                        label=""
-                        id={`regularPrice-${row.id}`}
-                        name={`regularPrice-${row.id}`}
-                        className={cn(singleInputStyle, "text-center truncate")}
-                        value={row.regularPrice}
-                        onChange={(e) =>
-                          handleInputChange(
-                            row.id,
-                            "regularPrice",
-                            e.target.value
-                          )
-                        }
-                      />
-                      {hasError("regularPrice") && (
-                        <ErrorDisplay message={rowErrors.regularPrice} />
-                      )}
-                    </div>
-                  </Table.Td>
-
-                  <Table.Td className="p-0 align-middle">
-                    <div
-                      className={cn(
-                        "flex items-center w-full h-full",
-                        hasError("salePrice") && "border border-red-500"
-                      )}
-                    >
-                      <NumberBox
-                        label=""
-                        id={`salePrice-${row.id}`}
-                        name={`salePrice-${row.id}`}
-                        className={cn(singleInputStyle, "text-center truncate")}
-                        value={row.salePrice}
-                        onChange={(e) =>
-                          handleInputChange(row.id, "salePrice", e.target.value)
-                        }
-                      />
-                      {hasError("salePrice") && (
-                        <ErrorDisplay message={rowErrors.salePrice} />
-                      )}
-                    </div>
-                  </Table.Td>
-
-                  <Table.Td className="p-0 align-middle">
-                    <div
-                      className={cn(
-                        "flex items-center w-full h-full",
-                        hasError("saleText") && "border border-red-500"
-                      )}
-                    >
-                      <TextBox
-                        label=""
-                        id={`saleText-${row.id}`}
-                        name={`saleText-${row.id}`}
-                        placeholder="文言を入力"
-                        className={cn(singleInputStyle, "text-center truncate")}
-                        value={row.saleText}
-                        onChange={(e) =>
-                          handleInputChange(row.id, "saleText", e.target.value)
-                        }
-                      />
-                      {hasError("saleText") && (
-                        <ErrorDisplay message={rowErrors.saleText} />
-                      )}
-                    </div>
-                  </Table.Td>
-
-                  <Table.Td className="p-0 align-top">
-                    <SelectBox
-                      label=""
-                      id={`discountType-${row.id}`}
-                      className={cn(
-                        tieredInputStyle,
-                        "text-center truncate border-b border-gray-300"
-                      )}
-                      options={[
-                        { value: "percent", label: "%" },
-                        { value: "yen", label: "円" },
-                      ]}
-                      value={row.discountType}
-                      onChange={(e) =>
-                        handleInputChange(
-                          row.id,
-                          "discountType",
-                          e.target.value
-                        )
-                      }
-                    />
-                    <TextBox
-                      label=""
-                      id={`discount-${row.id}`}
-                      name={`discount-${row.id}`}
-                      className={cn(
-                        tieredInputStyle,
-                        "text-center bg-gray-100 truncate"
-                      )}
-                      value={row.discount}
-                      readOnly
-                    />
-                  </Table.Td>
-
-                  <Table.Td className="p-0 align-top">
-                    <TextBox
-                      type="datetime-local"
-                      label=""
-                      id={`mobileStartDate-${row.id}`}
-                      name={`mobileStartDate-${row.id}`}
-                      className={cn(
-                        tieredInputStyle,
-                        "border-b border-gray-300 truncate"
-                      )}
-                      value={row.mobileStartDate}
-                      onChange={(e) =>
-                        handleInputChange(
-                          row.id,
-                          "mobileStartDate",
-                          e.target.value
-                        )
-                      }
-                    />
-                    <TextBox
-                      type="datetime-local"
-                      label=""
-                      id={`mobileEndDate-${row.id}`}
-                      name={`mobileEndDate-${row.id}`}
-                      className={cn(tieredInputStyle, "truncate")}
-                      value={row.mobileEndDate}
-                      onChange={(e) =>
-                        handleInputChange(
-                          row.id,
-                          "mobileEndDate",
-                          e.target.value
-                        )
-                      }
-                    />
-                  </Table.Td>
-
-                  <Table.Td center className="p-1 align-middle">
-                    <button
-                      onClick={() => deleteRow(row.id)}
-                      className={`p-1 ${rows.length > 1
-                        ? "text-gray-400 hover:text-red-600"
-                        : "text-gray-200 cursor-not-allowed"
-                        }`}
-                      disabled={rows.length <= 1}
-                    >
-                      <IconTrash size={20} />
-                    </button>
-                  </Table.Td>
-                </Table.Row>
-              );
-            })}
-          </Table.Body>
-        </Table.Root>
-      </CardContent>
-    </Card>
-  );
-}
-
-// --- Component Trang chính ---
 export default function TwoPriceImagePage() {
+  // --- State の宣言 ---
+  const { setTitle } = useHeader();
+
+  useEffect(() => {
+    setTitle('二重価格セール画像生成');
+  }, [setTitle]);
   const [isClient, setIsClient] = useState(false);
   const [selectedImages, setSelectedImages] = useState<string[] | null>(null);
   const [errors, setErrors] = useState<AllErrors>({});
   const [showErrors, setShowErrors] = useState(false);
   const [productRows, setProductRows] = useState<ProductRow[]>([]);
+  const [globalAlert, setGlobalAlert] = useState<string | null>(null);
+  const [modifiedRowIds, setModifiedRowIds] = useState<Set<string>>(new Set());
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+  const [jobId, setJobId] = useState<string | null>(null);
+  const [isApiLoading, setIsApiLoading] = useState(false);
+
+  // --- LAZY LOAD (START) ---
+  // 表示を許可する画像数を追跡する State
+  const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
+  // --- LAZY LOAD (END) ---
+
+  // セッション復元
+  const [showRestorePopup, setShowRestorePopup] = useState(false);
+  const [restoredData, setRestoredData] = useState<ProductRow[] | null>(null);
+  const initialLoadRef = useRef(true);
+
+  // リセット確認ポップアップ
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+
+  const goldUploadToastIdRef = useRef<SonnerToastId | null>(null);
+  const rcabinetUploadToastIdRef = useRef<SonnerToastId | null>(null);
+
+  // --- FTP用コールバック (変更なし) ---
+  const handleFtpSuccess = useCallback((target: 'gold' | 'rcabinet', message: string) => {
+    const toastIdRef = target === 'gold' ? goldUploadToastIdRef : rcabinetUploadToastIdRef;
+    if (toastIdRef.current) {
+      toast.dismiss(toastIdRef.current);
+      toastIdRef.current = null;
+    }
+    toast.success(message); // メッセージは日本語で渡される想定
+  }, []);
+  const handleFtpError = useCallback((target: 'gold' | 'rcabinet', message: string) => {
+    const toastIdRef = target === 'gold' ? goldUploadToastIdRef : rcabinetUploadToastIdRef;
+    if (toastIdRef.current) {
+      toast.error(message, { id: toastIdRef.current }); // メッセージは日本語で渡される想定
+      toastIdRef.current = null;
+    } else {
+      toast.error(message); // メッセージは日本語で渡される想定
+    }
+  }, []);
+
+  // -----------------------------------
+
+  // --- ポーリング用カスタムフック (変更なし) ---
+  const handleJobNotFound = useCallback(() => {
+    setJobId(null);
+    setGlobalAlert('現在のジョブが見つかりませんでした。新しいジョブを開始します。');
+    if (goldUploadToastIdRef.current) {
+      toast.dismiss(goldUploadToastIdRef.current);
+      goldUploadToastIdRef.current = null;
+    }
+    if (rcabinetUploadToastIdRef.current) {
+      toast.dismiss(rcabinetUploadToastIdRef.current);
+      rcabinetUploadToastIdRef.current = null;
+    }
+  }, []);
+
+  const {
+    jobStatus,
+    setJobStatus,
+    isLoading: isPollingLoading,
+    stopPolling,
+  } = useJobPolling({
+    jobId,
+    isOpen: isPreviewModalOpen,
+    onJobNotFound: handleJobNotFound,
+    onFtpSuccess: handleFtpSuccess,
+    onFtpError: handleFtpError,
+  });
+  //------------------------------------
+
+  // --- localStorage ロジック (変更なし) ---
+  const saveStateToLocalStorage = useCallback(
+    debounce((rowsToSave: ProductRow[]) => {
+      try {
+        const isDefaultEmptyRow =
+          rowsToSave.length === 1 &&
+          !rowsToSave[0].productCode &&
+          !rowsToSave[0].startDate &&
+          !rowsToSave[0].endDate &&
+          !rowsToSave[0].regularPrice &&
+          !rowsToSave[0].salePrice;
+
+        if (!isDefaultEmptyRow) {
+          console.log('[LocalStorage] 状態を保存中...', `(${rowsToSave.length} 行)`);
+          const dataString = JSON.stringify(rowsToSave);
+          localStorage.setItem(LOCAL_STORAGE_KEY, dataString);
+        } else {
+          console.log('[LocalStorage] デフォルトの空行を検出、ストレージから削除します。');
+          localStorage.removeItem(LOCAL_STORAGE_KEY);
+        }
+      } catch (error) {
+        console.error('localStorage への状態保存エラー:', error);
+        toast.error(
+          'セッションデータの保存中にエラーが発生しました。ストレージがいっぱいかもしれません。',
+        );
+      }
+    }, 1500),
+    [],
+  );
+
+  useEffect(() => {
+    if (!initialLoadRef.current && isClient && productRows.length > 0) {
+      saveStateToLocalStorage(productRows);
+    }
+  }, [productRows, saveStateToLocalStorage, isClient]);
 
   useEffect(() => {
     setIsClient(true);
-    setProductRows([createNewProductRow("initial-page-load")]);
+    if (initialLoadRef.current) {
+      try {
+        const savedDataString = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (savedDataString) {
+          const parsedData: ProductRow[] = JSON.parse(savedDataString);
+          if (Array.isArray(parsedData) && parsedData.length > 0) {
+            setRestoredData(parsedData);
+            setShowRestorePopup(true);
+            console.log(
+              '[LocalStorage] 保存されたセッションを発見、復元ポップアップを表示します。',
+            );
+          } else {
+            localStorage.removeItem(LOCAL_STORAGE_KEY);
+            initializeEmptyRow();
+          }
+        } else {
+          initializeEmptyRow();
+        }
+      } catch (error) {
+        console.error('localStorage からの状態読み込みエラー:', error);
+        localStorage.removeItem(LOCAL_STORAGE_KEY);
+        initializeEmptyRow();
+        toast.error('保存されたセッションデータの読み込み中にエラーが発生しました。');
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const validateRows = (rows: ProductRow[]) => {
-    const newErrors: AllErrors = {};
-    const productCodes = new Map<string, string[]>();
+  // --- 空行の初期化ロジック (変更なし) ---
+  const initializeEmptyRow = (idPrefix = 'initial-load-empty') => {
+    console.log(`[Session] 空行で初期化します (prefix: ${idPrefix}).`);
+    const initialRow = createNewProductRow(idPrefix);
+    setProductRows([initialRow]);
+    setModifiedRowIds(new Set([initialRow.id]));
+    setJobId(null);
+    setJobStatus(null);
+    setGlobalAlert(null);
+    setShowErrors(false);
+    setErrors({});
+    clearSavedSession(); // リセット時に古いセッションも削除することを保証
+    initialLoadRef.current = false; // 読み込み完了フラグ
+  };
+  // ----------------------------------------------
 
-    rows.forEach((row) => {
-      if (row.productCode) {
-        if (!productCodes.has(row.productCode)) {
-          productCodes.set(row.productCode, []);
-        }
-        productCodes.get(row.productCode)!.push(row.id);
-      }
-    });
-
-    rows.forEach((row) => {
-      const rowErrors: RowErrors = {};
-      if (!row.productCode) rowErrors.productCode = "必須項目です。";
-      if (!row.startDate) rowErrors.startDate = "必須項目です。";
-      if (!row.endDate) rowErrors.endDate = "必須項目です。";
-
-      if (!row.regularPrice) {
-        rowErrors.regularPrice = "必須項目です。";
-      } else if (isNaN(parseFloat(row.regularPrice))) {
-        rowErrors.regularPrice = "数値を入力してください。";
-      }
-
-      if (!row.salePrice) {
-        rowErrors.salePrice = "必須項目です。";
-      } else if (isNaN(parseFloat(row.salePrice))) {
-        rowErrors.salePrice = "数値を入力してください。";
-      }
-
-      if (row.productCode && productCodes.get(row.productCode)!.length > 1) {
-        rowErrors.productCode = "番号が重複しています。";
-      }
-
-      const regularPrice = parseFloat(row.regularPrice);
-      const salePrice = parseFloat(row.salePrice);
-      if (
-        !isNaN(regularPrice) &&
-        !isNaN(salePrice) &&
-        regularPrice <= salePrice
-      ) {
-        rowErrors.salePrice = "通常価格より低く設定してください。";
-      }
-
-      if (row.saleText && row.saleText.length > 12) {
-        rowErrors.saleText = "12文字以内で入力してください。";
-      }
-
-      if (Object.keys(rowErrors).length > 0) {
-        newErrors[row.id] = rowErrors;
-      }
-    });
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const handleRestoreSession = (restore: boolean) => {
+    setShowRestorePopup(false);
+    if (restore && restoredData) {
+      console.log('[LocalStorage] セッションを復元しています...');
+      setProductRows(restoredData);
+      setModifiedRowIds(new Set(restoredData.map((r) => r.id)));
+      toast.success('前のセッションを復元しました。');
+    } else {
+      console.log('[LocalStorage] 新しいセッションを開始します。');
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+      initializeEmptyRow('initial-new-session'); // 新しい空行を初期化
+    }
+    setRestoredData(null);
+    initialLoadRef.current = false; // 読み込み完了フラグ
   };
 
-  const handlePreviewClick = () => {
-    const isValid = validateRows(productRows);
-    setShowErrors(true); // Always show errors after the button is clicked
-    if (!isValid) {
-      alert("入力内容にエラーがあります。確認してください。");
+  const clearSavedSession = useCallback(() => {
+    console.log('[LocalStorage] 保存されたセッションをクリアします。');
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
+  }, []);
+  // --- localStorage ロジック終了 ---
+
+  // --- handleSetProductRows ロジック (変更なし) ---
+  const handleSetProductRows = useCallback(
+    (newRowsOrFn: ProductRow[] | ((prev: ProductRow[]) => ProductRow[])) => {
+      setProductRows((prevRows) => {
+        let newRows: ProductRow[];
+        let operation: 'set' | 'append' | 'delete' | 'reset' | 'unknown' = 'unknown';
+
+        if (typeof newRowsOrFn !== 'function') {
+          // 1. "Set" の場合 (空のテーブルへのインポート)
+          newRows = newRowsOrFn;
+          operation = 'set';
+        } else {
+          // 2. 関数型更新の場合 (Append, Delete, Reset)
+          newRows = newRowsOrFn(prevRows);
+          if (newRows.length > prevRows.length) {
+            operation = 'append';
+          } else if (
+            prevRows.length === 1 &&
+            newRows.length === 1 &&
+            prevRows[0].id !== newRows[0].id
+          ) {
+            operation = 'reset';
+          } else {
+            operation = 'delete';
+          }
+        }
+
+        // `operation` に基づいて他の State を更新
+        const currentIds = new Set(newRows.map((r) => r.id));
+        setModifiedRowIds((prevModified) => {
+          const nextModified = new Set(prevModified);
+
+          // 存在しなくなった ID を削除
+          prevModified.forEach((id) => {
+            if (!currentIds.has(id)) {
+              nextModified.delete(id);
+            }
+          });
+
+          if (operation === 'set') {
+            // "Set" (空のテーブルへのインポート): 全てリセットし、新しい ID をすべて追加
+            nextModified.clear();
+            newRows.forEach((r) => nextModified.add(r.id));
+            setJobId(null);
+            setJobStatus(null);
+            clearSavedSession();
+          } else if (operation === 'append') {
+            // "Append" (CSV追記インポート): 新しい ID を追加、ジョブはリセットしない
+            const addedRows = newRows.slice(prevRows.length);
+            addedRows.forEach((row) => nextModified.add(row.id));
+            // ここでは jobId やセッションをリセットしない
+          } else if (operation === 'reset') {
+            // "Reset" (最後の行の削除): 全てリセット
+            nextModified.clear();
+            nextModified.add(newRows[0].id);
+            setJobId(null);
+            setJobStatus(null);
+            clearSavedSession();
+          }
+          // "delete" または "unknown" は ID の削除のみ (上記で実施済み)
+
+          return nextModified;
+        });
+
+        return newRows;
+      });
+    },
+    [setJobStatus, clearSavedSession], // 依存関係は不変
+  );
+  // -----------------------------------------------------------
+
+  const handleCloseModal = useCallback(() => {
+    setIsPreviewModalOpen(false);
+    setIsApiLoading(false);
+    stopPolling();
+    // --- LAZY LOAD (START) ---
+    // モーダルを閉じる際に表示数をリセット
+    setVisibleCount(BATCH_SIZE);
+    // --- LAZY LOAD (END) ---
+    if (goldUploadToastIdRef.current) {
+      toast.dismiss(goldUploadToastIdRef.current);
+      goldUploadToastIdRef.current = null;
+    }
+    if (rcabinetUploadToastIdRef.current) {
+      toast.dismiss(rcabinetUploadToastIdRef.current);
+      rcabinetUploadToastIdRef.current = null;
+    }
+    if (jobStatus?.status === 'Completed') {
+      clearSavedSession();
+    }
+  }, [stopPolling, jobStatus, clearSavedSession]);
+
+  // --- リセットボタンのロジック (変更なし) ---
+  const handleResetClick = () => {
+    // テーブルが既に空の場合はポップアップ不要
+    if (
+      productRows.length === 1 &&
+      !productRows[0].productCode &&
+      !productRows[0].startDate &&
+      !productRows[0].regularPrice
+    ) {
+      toast.info('テーブルは既に空です。');
       return;
     }
-    // Proceed with preview logic
-    setShowErrors(false); // Hide errors if validation is successful
-    alert("プレビュー機能は開発中です。");
+    setShowResetConfirm(true);
   };
 
+  const handleResetConfirm = (confirm: boolean) => {
+    setShowResetConfirm(false);
+    if (confirm) {
+      initializeEmptyRow('manual-reset');
+      toast.success('テーブルをリセットしました。');
+    }
+  };
+  // ---------------------------------------
+
+  // handlePreviewClick 関数 (修正済み)
+  const handlePreviewClick = async () => {
+    setGlobalAlert(null);
+    const { errors: validationErrors, isValid } = validateRows(productRows);
+    setErrors(validationErrors);
+    setShowErrors(true);
+    if (!isValid) {
+      setGlobalAlert('入力内容にエラーがあります。確認してください。');
+      return;
+    }
+
+    clearSavedSession();
+    setIsApiLoading(true);
+    setIsPreviewModalOpen(true);
+    setShowErrors(false);
+    // --- LAZY LOAD (START) ---
+    // モーダルを開く際に表示数をリセット
+    setVisibleCount(BATCH_SIZE);
+    // --- LAZY LOAD (END) ---
+
+    try {
+      let currentJobId = jobId;
+      if (!currentJobId) {
+        // --- POST ロジック (新規ジョブ作成) ---
+        console.log('>>> [DEBUG][Page] 新規ジョブを作成中 (POST)');
+        const payload = { productRows };
+        const response = await fetch('/api/tools/03/jobs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          let errorDetail = `HTTPエラー! status: ${response.status}`;
+          try {
+            const errorData = await response.json();
+            errorDetail = errorData.detail || errorDetail;
+          } catch (e) {
+            /* JSON パースエラーは無視 */
+          }
+          throw new Error(errorDetail);
+        }
+
+        const data: { jobId: string; totalItems: number } = await response.json();
+        const newJobId = data.jobId;
+
+        setJobId(newJobId);
+        setJobStatus({
+          jobId: newJobId,
+          status: 'Pending', // この状態で "待機中..." と表示される
+          progress: 0,
+          total: data.totalItems,
+          results: {},
+          startTime: Date.now() / 1000,
+          endTime: null,
+          message: null,
+          ftpUploadStatusGold: 'idle',
+          ftpUploadErrorGold: null,
+          ftpUploadStatusRcabinet: 'idle',
+          ftpUploadErrorRcabinet: null,
+        });
+        setIsApiLoading(false);
+        setModifiedRowIds(new Set());
+        console.log('>>> [DEBUG][Page] 新規ジョブ作成完了, Job ID:', newJobId);
+      } else {
+        // --- PATCH ロジック (ジョブ更新) ---
+        console.log('>>> [DEBUG][Page] ジョブを更新中 (PATCH), Job ID:', currentJobId);
+        console.log('>>> [DEBUG] PATCH フィルター前の modifiedRowIds:', modifiedRowIds);
+        const rowsToUpdate = productRows.filter((row) => modifiedRowIds.has(row.id));
+        console.log('>>> [DEBUG] PATCH 対象の rowsToUpdate:', rowsToUpdate);
+
+        if (rowsToUpdate.length > 0) {
+          setJobStatus((prev) => ({
+            jobId: currentJobId,
+            startTime: prev?.startTime ?? Date.now() / 1000,
+            status: 'Processing', // "Processing" (画像生成中...) に設定
+            progress: 0,
+            total: productRows.length,
+            results: prev?.results ?? {},
+            message: null,
+            endTime: null,
+            ftpUploadStatusGold: 'idle',
+            ftpUploadErrorGold: null,
+            ftpUploadStatusRcabinet: 'idle',
+            ftpUploadErrorRcabinet: null,
+          }));
+
+          const payload = { productRows: rowsToUpdate };
+          const response = await fetch(`/api/tools/03/jobs/${currentJobId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+
+          if (!response.ok) {
+            let errorDetail = `HTTPエラー! status: ${response.status}`;
+            try {
+              const errorData = await response.json();
+              errorDetail = errorData.detail || errorDetail;
+            } catch (e) {
+              /* JSON パースエラーは無視 */
+            }
+            throw new Error(errorDetail);
+          }
+
+          setIsApiLoading(false);
+          setModifiedRowIds(new Set());
+          console.log(
+            '>>> [DEBUG][Page] ジョブ更新を開始しました。ポーリングが続行/再開されます。',
+          );
+        } else {
+          console.log('>>> [DEBUG][Page] 変更された行がないため、PATCH をスキップします。');
+          setIsApiLoading(false);
+        }
+      }
+    } catch (error) {
+      console.error('ジョブの開始または更新に失敗しました:', error);
+      toast.error(
+        `ジョブの開始/更新に失敗しました: ${
+          error instanceof Error ? error.message : '不明なエラー'
+        }`,
+      );
+      setIsApiLoading(false);
+      setIsPreviewModalOpen(false);
+    }
+  };
+
+  // ダウンロード/アップロード関数 (変更なし)
+  const handleDownloadZip = () => {
+    if (!jobId || jobStatus?.status === 'Failed') {
+      toast.error('ダウンロードするジョブが見つからないか、失敗しました。');
+      return;
+    }
+    window.open(`/api/tools/03/jobs/${jobId}/download`, '_blank');
+  };
+
+  const handleUploadFTP = async (target: 'gold' | 'rcabinet') => {
+    if (
+      !jobId ||
+      !jobStatus ||
+      !['Completed', 'Completed with errors'].includes(jobStatus.status)
+    ) {
+      toast.error('アップロードするジョブが見つからないか、まだ完了していません。');
+      return;
+    }
+    const targetName = target === 'gold' ? 'Rakuten GOLD' : 'R-Cabinet';
+    const toastIdRef = target === 'gold' ? goldUploadToastIdRef : rcabinetUploadToastIdRef;
+    const ftpStatusKey = target === 'gold' ? 'ftpUploadStatusGold' : 'ftpUploadStatusRcabinet';
+    const ftpErrorKey = target === 'gold' ? 'ftpUploadErrorGold' : 'ftpUploadErrorRcabinet';
+
+    if (toastIdRef.current || jobStatus[ftpStatusKey] === 'uploading') {
+      toast.info(`${targetName} へのアップロードは既に進行中です。`);
+      return;
+    }
+    setJobStatus((prev) =>
+      prev ? { ...prev, [ftpStatusKey]: 'uploading', [ftpErrorKey]: null } : null,
+    );
+    toastIdRef.current = toast.loading(`${targetName} へのアップロードを開始しています...`);
+
+    try {
+      const response = await fetch(`/api/tools/03/jobs/${jobId}/upload`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ target: target }),
+      });
+      if (response.status === 202) {
+        console.log(
+          `>>> [DEBUG][Page] ${targetName} アップロード開始。ポーリングでステータスを追跡します。`,
+        );
+      } else {
+        let errorDetail = `HTTPエラー! status: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorDetail = errorData.detail || errorDetail;
+        } catch (e) {
+          /* 無視 */
+        }
+        if (toastIdRef.current) {
+          toast.error(`${targetName} へのアップロード開始に失敗しました: ${errorDetail}`, {
+            id: toastIdRef.current,
+          });
+          toastIdRef.current = null;
+        }
+        setJobStatus((prev) =>
+          prev ? { ...prev, [ftpStatusKey]: 'failed', [ftpErrorKey]: errorDetail } : null,
+        );
+      }
+    } catch (error) {
+      console.error(`${target} アップロードの開始に失敗:`, error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (toastIdRef.current) {
+        toast.error(`${targetName} へのアップロード開始に失敗しました: ${errorMessage}`, {
+          id: toastIdRef.current,
+        });
+        toastIdRef.current = null;
+      }
+      setJobStatus((prev) =>
+        prev ? { ...prev, [ftpStatusKey]: 'failed', [ftpErrorKey]: errorMessage } : null,
+      );
+    }
+  };
+  // ---------------------------------
+
+  const isModalLoading = isApiLoading || isPollingLoading;
+
+  // --- LAZY LOAD (START) ---
+  // ジョブが実行中かどうかを判断 (テーブルを無効化するため)
+  const isJobRunning = jobStatus?.status === 'Processing' || jobStatus?.status === 'Pending';
+  // 全体のローディング状態 (最初の API 呼び出しも含む)
+  const isProcessing = isApiLoading || (isPollingLoading && !jobStatus) || isJobRunning;
+  // --- LAZY LOAD (END) ---
+
+  // --- JSX Return ---
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-800">二重価格画像作成</h1>
+      {/* テンプレート選択 (変更なし) */}
       <Card>
-        <CardHeader title="1. テンプレート" />
+        <CardHeader title="1. テンプレート選択" />
         <CardContent>
           <div className="relative">
             <div className="flex items-start gap-4 overflow-x-auto pb-4">
               {templates.map((template) => (
-                <div
-                  key={template.id}
-                  className="flex-shrink-0 text-center w-auto"
-                >
+                <div key={template.id} className="flex-shrink-0 text-center w-auto">
                   <div
                     className="flex items-start gap-2 cursor-pointer"
                     onClick={() => setSelectedImages(template.imgs)}
@@ -782,9 +571,7 @@ export default function TwoPriceImagePage() {
                       />
                     ))}
                   </div>
-                  <p className="text-sm font-medium text-gray-700">
-                    {template.name}
-                  </p>
+                  <p className="text-sm font-medium text-gray-700">{template.name}</p>
                 </div>
               ))}
             </div>
@@ -792,21 +579,65 @@ export default function TwoPriceImagePage() {
         </CardContent>
       </Card>
 
-      {isClient && (
+      {/* 編集可能テーブル */}
+      {isClient && !showRestorePopup && (
         <EditableProductTable
           rows={productRows}
-          setRows={setProductRows}
+          setRows={handleSetProductRows}
           errors={errors}
           showErrors={showErrors}
+          setModifiedRowIds={setModifiedRowIds}
+          jobId={jobId}
+          setJobId={setJobId}
+          // --- LAZY LOAD (START) ---
+          // `disabled` プロパティを渡す
+          disabled={isProcessing && isPreviewModalOpen}
+          // --- LAZY LOAD (END) ---
         />
       )}
+      {isClient && showRestorePopup && (
+        <div className="text-center p-10 text-gray-500">セッションデータを読み込み中...</div>
+      )}
 
-      <div className="flex justify-center pt-4">
-        <Button color="primary" onClick={handlePreviewClick}>
-          プレビュー
-        </Button>
-      </div>
+      {/* グローバルアラート */}
+      {globalAlert && <Alert variant="error">{globalAlert}</Alert>}
 
+      {/* ボタン群 (更新) */}
+      {!showRestorePopup && (
+        <div className="flex justify-center items-center space-x-4 pt-4">
+          <Button
+            color="secondary"
+            onClick={handleResetClick}
+            // --- LAZY LOAD (START) ---
+            // モーダルが開いていて処理中の場合は無効化
+            disabled={isProcessing && isPreviewModalOpen}
+            // --- LAZY LOAD (END) ---
+            className="inline-flex items-center"
+          >
+            <IconRefresh size={18} className="mr-1.5" />
+            リセット
+          </Button>
+          <Button
+            color="primary"
+            onClick={handlePreviewClick}
+            // --- LAZY LOAD (START) ---
+            // モーダルが開いていて処理中の場合は無効化
+            disabled={isProcessing && isPreviewModalOpen}
+            // --- LAZY LOAD (END) ---
+            className="inline-flex items-center"
+          >
+            {/* --- LAZY LOAD (START) ---
+             // モーダルが開いていて処理中の場合のみスピナーを表示
+            // --- LAZY LOAD (END) --- */}
+            {isProcessing && isPreviewModalOpen ? (
+              <IconLoader2 className="animate-spin mr-2" />
+            ) : null}
+            画像生成
+          </Button>
+        </div>
+      )}
+
+      {/* テンプレートプレビューモーダル (変更なし) */}
       {selectedImages && (
         <div
           className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
@@ -827,6 +658,33 @@ export default function TwoPriceImagePage() {
           </div>
         </div>
       )}
+
+      {/* 生成画像プレビューモーダル */}
+      <PreviewModal
+        isOpen={isPreviewModalOpen}
+        onClose={handleCloseModal}
+        jobStatus={jobStatus}
+        isLoading={isModalLoading}
+        productRows={productRows}
+        onDownloadZip={handleDownloadZip}
+        onUploadFTP={handleUploadFTP}
+        isUploadingGold={jobStatus?.ftpUploadStatusGold === 'uploading'}
+        isUploadingRcabinet={jobStatus?.ftpUploadStatusRcabinet === 'uploading'}
+        // --- LAZY LOAD (START) ---
+        // State とハンドラ関数を渡す
+        visibleCount={visibleCount}
+        onLoadMore={() => setVisibleCount((prev) => prev + BATCH_SIZE)}
+        // --- LAZY LOAD (END) ---
+      />
+
+      {/* セッション復元ポップアップ (変更なし) */}
+      {showRestorePopup && <RestoreSessionPopup onResponse={handleRestoreSession} />}
+
+      {/* Reset popup (変更なし) */}
+      {showResetConfirm && <ResetConfirmPopup onResponse={handleResetConfirm} />}
+
+      {/* Sonner Toaster (変更なし) */}
+      <Toaster richColors position="top-right" />
     </div>
   );
 }

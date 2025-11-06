@@ -1,7 +1,8 @@
 "use client"
 
 import React, { ReactNode } from 'react';
-import { ToastContainer } from 'react-toastify';
+import { HeaderProvider } from './context/HeaderContext';
+import { Toaster } from 'sonner';
 
 interface Props {
     children: ReactNode
@@ -9,8 +10,14 @@ interface Props {
 const providers = ({ children }: Props) => {
     return (
         <React.Fragment>
-            {children}
-            <ToastContainer />
+            <HeaderProvider>
+                {children}
+            </HeaderProvider>
+            <Toaster
+                position="top-right"
+                richColors={true}
+                closeButton={true}
+            />
         </React.Fragment>
     )
 }
