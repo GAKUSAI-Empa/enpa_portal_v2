@@ -54,7 +54,7 @@ const Page = () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
-
+        console.log('🟢 保存ボタン押下時のデータ:', payload);
         toast.success('設定を保存しました！');
       } catch (err) {
         console.error(err);
@@ -100,7 +100,10 @@ const Page = () => {
             <Card>
               <CardHeader title="1.テンプレート選択" />
               <CardContent>
-                <SliderImagereview />
+                <SliderImagereview
+                  value={formik.values.template_id}
+                  onChange={(val) => formik.setFieldValue('template_id', val)}
+                />
               </CardContent>
             </Card>
 
