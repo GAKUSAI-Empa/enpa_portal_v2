@@ -1,7 +1,7 @@
 // src/app/tools/03/lib/utils.ts
-import React from "react";
-import type { ProductRow, BackendJobStatus, FtpUploadStatus } from "../types";
-import { templates } from "../constants";
+import React from 'react';
+import type { ProductRow, BackendJobStatus, FtpUploadStatus } from '../types';
+import { templates } from '../constants';
 import {
   IconLoader2,
   IconCircleCheck,
@@ -10,7 +10,7 @@ import {
   IconCloudUpload,
   IconCloudCheck,
   IconCloudOff,
-} from "@tabler/icons-react";
+} from '@tabler/icons-react';
 
 /**
  * Tạo một đối tượng ProductRow mới với giá trị mặc định.
@@ -19,19 +19,19 @@ import {
  */
 export const createNewProductRow = (idPrefix: string): ProductRow => ({
   id: `${idPrefix}-${Date.now()}`, // Tạo ID duy nhất dựa trên thời gian
-  productCode: "",
-  template: templates[0]?.name || "", // Lấy template đầu tiên làm mặc định
-  startDate: "",
-  endDate: "",
-  priceType: "当店通常価格", // Giá trị mặc định
-  customPriceType: "",
-  regularPrice: "",
-  salePrice: "",
-  saleText: "",
-  discount: "", // Sẽ được tính toán sau
-  discountType: "percent", // Mặc định là %
-  mobileStartDate: "",
-  mobileEndDate: "",
+  productCode: '',
+  template: templates[0]?.name || '', // Lấy template đầu tiên làm mặc định
+  startDate: '',
+  endDate: '',
+  priceType: '当店通常価格', // Giá trị mặc định
+  customPriceType: '',
+  regularPrice: '',
+  salePrice: '',
+  saleText: '',
+  discount: '', // Sẽ được tính toán sau
+  discountType: 'percent', // Mặc định là %
+  mobileStartDate: '',
+  mobileEndDate: '',
 });
 
 /**
@@ -44,7 +44,7 @@ export const createNewProductRow = (idPrefix: string): ProductRow => ({
 export const calculateDiscountDisplay = (
   regularPriceStr: string,
   salePriceStr: string,
-  type: "percent" | "yen" | ""
+  type: 'percent' | 'yen' | '',
 ): string => {
   const regularPrice = parseFloat(regularPriceStr);
   const salePrice = parseFloat(salePriceStr);
@@ -55,12 +55,12 @@ export const calculateDiscountDisplay = (
     !isNaN(salePrice) &&
     regularPrice > salePrice // Chỉ tính khi giá gốc > giá sale
   ) {
-    if (type === "percent") {
+    if (type === 'percent') {
       // Thêm kiểm tra regularPrice > 0 trước khi chia
       if (regularPrice > 0) {
         const percentage = Math.round(
           // Làm tròn phần trăm
-          ((regularPrice - salePrice) / regularPrice) * 100
+          ((regularPrice - salePrice) / regularPrice) * 100,
         );
         // Đảm bảo kết quả phép toán là số trước khi dùng trong template literal
         if (!isNaN(percentage)) {
@@ -76,7 +76,7 @@ export const calculateDiscountDisplay = (
       }
     }
   }
-  return ""; // Trả về rỗng nếu không hợp lệ hoặc chia cho 0
+  return ''; // Trả về rỗng nếu không hợp lệ hoặc chia cho 0
 };
 
 /**
@@ -86,10 +86,10 @@ export const calculateDiscountDisplay = (
  * @returns Chuỗi định dạng ISO hoặc chuỗi rỗng nếu không parse được.
  */
 export const parseJapaneseDate = (dateStr: string): string => {
-  if (!dateStr || !dateStr.includes("月")) return ""; // Kiểm tra cơ bản
+  if (!dateStr || !dateStr.includes('月')) return ''; // Kiểm tra cơ bản
   // Regex để trích xuất tháng, ngày, giờ, phút
   const match = dateStr.match(/(\d{1,2})月(\d{1,2})日(\d{1,2}):(\d{1,2})/);
-  if (!match) return "";
+  if (!match) return '';
 
   const [, month, day, hour, minute] = match.map(Number); // Chuyển các group thành số
 
@@ -101,10 +101,10 @@ export const parseJapaneseDate = (dateStr: string): string => {
   const year = month < currentMonth ? currentYear + 1 : currentYear;
 
   // Định dạng các thành phần thành 2 chữ số (vd: '01', '09')
-  const formattedMonth = String(month).padStart(2, "0");
-  const formattedDay = String(day).padStart(2, "0");
-  const formattedHour = String(hour).padStart(2, "0");
-  const formattedMinute = String(minute).padStart(2, "0");
+  const formattedMonth = String(month).padStart(2, '0');
+  const formattedDay = String(day).padStart(2, '0');
+  const formattedHour = String(hour).padStart(2, '0');
+  const formattedMinute = String(minute).padStart(2, '0');
 
   // Trả về định dạng YYYY-MM-DDTHH:mm
   return `${year}-${formattedMonth}-${formattedDay}T${formattedHour}:${formattedMinute}`;
@@ -116,18 +116,18 @@ export const parseJapaneseDate = (dateStr: string): string => {
  * @returns React Node của Icon hoặc null.
  */
 export const getJobStatusIcon = (
-  status: BackendJobStatus["status"] | "Pending"
+  status: BackendJobStatus['status'] | 'Pending',
 ): React.ReactNode => {
   switch (status) {
-    case "Pending":
+    case 'Pending':
       return <IconLoader2 className="h-5 w-5 text-gray-500" />;
-    case "Processing":
+    case 'Processing':
       return <IconLoader2 className="h-5 w-5 animate-spin text-blue-500" />;
-    case "Completed":
+    case 'Completed':
       return <IconCircleCheck className="h-5 w-5 text-green-500" />;
-    case "Completed with errors":
+    case 'Completed with errors':
       return <IconAlertCircle className="h-5 w-5 text-yellow-500" />;
-    case "Failed":
+    case 'Failed':
       return <IconX className="h-5 w-5 text-red-500" />;
     default:
       return null;
@@ -135,26 +135,24 @@ export const getJobStatusIcon = (
 };
 
 /**
- * Trả về Text mô tả tương ứng với trạng thái của Job.
+ * Trả về Text mô tả tương ứng với trạng thái của Job (Tiếng Nhật).
  * @param status - Trạng thái Job.
  * @returns Chuỗi mô tả trạng thái.
  */
-export const getJobStatusText = (
-  status: BackendJobStatus["status"] | "Pending"
-): string => {
+export const getJobStatusText = (status: BackendJobStatus['status'] | 'Pending'): string => {
   switch (status) {
-    case "Pending":
-      return "待機中...";
-    case "Processing":
-      return "画像生成中...";
-    case "Completed":
-      return "完了しました";
-    case "Completed with errors":
-      return "一部エラーで完了しました";
-    case "Failed":
-      return "失敗しました";
+    case 'Pending':
+      return '待機中...';
+    case 'Processing':
+      return '生成中...';
+    case 'Completed':
+      return '完了';
+    case 'Completed with errors':
+      return '完了 (一部エラー)';
+    case 'Failed':
+      return '失敗';
     default:
-      return "不明";
+      return status || '不明';
   }
 };
 
@@ -165,38 +163,37 @@ export const getJobStatusText = (
  */
 export const getFtpStatusIcon = (status?: FtpUploadStatus): React.ReactNode => {
   switch (status) {
-    case "uploading":
-      return (
-        <IconCloudUpload className="h-4 w-4 animate-pulse text-blue-500" />
-      );
-    case "success":
+    case 'uploading':
+      return <IconCloudUpload className="h-4 w-4 animate-pulse text-blue-500" />;
+    case 'success':
       return <IconCloudCheck className="h-4 w-4 text-green-500" />;
-    case "failed":
+    case 'failed':
       return <IconCloudOff className="h-4 w-4 text-red-500" />;
-    case "idle":
+    case 'idle':
     default:
       return null;
   }
 };
 
 /**
- * Trả về Text mô tả tương ứng với trạng thái Upload FTP (bao gồm cả lỗi).
+ * Trả về Text mô tả tương ứng với trạng thái Upload FTP (Tiếng Nhật).
  * @param status - Trạng thái FTP.
  * @param error - Thông báo lỗi (nếu có).
  * @returns Chuỗi mô tả trạng thái hoặc null.
  */
 export const getFtpStatusText = (
   status?: FtpUploadStatus,
-  error?: string | null
+  error?: string | null,
 ): string | null => {
   switch (status) {
-    case "uploading":
-      return "アップロード中...";
-    case "success":
-      return "アップロード完了";
-    case "failed":
-      return error || "アップロード失敗"; // Hiển thị lỗi cụ thể nếu có
-    case "idle":
+    case 'uploading':
+      return 'アップロード中...';
+    case 'success':
+      return '完了';
+    case 'failed':
+      // Nếu có thông báo lỗi cụ thể thì hiển thị, không thì hiện "失敗"
+      return error ? `失敗: ${error}` : '失敗';
+    case 'idle':
     default:
       return null;
   }

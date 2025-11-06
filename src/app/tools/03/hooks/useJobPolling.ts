@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 // import { toast } from "react-toastify";
 import { toast } from 'sonner'; // << Import từ sonner
 // -----------------------------
+import { tool03API } from '../api/tool03API';
 import type { BackendJobStatus } from '../types';
 
 // --- Interface và các helper function giữ nguyên ---
@@ -79,8 +80,22 @@ export function useJobPolling({
     }
 
     try {
-      const API_URL = process.env.NEXT_PUBLIC_BACKEND_DOMAIN;
-      const response = await fetch(`${API_URL}/tools/03/jobs/${targetJobId}/status`);
+      // Sử dụng tool03API để lấy trạng thái job
+      let newData: BackendJobStatus;
+      try {
+        newData = await tool03API.getJobStatus(targetJobId);
+      } catch (error: any) {
+        // Nếu là lỗi 404 từ axios, xử lý như job không tìm thấy
+        if (error.response && error.response.status === 404) {
+          toast.error('ジョブが見つかりません。');
+          stopPolling();
+          setJobStatus(null);
+          onJobNotFoundRef.current?.();
+          return;
+        }
+        // Nếu là lỗi khác, ném ra để catch bên ngoài xử lý
+        throw error;
+      }
 
       if (
         !latestIsOpenRef.current ||
@@ -91,21 +106,6 @@ export function useJobPolling({
         return;
       }
 
-      if (response.status === 404) {
-        // Gọi toast.error của Sonner
-        toast.error('ジョブが見つかりません。');
-        stopPolling();
-        setJobStatus(null);
-        onJobNotFoundRef.current?.();
-        return;
-      }
-
-      if (!response.ok) {
-        onPollingErrorRef.current?.(new Error(`Polling failed with status ${response.status}`));
-        return; // Thử lại ở lần poll sau
-      }
-
-      const newData: BackendJobStatus = await response.json();
       console.log('[Hook] polling RECEIVED:', JSON.stringify(newData));
       const prevData = previousJobStatusRef.current;
       setJobStatus(newData); // Cập nhật state
@@ -118,14 +118,10 @@ export function useJobPolling({
         !isJobProcessingFinished(prevData.status) &&
         isJobProcessingFinished(newData.status)
       ) {
-        if (newData.status === 'Completed')
-          // Gọi toast.success của Sonner
-          toast.success('画像の生成が完了しました。');
+        if (newData.status === 'Completed') toast.success('画像の生成が完了しました。');
         else if (newData.status === 'Completed with errors')
-          // Gọi toast.warn của Sonner
           toast.warning('一部のプレビュー生成に失敗しました。');
         else if (newData.status === 'Failed')
-          // Gọi toast.error của Sonner
           toast.error(`画像の生成に失敗しました: ${newData.message || '不明なエラー'}`);
       }
 
@@ -177,7 +173,7 @@ export function useJobPolling({
       onPollingErrorRef.current?.(error as Error);
       // Không dừng polling khi có lỗi mạng, để thử lại
     }
-  }, [stopPolling]); // Dependencies giữ nguyên
+  }, [stopPolling]);
 
   // --- useEffect quản lý interval giữ nguyên logic ---
   useEffect(() => {

@@ -1,8 +1,9 @@
 // src/app/tools/03/components/PreviewModal.tsx
-import React from "react";
-import { Button } from "@/component/common/Button";
-import { cn } from "@/lib/utils";
-import type { BackendJobStatus, FtpUploadStatus, ProductRow } from "../types";
+import React from 'react';
+import { Button } from '@/component/common/Button';
+import { cn } from '@/lib/utils';
+import { tool03API } from '../api/tool03API';
+import type { BackendJobStatus, FtpUploadStatus, ProductRow } from '../types';
 import {
   IconLoader2,
   IconCircleCheck,
@@ -17,14 +18,19 @@ import {
   // --- LAZY LOAD (START) ---
   IconChevronDown, // 「さらに表示」ボタン用のアイコンを追加
   // --- LAZY LOAD (END) ---
-} from "@tabler/icons-react";
+} from '@tabler/icons-react';
 import {
   getJobStatusIcon,
   getJobStatusText,
   getFtpStatusIcon,
   getFtpStatusText,
-} from "../lib/utils"; // Import utils
-
+} from '../lib/utils'; // Import utils
+const STATUS_TEXT_JP: Record<string, string> = {
+  Pending: '待機中',
+  Processing: '処理中',
+  Success: '成功',
+  Error: 'エラー',
+};
 interface PreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -32,7 +38,7 @@ interface PreviewModalProps {
   isLoading: boolean; // 初期ローディングまたはポーリング中
   productRows: ProductRow[];
   onDownloadZip: () => void;
-  onUploadFTP: (target: "gold" | "rcabinet") => void;
+  onUploadFTP: (target: 'gold' | 'rcabinet') => void;
   isUploadingGold: boolean; // Goldボタンの一時的なローディング状態
   isUploadingRcabinet: boolean; // R-Cabinetボタンの一時的なローディング状態
   // --- LAZY LOAD (START) ---
@@ -60,13 +66,10 @@ function PreviewModal({
 }: PreviewModalProps) {
   // **** CONSOLE LOG 追加 ****
   console.log(
-    ">>> [DEBUG][PreviewModal V2 LOG ADDED] jobStatus prop でレンダリング中:",
-    JSON.stringify(jobStatus) // 完全なオブジェクトをログに記録するために Stringify する
+    '>>> [DEBUG][PreviewModal V2 LOG ADDED] jobStatus prop でレンダリング中:',
+    JSON.stringify(jobStatus), // 完全なオブジェクトをログに記録するために Stringify する
   );
-  console.log(
-    ">>> [DEBUG][PreviewModal V2 LOG ADDED] isLoading prop:",
-    isLoading
-  );
+  console.log('>>> [DEBUG][PreviewModal V2 LOG ADDED] isLoading prop:', isLoading);
   // ********************************
 
   if (!isOpen) return null;
@@ -74,24 +77,20 @@ function PreviewModal({
   // 進捗を計算
   const currentTotal = jobStatus?.total ?? productRows.length;
   const currentProgress = jobStatus?.progress ?? 0;
-  const progressPercentage = currentTotal
-    ? (currentProgress / currentTotal) * 100
-    : 0;
+  const progressPercentage = currentTotal ? (currentProgress / currentTotal) * 100 : 0;
 
   // ジョブとFTPのステータスを判断
   const isJobFinished =
-    jobStatus?.status === "Completed" ||
-    jobStatus?.status === "Completed with errors";
-  const isJobFailed = jobStatus?.status === "Failed";
-  const isJobRunning =
-    jobStatus?.status === "Processing" || jobStatus?.status === "Pending";
+    jobStatus?.status === 'Completed' || jobStatus?.status === 'Completed with errors';
+  const isJobFailed = jobStatus?.status === 'Failed';
+  const isJobRunning = jobStatus?.status === 'Processing' || jobStatus?.status === 'Pending';
 
   // いずれかのFTPがアップロード中かどうかのフラグ（ボタンのローディング状態とバックエンドからの実際の状態を含む）
   const isAnyFtpUploading =
     isUploadingGold ||
     isUploadingRcabinet ||
-    jobStatus?.ftpUploadStatusGold === "uploading" ||
-    jobStatus?.ftpUploadStatusRcabinet === "uploading";
+    jobStatus?.ftpUploadStatusGold === 'uploading' ||
+    jobStatus?.ftpUploadStatusRcabinet === 'uploading';
 
   // アクション（ダウンロード/アップロード）が実行可能かどうか
   const canPerformActions = isJobFinished && !isJobFailed;
@@ -99,10 +98,13 @@ function PreviewModal({
   // --- 修正: ロジックをコンポーネント内部に移動 ---
 
   // 簡単に検索できるように、行IDから商品管理番号へのマップを作成
-  const rowIdToProductCodeMap = productRows.reduce((acc, row) => {
-    acc[row.id] = row.productCode;
-    return acc;
-  }, {} as { [key: string]: string });
+  const rowIdToProductCodeMap = productRows.reduce(
+    (acc, row) => {
+      acc[row.id] = row.productCode;
+      return acc;
+    },
+    {} as { [key: string]: string },
+  );
 
   // 後で結果をフィルタリングするために、現在の行IDのセットを取得
   const currentRowIds = new Set(productRows.map((row) => row.id));
@@ -113,7 +115,6 @@ function PreviewModal({
   const relevantRows = jobStatus?.results
     ? productRows.filter((row) => currentRowIds.has(row.id) && jobStatus.results[row.id])
     : productRows.filter((row) => currentRowIds.has(row.id));
-
 
   const visibleRows = relevantRows.slice(0, visibleCount);
   const totalRelevantRows = relevantRows.length;
@@ -144,9 +145,9 @@ function PreviewModal({
             {/* ジョブステータス行 */}
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                {getJobStatusIcon(jobStatus?.status ?? "Pending")}
+                {getJobStatusIcon(jobStatus?.status ?? 'Pending')}
                 <span className="font-medium">
-                  {getJobStatusText(jobStatus?.status ?? "Pending")}
+                  {getJobStatusText(jobStatus?.status ?? 'Pending')}
                 </span>
               </div>
               <span className="text-sm text-gray-600">
@@ -156,9 +157,7 @@ function PreviewModal({
                   // isJobFinished đã được tính ở trên
                   if (isJobFinished && jobStatus?.startTime && jobStatus?.endTime) {
                     const duration = (jobStatus.endTime - jobStatus.startTime).toFixed(2);
-                    return (
-                      <span className="ml-2">(処理時間: {duration}秒)</span>
-                    );
+                    // return <span className="ml-2">(処理時間: {duration}秒)</span>;
                   }
                   return null;
                 })()}
@@ -170,18 +169,16 @@ function PreviewModal({
               <div className="w-full bg-gray-200 rounded-full h-2.5">
                 <div
                   className={cn(
-                    "h-2.5 rounded-full transition-all duration-300",
+                    'h-2.5 rounded-full transition-all duration-300',
                     // 全体がローディング中だがステータスがまだ処理中でない場合、パルス表示
-                    isLoading && jobStatus?.status !== "Processing"
-                      ? "bg-gray-400 animate-pulse"
-                      : "bg-blue-600"
+                    isLoading && jobStatus?.status !== 'Processing'
+                      ? 'bg-gray-400 animate-pulse'
+                      : 'bg-blue-600',
                   )}
                   style={{
                     // 初期ローディング中は100%幅のパルスを表示、それ以外は進捗率を表示
                     width: `${
-                      isLoading && jobStatus?.status !== "Processing"
-                        ? 100
-                        : progressPercentage
+                      isLoading && jobStatus?.status !== 'Processing' ? 100 : progressPercentage
                     }%`,
                   }}
                 ></div>
@@ -194,10 +191,7 @@ function PreviewModal({
                 <span>GOLD:</span>
                 {getFtpStatusIcon(jobStatus?.ftpUploadStatusGold)}
                 <span title={jobStatus?.ftpUploadErrorGold ?? undefined}>
-                  {getFtpStatusText(
-                    jobStatus?.ftpUploadStatusGold,
-                    jobStatus?.ftpUploadErrorGold
-                  )}
+                  {getFtpStatusText(jobStatus?.ftpUploadStatusGold, jobStatus?.ftpUploadErrorGold)}
                 </span>
               </div>
               {/* R-Cabinet ステータス */}
@@ -207,7 +201,7 @@ function PreviewModal({
                 <span title={jobStatus?.ftpUploadErrorRcabinet ?? undefined}>
                   {getFtpStatusText(
                     jobStatus?.ftpUploadStatusRcabinet,
-                    jobStatus?.ftpUploadErrorRcabinet
+                    jobStatus?.ftpUploadErrorRcabinet,
                   )}
                 </span>
               </div>
@@ -219,12 +213,11 @@ function PreviewModal({
               </div>
             )}
             {/* 部分完了の警告 */}
-            {jobStatus?.status === "Completed with errors" &&
-              !jobStatus.message && (
-                <div className="text-sm text-yellow-700 bg-yellow-50 p-2 rounded border border-yellow-200">
-                  一部の画像の生成に失敗しました。詳細は各画像をご確認ください。
-                </div>
-              )}
+            {jobStatus?.status === 'Completed with errors' && !jobStatus.message && (
+              <div className="text-sm text-yellow-700 bg-yellow-50 p-2 rounded border border-yellow-200">
+                一部の画像の生成に失敗しました。詳細は各画像をご確認ください。
+              </div>
+            )}
           </div>
 
           {/* 画像グリッド */}
@@ -250,99 +243,75 @@ function PreviewModal({
             */}
             {jobStatus?.results &&
               visibleRows.map((row) => {
-                  const rowId = row.id;
-                  const result = jobStatus.results[rowId];
-                  const productCode =
-                    rowIdToProductCodeMap[rowId] || `item-${rowId.slice(-3)}`;
-                  const cacheBuster =
-                    jobStatus?.endTime || jobStatus?.startTime || Date.now();
+                const rowId = row.id;
+                const result = jobStatus.results[rowId];
+                const productCode = rowIdToProductCodeMap[rowId] || `item-${rowId.slice(-3)}`;
+                const cacheBuster = jobStatus?.endTime || jobStatus?.startTime || Date.now();
 
-                  // result がまだない場合は、デフォルトで処理中とする
-                  const status = result?.status ?? "Pending";
-                  const message = result?.message;
+                // result がまだない場合は、デフォルトで処理中とする
+                const status = result?.status ?? 'Pending';
+                const message = result?.message;
 
-                  const imageUrl =
-                    status === "Success" &&
-                    result.filename &&
-                    jobStatus?.jobId
-                      ? `/api/tools/03/jobs/${
-                          jobStatus.jobId
-                        }/image/${encodeURIComponent(
-                          result.filename
-                        )}?v=${cacheBuster}`
-                      : ""; // プレースホルダー
+                const imageUrl =
+                  status === 'Success' && result.filename && jobStatus?.jobId
+                    ? `${tool03API.getImageUrl(jobStatus.jobId, result.filename)}?v=${cacheBuster}`
+                    : '';
 
-                  return (
-                    <div
-                      key={rowId}
-                      className="border rounded-lg p-3 flex flex-col items-center text-center shadow-sm"
-                    >
-                      <div className="w-40 h-40 mb-2 flex items-center justify-center bg-gray-100 rounded">
-                        {status === "Processing" ||
-                        status === "Pending" ? (
-                          <IconLoader2
-                            size={32}
-                            className="animate-spin text-blue-400"
-                          />
-                        ) : (
-                          <img
-                            src={imageUrl}
-                            alt={`Preview for ${productCode}`}
-                            className="max-w-full max-h-full object-contain rounded"
-                            // オプション: 画像のエラーハンドリングを追加
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.onerror = null; // 無限ループを防止
-                              target.src = "/img/placeholder_error.png";
-                            }}
-                          />
-                        )}
-                      </div>
-                      <p
-                        className="text-sm font-medium truncate w-full"
-                        title={productCode}
-                      >
-                        {" "}
-                        {productCode}{" "}
-                      </p>
-                      <div className="flex items-center text-xs mt-1">
-                        {status === "Success" && (
-                          <IconCircleCheck
-                            size={14}
-                            className="text-green-500 mr-1 flex-shrink-0"
-                          />
-                        )}
-                        {status === "Error" && (
-                          <IconCircleX
-                            size={14}
-                            className="text-red-500 mr-1 flex-shrink-0"
-                          />
-                        )}
-                        {(status === "Processing" ||
-                          status === "Pending") && (
-                          <IconLoader2
-                            size={14}
-                            className="text-blue-500 mr-1 flex-shrink-0 animate-spin"
-                          />
-                        )}
-                        <span
-                          className={cn(
-                            "truncate",
-                            status === "Success" && "text-green-600",
-                            status === "Error" && "text-red-600",
-                            (status === "Processing" ||
-                              status === "Pending") &&
-                              "text-blue-600"
-                          )}
-                          title={message ?? status}
-                        >
-                          {message ? message : status}
-                        </span>
-                      </div>
+                return (
+                  <div
+                    key={rowId}
+                    className="border rounded-lg p-3 flex flex-col items-center text-center shadow-sm"
+                  >
+                    <div className="w-40 h-40 mb-2 flex items-center justify-center bg-gray-100 rounded">
+                      {status === 'Processing' || status === 'Pending' ? (
+                        <IconLoader2 size={32} className="animate-spin text-blue-400" />
+                      ) : (
+                        <img
+                          src={imageUrl}
+                          alt={`Preview for ${productCode}`}
+                          className="max-w-full max-h-full object-contain rounded"
+                          // オプション: 画像のエラーハンドリングを追加
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.onerror = null; // 無限ループを防止
+                            target.src = '/img/placeholder_error.png';
+                          }}
+                        />
+                      )}
                     </div>
-                  );
-                })}
-             {/* --- LAZY LOAD (END) --- */}
+                    <p className="text-sm font-medium truncate w-full" title={productCode}>
+                      {' '}
+                      {productCode}{' '}
+                    </p>
+                    <div className="flex items-center text-xs mt-1">
+                      {status === 'Success' && (
+                        <IconCircleCheck size={14} className="text-green-500 mr-1 flex-shrink-0" />
+                      )}
+                      {status === 'Error' && (
+                        <IconCircleX size={14} className="text-red-500 mr-1 flex-shrink-0" />
+                      )}
+                      {(status === 'Processing' || status === 'Pending') && (
+                        <IconLoader2
+                          size={14}
+                          className="text-blue-500 mr-1 flex-shrink-0 animate-spin"
+                        />
+                      )}
+                      <span
+                        className={cn(
+                          'truncate',
+                          status === 'Success' && 'text-green-600',
+                          status === 'Error' && 'text-red-600',
+                          (status === 'Processing' || status === 'Pending') && 'text-blue-600',
+                        )}
+                        title={message ?? status}
+                      >
+                        {message ? message : STATUS_TEXT_JP[status] || status}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            {/* --- LAZY LOAD (END) --- */}
           </div>
 
           {/* --- LAZY LOAD (START) --- */}
@@ -362,14 +331,13 @@ function PreviewModal({
             </div>
           )}
           {/* --- LAZY LOAD (END) --- */}
-
         </div>
 
         {/* フッター アクションボタン */}
         <div className="flex justify-center items-center p-4 border-t space-x-3 bg-gray-50">
           <Button color="grey" onClick={onClose}>
-            {" "}
-            修正 (閉じる){" "}
+            {' '}
+            修正 (閉じる){' '}
           </Button>
           <Button
             color="secondary"
@@ -382,14 +350,13 @@ function PreviewModal({
           </Button>
           <Button
             color="primary"
-            onClick={() => onUploadFTP("gold")}
+            onClick={() => onUploadFTP('gold')}
             // ジョブが未完了/エラー、またはいずれかのFTPアップロード中の場合は無効化
             disabled={!canPerformActions || isAnyFtpUploading}
             className="inline-flex items-center"
           >
             {/* GOLD の特定の状態に基づいてローダーを表示 */}
-            {isUploadingGold ||
-            jobStatus?.ftpUploadStatusGold === "uploading" ? (
+            {isUploadingGold || jobStatus?.ftpUploadStatusGold === 'uploading' ? (
               <IconLoader2 size={18} className="mr-1.5 animate-spin" />
             ) : (
               <IconUpload size={18} className="mr-1.5" />
@@ -398,14 +365,13 @@ function PreviewModal({
           </Button>
           <Button
             color="primary"
-            onClick={() => onUploadFTP("rcabinet")}
+            onClick={() => onUploadFTP('rcabinet')}
             // ジョブが未完了/エラー、またはいずれかのFTPアップロード中の場合は無効化
             disabled={!canPerformActions || isAnyFtpUploading}
             className="inline-flex items-center"
           >
             {/* R-Cabinet の特定の状態に基づいてローダーを表示 */}
-            {isUploadingRcabinet ||
-            jobStatus?.ftpUploadStatusRcabinet === "uploading" ? (
+            {isUploadingRcabinet || jobStatus?.ftpUploadStatusRcabinet === 'uploading' ? (
               <IconLoader2 size={18} className="mr-1.5 animate-spin" />
             ) : (
               <IconUpload size={18} className="mr-1.5" />
