@@ -27,8 +27,7 @@ const useStaffAPI = () => {
       const response = await axiosClient.post(URL_PREFIX + '/create_staff', body, { headers });
       return response.data;
     } catch (e: any) {
-      console.log(e);
-      throw new Error(e);
+      throw e;
     }
   };
   return {

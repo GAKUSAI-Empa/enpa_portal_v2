@@ -30,6 +30,7 @@ const page = () => {
       username: Yup.string()
         .trim()
         .required('ユーザー名を入力してください。')
+        .matches(/^[a-zA-Z0-9_]+$/, 'ユーザー名には英数字とアンダースコア（_）のみ使用できます。')
         .max(20, 'ユーザー名は20文字以内で入力してください。'),
       email: Yup.string()
         .email('メールアドレスの形式が正しくありません。')
@@ -41,11 +42,11 @@ const page = () => {
       isAdmin: Yup.string().trim().required('権限を選択してください。'),
       password: Yup.string()
         .trim()
-        // .matches(
-        //   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/,
-        //   'パスワードは英大文字・英小文字・数字を含めてください。',
-        // )
-        // .min(8, 'パスワードは8文字以上で入力してください。')
+        .matches(
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/,
+          'パスワードは英大文字・英小文字・数字を含めてください。',
+        )
+        .min(8, 'パスワードは8文字以上で入力してください。')
         .required('パスワードを入力してください。'),
       retypePassword: Yup.string()
         .trim()
@@ -62,9 +63,12 @@ const page = () => {
           values.isAdmin,
           values.password,
         );
-        toast.success(resData.detail);
-      } catch (e) {
-        toast.error('エラーが発生しました。もう一度お試しください。');
+        toast.success(resData.message);
+        router.push('/staff');
+      } catch (e: any) {
+        const backendMessage =
+          e?.response?.data?.message || 'エラーが発生しました。もう一度お試しください。';
+        toast.error(backendMessage);
       } finally {
         setIsLoading(false);
       }
@@ -99,7 +103,7 @@ const page = () => {
                   <TextBox
                     id="email"
                     name="email"
-                    type="text"
+                    type="email"
                     isRequired={true}
                     label={'メールアドレス'}
                     value={formik.values.email}

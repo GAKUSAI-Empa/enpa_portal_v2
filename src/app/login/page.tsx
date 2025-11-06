@@ -48,7 +48,7 @@ const page = () => {
         const session = await getSession();
         toast.success('おはよう' + session?.user.username);
         console.log(session?.user.accessToken);
-        router.push('/');
+        router.push('/tools/dashboard');
       }
 
       setIsLoading(false);
