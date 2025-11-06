@@ -62,25 +62,21 @@ const page = () => {
           {/* Form */}
           <div className="w-full max-w-md">
             {/* Logo */}
-            <div className="flex items-center justify-center mb-8 w-full">
-              <div className="flex-1 flex justify-end pr-2">
+            <div className="relative flex items-center justify-center mb-8 w-full h-[100px]">
+              <div className="flex-1 flex justify-end relative h-full">
                 <Image
-                  width={0}
-                  height={60}
                   src="/img/logo/emportal_logo.png"
                   alt="Logo"
+                  fill
                   className="object-contain"
-                  style={{ width: 'auto' }}
                 />
               </div>
-              <div className="flex-[4] flex justify-start pl-2">
+              <div className="flex-[4] flex justify-start relative h-full">
                 <Image
-                  width={0}
-                  height={60}
                   src="/img/logo/emportal_logo_text.png"
                   alt="Logo Text"
+                  fill
                   className="object-contain"
-                  style={{ width: 'auto' }}
                 />
               </div>
             </div>
