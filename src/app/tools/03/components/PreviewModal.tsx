@@ -151,8 +151,7 @@ function PreviewModal({
               </div>
               <span className="text-sm text-gray-600">
                 {currentProgress} / {currentTotal} 件処理済み
-<<<<<<< HEAD
-=======
+
                 {/* --- 修正案 (START) --- */}
                 {(() => {
                   // isJobFinished đã được tính ở trên
@@ -165,7 +164,6 @@ function PreviewModal({
                   return null;
                 })()}
                 {/* --- 修正案 (END) --- */}
->>>>>>> origin/master
               </span>
             </div>
             {/* プログレスバー */}
