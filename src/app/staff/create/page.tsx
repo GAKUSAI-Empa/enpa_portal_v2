@@ -9,13 +9,13 @@ import { FormikProvider, useFormik } from 'formik';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import * as Yup from 'yup';
-import useStaffAPI from '../api/useStaffMainteAPI';
+import useStaffMainteAPI from '../api/useStaffMainteAPI';
 import { toast } from 'sonner';
 
 const page = () => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { createStaff } = useStaffAPI();
+  const { createStaff } = useStaffMainteAPI();
 
   const formik = useFormik({
     initialValues: {

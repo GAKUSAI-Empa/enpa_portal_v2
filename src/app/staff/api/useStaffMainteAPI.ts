@@ -2,7 +2,7 @@ import useAxiosClient from '@/lib/axios/useAxiosClient';
 import { getSession } from 'next-auth/react';
 import useSWR from 'swr';
 
-const useStaffAPI = () => {
+const useStaffMainteAPI = () => {
   const URL_PREFIX = '/staff';
   const axiosClient = useAxiosClient();
 
@@ -35,4 +35,4 @@ const useStaffAPI = () => {
   };
 };
 
-export default useStaffAPI;
+export default useStaffMainteAPI;
