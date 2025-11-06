@@ -6,6 +6,7 @@ import Slider from 'react-slick';
 export default function SliderImagereview() {
   const sliderRef = useRef<Slider>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('templateA');
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const settings = {
     dots: false,
     infinite: false,
@@ -77,10 +78,20 @@ export default function SliderImagereview() {
               <tbody>
                 <tr>
                   <td>
-                    <img src={item.imgSrc1} className="w-auto h-[200px] object-cover" alt="" />
+                    <img
+                      src={item.imgSrc1}
+                      className="w-[400px] h-[200px] object-cover object-center"
+                      alt=""
+                      onClick={() => setPreviewImage(item.imgSrc1)}
+                    />
                   </td>
                   <td>
-                    <img src={item.imgSrc2} className="w-auto h-[200px] object-cover" alt="" />
+                    <img
+                      src={item.imgSrc2}
+                      className="w-[400px] h-[200px] object-cover object-center"
+                      alt=""
+                      onClick={() => setPreviewImage(item.imgSrc2)}
+                    />
                   </td>
                 </tr>
               </tbody>
@@ -101,6 +112,7 @@ export default function SliderImagereview() {
       </Slider>
 
       <button
+        type="button"
         onClick={() => sliderRef.current?.slickPrev()}
         className="absolute top-1/2 left-2 -translate-y-1/2 bg-white/70 hover:bg-white p-2 rounded-full shadow"
       >
@@ -108,11 +120,32 @@ export default function SliderImagereview() {
       </button>
 
       <button
+        type="button"
         onClick={() => sliderRef.current?.slickNext()}
         className="absolute top-1/2 right-2 -translate-y-1/2 bg-white/70 hover:bg-white p-2 rounded-full shadow"
       >
         ▶
       </button>
+      {/* 🟢 Popup hiển thị ảnh lớn */}
+      {previewImage && (
+        <div
+          className="fixed inset-0 bg-black/70 flex justify-center items-center z-50"
+          onClick={() => setPreviewImage(null)}
+        >
+          <img
+            src={previewImage}
+            alt="preview"
+            className="max-w-[90%] max-h-[90%] object-contain rounded-lg shadow-lg"
+            onClick={(e) => e.stopPropagation()} // để click vào ảnh không đóng popup
+          />
+          <button
+            onClick={() => setPreviewImage(null)}
+            className="absolute top-5 right-5 text-white text-3xl"
+          >
+            ✕
+          </button>
+        </div>
+      )}
     </div>
   );
 }

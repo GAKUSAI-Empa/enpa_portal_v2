@@ -18,7 +18,7 @@ interface DateRangePickerProps {
 }
 
 export default function DateRangePicker({
-  label = '抽出期間',
+  label = '',
   defaultFrom,
   defaultTo,
   onChange,
@@ -38,7 +38,6 @@ export default function DateRangePicker({
       <div className="flex items-center space-x-2 w-full">
         <Popover>
           <PopoverTrigger asChild>
-            {/* flex-1 đảm bảo ô này chiếm 50% không gian trừ đi dấu ~ */}
             <div className="relative flex-1">
               <Input
                 readOnly
