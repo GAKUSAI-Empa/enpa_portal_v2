@@ -1,24 +1,20 @@
-"use client"
+'use client';
 
 import React, { ReactNode } from 'react';
-import { HeaderProvider } from './context/HeaderContext';
+
 import { Toaster } from 'sonner';
+import { SessionProvider } from 'next-auth/react';
 
 interface Props {
-    children: ReactNode
+  children: ReactNode;
 }
 const providers = ({ children }: Props) => {
-    return (
-        <React.Fragment>
-            <HeaderProvider>
-                {children}
-            </HeaderProvider>
-            <Toaster
-                position="top-right"
-                richColors={true}
-                closeButton={true}
-            />
-        </React.Fragment>
-    )
-}
-export default providers
+
+  return (
+    <React.Fragment>
+      <SessionProvider>{children}</SessionProvider>
+      <Toaster position="top-right" richColors={true} closeButton={true} />
+    </React.Fragment>
+  );
+};
+export default providers;

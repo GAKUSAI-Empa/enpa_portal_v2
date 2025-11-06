@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { useHeader } from '@/app/context/HeaderContext';
+
 import { Card, CardContent, CardHeader } from '@/component/common/Card';
 import { Button } from '@/component/common/Button';
 import { Alert } from '@/component/common/Alert';
@@ -34,11 +34,12 @@ const BATCH_SIZE = 10;
 
 export default function TwoPriceImagePage() {
   // --- State の宣言 ---
-  const { setTitle } = useHeader();
 
-  useEffect(() => {
-    setTitle('二重価格セール画像生成');
-  }, [setTitle]);
+  // const { setTitle } = useHeader();
+
+  // useEffect(() => {
+  //   setTitle('二重価格セール画像生成');
+  // }, [setTitle]);
   const [isClient, setIsClient] = useState(false);
   const [selectedImages, setSelectedImages] = useState<string[] | null>(null);
   const [errors, setErrors] = useState<AllErrors>({});
@@ -550,6 +551,7 @@ export default function TwoPriceImagePage() {
   // --- JSX Return ---
   return (
     <div className="space-y-6">
+      <h1 className="text-xl font-bold text-gray-800">二重価格セール画像生成</h1>
       {/* テンプレート選択 (変更なし) */}
       <Card>
         <CardHeader title="1. テンプレート選択" />

@@ -1,10 +1,11 @@
 // src/app/tools/03/hooks/useJobPolling.ts
-import { useState, useEffect, useRef, useCallback } from "react";
+
+import { useState, useEffect, useRef, useCallback } from 'react';
 // --- Thay đổi import Toast ---
 // import { toast } from "react-toastify";
-import { toast } from "sonner"; // << Import từ sonner
+import { toast } from 'sonner'; // << Import từ sonner
 // -----------------------------
-import type { BackendJobStatus } from "../types";
+import type { BackendJobStatus } from '../types';
 
 // --- Interface và các helper function giữ nguyên ---
 interface UseJobPollingProps {
@@ -12,20 +13,21 @@ interface UseJobPollingProps {
   isOpen: boolean;
   onJobNotFound?: () => void;
   onPollingError?: (error: Error) => void;
-  onFtpSuccess?: (target: "gold" | "rcabinet", message: string) => void;
-  onFtpError?: (target: "gold" | "rcabinet", message: string) => void;
+
+  onFtpSuccess?: (target: 'gold' | 'rcabinet', message: string) => void;
+  onFtpError?: (target: 'gold' | 'rcabinet', message: string) => void;
 }
 
 function isFtpFinalState(status?: string | null): boolean {
-  return status === "success" || status === "failed";
+  return status === 'success' || status === 'failed';
 }
 
 function isFtpUploading(status?: string | null): boolean {
-  return status === "uploading";
+  return status === 'uploading';
 }
 
 function isJobProcessingFinished(status?: string | null): boolean {
-  return !["Pending", "Processing"].includes(status || "");
+  return !['Pending', 'Processing'].includes(status || '');
 }
 // --------------------------------------------------
 
@@ -65,7 +67,7 @@ export function useJobPolling({
     if (pollingIntervalRef.current) {
       clearInterval(pollingIntervalRef.current);
       pollingIntervalRef.current = null;
-      console.log("[Hook] stop interval");
+      console.log('[Hook] stop interval');
     }
   }, []);
   // -----------------------------
@@ -79,7 +81,9 @@ export function useJobPolling({
     }
 
     try {
-      const response = await fetch(`/api/tools/03/jobs/${targetJobId}/status`);
+
+      const API_URL = process.env.NEXT_PUBLIC_BACKEND_DOMAIN;
+      const response = await fetch(`${API_URL}/tools/03/jobs/${targetJobId}/status`);
 
       if (
         !latestIsOpenRef.current ||
@@ -92,7 +96,8 @@ export function useJobPolling({
 
       if (response.status === 404) {
         // Gọi toast.error của Sonner
-        toast.error("ジョブが見つかりません。");
+
+        toast.error('ジョブが見つかりません。');
         stopPolling();
         setJobStatus(null);
         onJobNotFoundRef.current?.();
@@ -100,14 +105,14 @@ export function useJobPolling({
       }
 
       if (!response.ok) {
-        onPollingErrorRef.current?.(
-          new Error(`Polling failed with status ${response.status}`)
-        );
+
+        onPollingErrorRef.current?.(new Error(`Polling failed with status ${response.status}`));
         return; // Thử lại ở lần poll sau
       }
 
       const newData: BackendJobStatus = await response.json();
-      console.log("[Hook] polling RECEIVED:", JSON.stringify(newData));
+
+      console.log('[Hook] polling RECEIVED:', JSON.stringify(newData));
       const prevData = previousJobStatusRef.current;
       setJobStatus(newData); // Cập nhật state
 
@@ -119,17 +124,16 @@ export function useJobPolling({
         !isJobProcessingFinished(prevData.status) &&
         isJobProcessingFinished(newData.status)
       ) {
-        if (newData.status === "Completed")
+
+        if (newData.status === 'Completed')
           // Gọi toast.success của Sonner
-          toast.success("画像の生成が完了しました。");
-        else if (newData.status === "Completed with errors")
+          toast.success('画像の生成が完了しました。');
+        else if (newData.status === 'Completed with errors')
           // Gọi toast.warn của Sonner
-          toast.warning("一部のプレビュー生成に失敗しました。");
-        else if (newData.status === "Failed")
+          toast.warning('一部のプレビュー生成に失敗しました。');
+        else if (newData.status === 'Failed')
           // Gọi toast.error của Sonner
-          toast.error(
-            `画像の生成に失敗しました: ${newData.message || "不明なエラー"}`
-          );
+          toast.error(`画像の生成に失敗しました: ${newData.message || '不明なエラー'}`);
       }
 
       // Chuyển đổi trạng thái GOLD FTP (Gọi callback)
@@ -137,17 +141,13 @@ export function useJobPolling({
         isFtpUploading(prevData?.ftpUploadStatusGold) &&
         isFtpFinalState(newData.ftpUploadStatusGold)
       ) {
-        if (newData.ftpUploadStatusGold === "success") {
-          onFtpSuccessRef.current?.(
-            "gold",
-            "GOLDへのアップロードが完了しました。"
-          );
+
+        if (newData.ftpUploadStatusGold === 'success') {
+          onFtpSuccessRef.current?.('gold', 'GOLDへのアップロードが完了しました。');
         } else {
           onFtpErrorRef.current?.(
-            "gold",
-            `GOLDへのアップロードに失敗しました: ${
-              newData.ftpUploadErrorGold || "不明なエラー"
-            }`
+            'gold',
+            `GOLDへのアップロードに失敗しました: ${newData.ftpUploadErrorGold || '不明なエラー'}`,
           );
         }
       }
@@ -157,17 +157,14 @@ export function useJobPolling({
         isFtpUploading(prevData?.ftpUploadStatusRcabinet) &&
         isFtpFinalState(newData.ftpUploadStatusRcabinet)
       ) {
-        if (newData.ftpUploadStatusRcabinet === "success") {
-          onFtpSuccessRef.current?.(
-            "rcabinet",
-            "R-Cabinetへのアップロードが完了しました。"
-          );
+        if (newData.ftpUploadStatusRcabinet === 'success') {
+          onFtpSuccessRef.current?.('rcabinet', 'R-Cabinetへのアップロードが完了しました。');
         } else {
           onFtpErrorRef.current?.(
-            "rcabinet",
+            'rcabinet',
             `R-Cabinetへのアップロードに失敗しました: ${
-              newData.ftpUploadErrorRcabinet || "不明なエラー"
-            }`
+              newData.ftpUploadErrorRcabinet || '不明なエラー'
+            }`,
           );
         }
       }
@@ -175,7 +172,8 @@ export function useJobPolling({
 
       // --- Xác định khi nào dừng polling ---
       const shouldStop =
-        newData.status === "Failed" ||
+
+        newData.status === 'Failed' ||
         (isJobProcessingFinished(newData.status) &&
           isFtpFinalState(newData.ftpUploadStatusGold) &&
           isFtpFinalState(newData.ftpUploadStatusRcabinet));
@@ -184,7 +182,8 @@ export function useJobPolling({
         stopPolling();
       }
     } catch (error) {
-      console.error("[Hook] polling error:", error);
+
+      console.error('[Hook] polling error:', error);
       onPollingErrorRef.current?.(error as Error);
       // Không dừng polling khi có lỗi mạng, để thử lại
     }
@@ -212,19 +211,22 @@ export function useJobPolling({
           firstRunTimeoutId = null;
         }, 100);
         pollingIntervalRef.current = setInterval(runPollingIteration, 3000);
-        console.log("[Hook] start interval (polling needed)");
+
+        console.log('[Hook] start interval (polling needed)');
       }
     } else {
       if (firstRunTimeoutId) clearTimeout(firstRunTimeoutId);
       if (pollingIntervalRef.current) {
         stopPolling();
-        console.log("[Hook] stop interval (polling no longer needed)");
+
+        console.log('[Hook] stop interval (polling no longer needed)');
       }
     }
     return () => {
       if (firstRunTimeoutId) clearTimeout(firstRunTimeoutId);
       stopPolling();
-      console.log("[Hook] interval cleanup on unmount/deps change");
+
+      console.log('[Hook] interval cleanup on unmount/deps change');
     };
   }, [isOpen, jobId, jobStatus, stopPolling, runPollingIteration]);
   // ------------------------------------------
@@ -232,8 +234,9 @@ export function useJobPolling({
   // --- isLoading giữ nguyên ---
   const isLoading =
     (isOpen && !!jobId && !jobStatus) ||
-    jobStatus?.status === "Processing" ||
-    jobStatus?.status === "Pending" ||
+
+    jobStatus?.status === 'Processing' ||
+    jobStatus?.status === 'Pending' ||
     isFtpUploading(jobStatus?.ftpUploadStatusGold) ||
     isFtpUploading(jobStatus?.ftpUploadStatusRcabinet);
 
