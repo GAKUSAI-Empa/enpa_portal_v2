@@ -2,12 +2,19 @@
 import { Button } from '@/component/common/Button';
 import { Card, CardContent, CardHeader } from '@/component/common/Card';
 import { Table } from '@/component/common/Table';
-import { IconPlus } from '@tabler/icons-react';
+import { IconPlus, IconTrash } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import useStaffAPI from './api/useStaffMainteAPI';
+import { toast } from 'sonner';
+import { useSession } from 'next-auth/react';
+import useStaffListAPI from './api/useStaffListAPI';
 
 const page = () => {
   const router = useRouter();
+  const [staffs, setStaffs] = useState([]);
+  const { data: session } = useSession();
+  const { data: list, error, isLoading, mutate } = useStaffListAPI(session?.user.company_id);
 
   return (
     <>
@@ -32,23 +39,22 @@ const page = () => {
                 <Table.Th width="w-16"></Table.Th>
                 <Table.Th width="w-40">ユーザー名 </Table.Th>
                 <Table.Th width="w-40">メールアドレス </Table.Th>
-                <Table.Th width="w-40">ChatWorkルームID</Table.Th>
                 <Table.Th width="w-40">企業名</Table.Th>
                 <Table.Th width="w-16">削除</Table.Th>
               </Table.Row>
             </Table.Head>
             <Table.Body>
-              <Table.Row>
-                <Table.Td>1</Table.Td>
-                <Table.Td>AB123</Table.Td>
-                <Table.Td>https://example.com/image.png</Table.Td>
-                <Table.Td>id_string</Table.Td>
-                <Table.Td>id_string</Table.Td>
-                <Table.Td>
-                  <button className="text-red-500 hover:text-red-700">削除</button>
-                </Table.Td>
-              </Table.Row>
-              {/* More rows */}
+              {list?.map((item: any, index: number) => (
+                <Table.Row>
+                  <Table.Td>{index}</Table.Td>
+                  <Table.Td>{item.username}</Table.Td>
+                  <Table.Td>{item.email}</Table.Td>
+                  <Table.Td>{item.company_id}</Table.Td>
+                  <Table.Button>
+                    <IconTrash size={20} />
+                  </Table.Button>
+                </Table.Row>
+              ))}
             </Table.Body>
           </Table.Container>
         </CardContent>

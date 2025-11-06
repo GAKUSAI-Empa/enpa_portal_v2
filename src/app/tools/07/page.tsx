@@ -118,7 +118,8 @@ const Page = () => {
                     name="min_review_placement"
                     value={formik.values.min_review_placement}
                     onChange={formik.handleChange}
-                    direction="horizontal"
+                    direction="vertical"
+                    width="lg"
                     error={formik.errors.min_review_placement}
                     touched={formik.touched.min_review_placement}
                   />

@@ -8,6 +8,8 @@ import { Alert } from '@/component/common/Alert';
 import { IconLoader2, IconRefresh } from '@tabler/icons-react';
 import { Toaster, toast } from 'sonner';
 import debounce from 'lodash/debounce';
+import axios from 'axios';
+import { tool03API } from './api/tool03API';
 
 // コンポーネントとロジックの分離
 import EditableProductTable from './components/EditableProductTable';
@@ -333,7 +335,6 @@ export default function TwoPriceImagePage() {
     }
   };
   // ---------------------------------------
-
   // handlePreviewClick 関数 (修正済み)
   const handlePreviewClick = async () => {
     setGlobalAlert(null);
@@ -359,25 +360,9 @@ export default function TwoPriceImagePage() {
       if (!currentJobId) {
         // --- POST ロジック (新規ジョブ作成) ---
         console.log('>>> [DEBUG][Page] 新規ジョブを作成中 (POST)');
-        const payload = { productRows };
-        const response = await fetch('/api/tools/03/jobs', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
 
-        if (!response.ok) {
-          let errorDetail = `HTTPエラー! status: ${response.status}`;
-          try {
-            const errorData = await response.json();
-            errorDetail = errorData.detail || errorDetail;
-          } catch (e) {
-            /* JSON パースエラーは無視 */
-          }
-          throw new Error(errorDetail);
-        }
-
-        const data: { jobId: string; totalItems: number } = await response.json();
+        // 変更点: tool03API を使用してジョブを作成
+        const data = await tool03API.createJob(productRows);
         const newJobId = data.jobId;
 
         setJobId(newJobId);
@@ -407,7 +392,7 @@ export default function TwoPriceImagePage() {
 
         if (rowsToUpdate.length > 0) {
           setJobStatus((prev) => ({
-            jobId: currentJobId,
+            jobId: currentJobId!, // currentJobId は確実に存在するので ! を付ける
             startTime: prev?.startTime ?? Date.now() / 1000,
             status: 'Processing', // "Processing" (画像生成中...) に設定
             progress: 0,
@@ -421,23 +406,8 @@ export default function TwoPriceImagePage() {
             ftpUploadErrorRcabinet: null,
           }));
 
-          const payload = { productRows: rowsToUpdate };
-          const response = await fetch(`/api/tools/03/jobs/${currentJobId}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
-          });
-
-          if (!response.ok) {
-            let errorDetail = `HTTPエラー! status: ${response.status}`;
-            try {
-              const errorData = await response.json();
-              errorDetail = errorData.detail || errorDetail;
-            } catch (e) {
-              /* JSON パースエラーは無視 */
-            }
-            throw new Error(errorDetail);
-          }
+          // 変更点: tool03API を使用してジョブを更新
+          await tool03API.updateJob(currentJobId, rowsToUpdate);
 
           setIsApiLoading(false);
           setModifiedRowIds(new Set());
@@ -451,11 +421,15 @@ export default function TwoPriceImagePage() {
       }
     } catch (error) {
       console.error('ジョブの開始または更新に失敗しました:', error);
-      toast.error(
-        `ジョブの開始/更新に失敗しました: ${
-          error instanceof Error ? error.message : '不明なエラー'
-        }`,
-      );
+      // エラーメッセージの取得方法を少し改善 (APIのエラーレスポンス構造に合わせて調整が必要かもしれません)
+      let errorMessage = '不明なエラー';
+      if (axios.isAxiosError(error) && error.response?.data?.detail) {
+        errorMessage = error.response.data.detail;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      toast.error(`ジョブの開始/更新に失敗しました: ${errorMessage}`);
       setIsApiLoading(false);
       setIsPreviewModalOpen(false);
     }
@@ -467,7 +441,7 @@ export default function TwoPriceImagePage() {
       toast.error('ダウンロードするジョブが見つからないか、失敗しました。');
       return;
     }
-    window.open(`/api/tools/03/jobs/${jobId}/download`, '_blank');
+    window.open(tool03API.getDownloadUrl(jobId), '_blank');
   };
 
   const handleUploadFTP = async (target: 'gold' | 'rcabinet') => {
@@ -488,42 +462,46 @@ export default function TwoPriceImagePage() {
       toast.info(`${targetName} へのアップロードは既に進行中です。`);
       return;
     }
+
+    // Cập nhật state local để phản hồi UI ngay lập tức
     setJobStatus((prev) =>
       prev ? { ...prev, [ftpStatusKey]: 'uploading', [ftpErrorKey]: null } : null,
     );
     toastIdRef.current = toast.loading(`${targetName} へのアップロードを開始しています...`);
 
     try {
-      const response = await fetch(`/api/tools/03/jobs/${jobId}/upload`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ target: target }),
-      });
-      if (response.status === 202) {
-        console.log(
-          `>>> [DEBUG][Page] ${targetName} アップロード開始。ポーリングでステータスを追跡します。`,
-        );
-      } else {
-        let errorDetail = `HTTPエラー! status: ${response.status}`;
-        try {
-          const errorData = await response.json();
-          errorDetail = errorData.detail || errorDetail;
-        } catch (e) {
-          /* 無視 */
-        }
-        if (toastIdRef.current) {
-          toast.error(`${targetName} へのアップロード開始に失敗しました: ${errorDetail}`, {
-            id: toastIdRef.current,
-          });
-          toastIdRef.current = null;
-        }
-        setJobStatus((prev) =>
-          prev ? { ...prev, [ftpStatusKey]: 'failed', [ftpErrorKey]: errorDetail } : null,
-        );
-      }
-    } catch (error) {
+      // --- [SỬA ĐỔI QUAN TRỌNG START] ---
+      // Sử dụng tool03API.uploadFTP thay vì fetch.
+      // tool03API dùng axios, nó sẽ tự ném lỗi nếu status không phải 2xx.
+      // Nếu thành công (202), nó sẽ chạy tiếp xuống dưới.
+      await tool03API.uploadFTP(jobId, target);
+
+      console.log(
+        `>>> [DEBUG][Page] ${targetName} アップロード開始。ポーリングでステータスを追跡します。`,
+      );
+      // Không cần làm gì thêm ở đây, polling sẽ tự cập nhật trạng thái tiếp theo.
+      // --- [SỬA ĐỔI QUAN TRỌNG END] ---
+    } catch (error: any) {
       console.error(`${target} アップロードの開始に失敗:`, error);
-      const errorMessage = error instanceof Error ? error.message : String(error);
+
+      // Xử lý lỗi từ axios hoặc lỗi khác để lấy message chuẩn xác
+      let errorMessage = '不明なエラー';
+      if (axios.isAxiosError(error)) {
+        if (error.response) {
+          // Server trả về response lỗi (vd: 400, 500)
+          errorMessage =
+            error.response.data?.detail || `HTTPエラー! status: ${error.response.status}`;
+        } else if (error.request) {
+          // Request đã gửi nhưng không nhận được response (lỗi mạng)
+          errorMessage = 'サーバーからの応答がありません。ネットワーク接続を確認してください。';
+        } else {
+          // Lỗi khi thiết lập request
+          errorMessage = error.message;
+        }
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
       if (toastIdRef.current) {
         toast.error(`${targetName} へのアップロード開始に失敗しました: ${errorMessage}`, {
           id: toastIdRef.current,
