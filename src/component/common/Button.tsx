@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { Children } from 'react';
 import { cn } from '../../lib/utils';
+import { IconProps } from '@tabler/icons-react';
 
 const colorClass: Record<string, string> = {
   primary:
@@ -18,9 +19,21 @@ const sizeClass: Record<string, string> = {
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   color?: 'primary' | 'secondary' | 'textOnly' | 'grey';
   size?: 'sm' | 'md' | 'lg';
+  prefixIcon?: React.ComponentType<IconProps>;
 }
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className = '', type = 'button', color = 'primary', size = 'md', ...props }, ref) => {
+  (
+    {
+      className = '',
+      type = 'button',
+      color = 'primary',
+      size = 'md',
+      prefixIcon: PrefixIcon,
+      children,
+      ...props
+    },
+    ref,
+  ) => {
     return (
       <button
         ref={ref}
@@ -32,7 +45,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           className,
         )}
         {...props}
-      />
+      >
+        {PrefixIcon && <PrefixIcon stroke={1.5} />}
+        {children}
+      </button>
     );
   },
 );

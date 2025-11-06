@@ -1,37 +1,30 @@
 // src/app/tools/03/page.tsx
-"use client";
+'use client';
 
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  useMemo,
-  useRef,
-} from "react";
-import { useHeader } from "@/app/context/HeaderContext";
-import { Card, CardContent, CardHeader } from "@/component/common/Card";
-import { Button } from "@/component/common/Button";
-import { Alert } from "@/component/common/Alert";
-import { IconLoader2, IconRefresh } from "@tabler/icons-react";
-import { Toaster, toast } from "sonner";
-import debounce from "lodash/debounce";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { Card, CardContent, CardHeader } from '@/component/common/Card';
+import { Button } from '@/component/common/Button';
+import { Alert } from '@/component/common/Alert';
+import { IconLoader2, IconRefresh } from '@tabler/icons-react';
+import { Toaster, toast } from 'sonner';
+import debounce from 'lodash/debounce';
 
 // コンポーネントとロジックの分離
-import EditableProductTable from "./components/EditableProductTable";
-import PreviewModal from "./components/PreviewModal";
-import RestoreSessionPopup from "./components/RestoreSessionPopup";
-import ResetConfirmPopup from "./components/ResetConfirmPopup";
-import { useJobPolling } from "./hooks/useJobPolling";
-import { validateRows } from "./lib/validation";
-import { createNewProductRow } from "./lib/utils";
-import { templates } from "./constants";
-import type { ProductRow, AllErrors, BackendJobStatus } from "./types";
+import EditableProductTable from './components/EditableProductTable';
+import PreviewModal from './components/PreviewModal';
+import RestoreSessionPopup from './components/RestoreSessionPopup';
+import ResetConfirmPopup from './components/ResetConfirmPopup';
+import { useJobPolling } from './hooks/useJobPolling';
+import { validateRows } from './lib/validation';
+import { createNewProductRow } from './lib/utils';
+import { templates } from './constants';
+import type { ProductRow, AllErrors, BackendJobStatus } from './types';
 
 // Sonner toast ID の型
 type SonnerToastId = string | number;
 
 // localStorage のキー
-const LOCAL_STORAGE_KEY = "tool03_session_data_v2";
+const LOCAL_STORAGE_KEY = 'tool03_session_data_v2';
 
 // --- LAZY LOAD (START) ---
 // 一度に表示する画像数
@@ -40,11 +33,11 @@ const BATCH_SIZE = 10;
 
 export default function TwoPriceImagePage() {
   // --- State の宣言 ---
-  const { setTitle } = useHeader();
+  // const { setTitle } = useHeader();
 
-  useEffect(() => {
-    setTitle('二重価格セール画像生成');
-  }, [setTitle]);
+  // useEffect(() => {
+  //   setTitle('二重価格セール画像生成');
+  // }, [setTitle]);
   const [isClient, setIsClient] = useState(false);
   const [selectedImages, setSelectedImages] = useState<string[] | null>(null);
   const [errors, setErrors] = useState<AllErrors>({});
@@ -73,40 +66,30 @@ export default function TwoPriceImagePage() {
   const rcabinetUploadToastIdRef = useRef<SonnerToastId | null>(null);
 
   // --- FTP用コールバック (変更なし) ---
-  const handleFtpSuccess = useCallback(
-    (target: "gold" | "rcabinet", message: string) => {
-      const toastIdRef =
-        target === "gold" ? goldUploadToastIdRef : rcabinetUploadToastIdRef;
-      if (toastIdRef.current) {
-        toast.dismiss(toastIdRef.current);
-        toastIdRef.current = null;
-      }
-      toast.success(message); // メッセージは日本語で渡される想定
-    },
-    []
-  );
-  const handleFtpError = useCallback(
-    (target: "gold" | "rcabinet", message: string) => {
-      const toastIdRef =
-        target === "gold" ? goldUploadToastIdRef : rcabinetUploadToastIdRef;
-      if (toastIdRef.current) {
-        toast.error(message, { id: toastIdRef.current }); // メッセージは日本語で渡される想定
-        toastIdRef.current = null;
-      } else {
-        toast.error(message); // メッセージは日本語で渡される想定
-      }
-    },
-    []
-  );
+  const handleFtpSuccess = useCallback((target: 'gold' | 'rcabinet', message: string) => {
+    const toastIdRef = target === 'gold' ? goldUploadToastIdRef : rcabinetUploadToastIdRef;
+    if (toastIdRef.current) {
+      toast.dismiss(toastIdRef.current);
+      toastIdRef.current = null;
+    }
+    toast.success(message); // メッセージは日本語で渡される想定
+  }, []);
+  const handleFtpError = useCallback((target: 'gold' | 'rcabinet', message: string) => {
+    const toastIdRef = target === 'gold' ? goldUploadToastIdRef : rcabinetUploadToastIdRef;
+    if (toastIdRef.current) {
+      toast.error(message, { id: toastIdRef.current }); // メッセージは日本語で渡される想定
+      toastIdRef.current = null;
+    } else {
+      toast.error(message); // メッセージは日本語で渡される想定
+    }
+  }, []);
 
   // -----------------------------------
 
   // --- ポーリング用カスタムフック (変更なし) ---
   const handleJobNotFound = useCallback(() => {
     setJobId(null);
-    setGlobalAlert(
-      "現在のジョブが見つかりませんでした。新しいジョブを開始します。"
-    );
+    setGlobalAlert('現在のジョブが見つかりませんでした。新しいジョブを開始します。');
     if (goldUploadToastIdRef.current) {
       toast.dismiss(goldUploadToastIdRef.current);
       goldUploadToastIdRef.current = null;
@@ -144,26 +127,21 @@ export default function TwoPriceImagePage() {
           !rowsToSave[0].salePrice;
 
         if (!isDefaultEmptyRow) {
-          console.log(
-            "[LocalStorage] 状態を保存中...",
-            `(${rowsToSave.length} 行)`
-          );
+          console.log('[LocalStorage] 状態を保存中...', `(${rowsToSave.length} 行)`);
           const dataString = JSON.stringify(rowsToSave);
           localStorage.setItem(LOCAL_STORAGE_KEY, dataString);
         } else {
-          console.log(
-            "[LocalStorage] デフォルトの空行を検出、ストレージから削除します。"
-          );
+          console.log('[LocalStorage] デフォルトの空行を検出、ストレージから削除します。');
           localStorage.removeItem(LOCAL_STORAGE_KEY);
         }
       } catch (error) {
-        console.error("localStorage への状態保存エラー:", error);
+        console.error('localStorage への状態保存エラー:', error);
         toast.error(
-          "セッションデータの保存中にエラーが発生しました。ストレージがいっぱいかもしれません。"
+          'セッションデータの保存中にエラーが発生しました。ストレージがいっぱいかもしれません。',
         );
       }
     }, 1500),
-    []
+    [],
   );
 
   useEffect(() => {
@@ -183,7 +161,7 @@ export default function TwoPriceImagePage() {
             setRestoredData(parsedData);
             setShowRestorePopup(true);
             console.log(
-              "[LocalStorage] 保存されたセッションを発見、復元ポップアップを表示します。"
+              '[LocalStorage] 保存されたセッションを発見、復元ポップアップを表示します。',
             );
           } else {
             localStorage.removeItem(LOCAL_STORAGE_KEY);
@@ -193,17 +171,17 @@ export default function TwoPriceImagePage() {
           initializeEmptyRow();
         }
       } catch (error) {
-        console.error("localStorage からの状態読み込みエラー:", error);
+        console.error('localStorage からの状態読み込みエラー:', error);
         localStorage.removeItem(LOCAL_STORAGE_KEY);
         initializeEmptyRow();
-        toast.error("保存されたセッションデータの読み込み中にエラーが発生しました。");
+        toast.error('保存されたセッションデータの読み込み中にエラーが発生しました。');
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // --- 空行の初期化ロジック (変更なし) ---
-  const initializeEmptyRow = (idPrefix = "initial-load-empty") => {
+  const initializeEmptyRow = (idPrefix = 'initial-load-empty') => {
     console.log(`[Session] 空行で初期化します (prefix: ${idPrefix}).`);
     const initialRow = createNewProductRow(idPrefix);
     setProductRows([initialRow]);
@@ -221,23 +199,21 @@ export default function TwoPriceImagePage() {
   const handleRestoreSession = (restore: boolean) => {
     setShowRestorePopup(false);
     if (restore && restoredData) {
-      console.log("[LocalStorage] セッションを復元しています...");
+      console.log('[LocalStorage] セッションを復元しています...');
       setProductRows(restoredData);
-      setModifiedRowIds(
-        new Set(restoredData.map((r) => r.id))
-      );
-      toast.success("前のセッションを復元しました。");
+      setModifiedRowIds(new Set(restoredData.map((r) => r.id)));
+      toast.success('前のセッションを復元しました。');
     } else {
-      console.log("[LocalStorage] 新しいセッションを開始します。");
+      console.log('[LocalStorage] 新しいセッションを開始します。');
       localStorage.removeItem(LOCAL_STORAGE_KEY);
-      initializeEmptyRow("initial-new-session"); // 新しい空行を初期化
+      initializeEmptyRow('initial-new-session'); // 新しい空行を初期化
     }
     setRestoredData(null);
     initialLoadRef.current = false; // 読み込み完了フラグ
   };
 
   const clearSavedSession = useCallback(() => {
-    console.log("[LocalStorage] 保存されたセッションをクリアします。");
+    console.log('[LocalStorage] 保存されたセッションをクリアします。');
     localStorage.removeItem(LOCAL_STORAGE_KEY);
   }, []);
   // --- localStorage ロジック終了 ---
@@ -247,26 +223,25 @@ export default function TwoPriceImagePage() {
     (newRowsOrFn: ProductRow[] | ((prev: ProductRow[]) => ProductRow[])) => {
       setProductRows((prevRows) => {
         let newRows: ProductRow[];
-        let operation: "set" | "append" | "delete" | "reset" | "unknown" =
-          "unknown";
+        let operation: 'set' | 'append' | 'delete' | 'reset' | 'unknown' = 'unknown';
 
-        if (typeof newRowsOrFn !== "function") {
+        if (typeof newRowsOrFn !== 'function') {
           // 1. "Set" の場合 (空のテーブルへのインポート)
           newRows = newRowsOrFn;
-          operation = "set";
+          operation = 'set';
         } else {
           // 2. 関数型更新の場合 (Append, Delete, Reset)
           newRows = newRowsOrFn(prevRows);
           if (newRows.length > prevRows.length) {
-            operation = "append";
+            operation = 'append';
           } else if (
             prevRows.length === 1 &&
             newRows.length === 1 &&
             prevRows[0].id !== newRows[0].id
           ) {
-            operation = "reset";
+            operation = 'reset';
           } else {
-            operation = "delete";
+            operation = 'delete';
           }
         }
 
@@ -282,19 +257,19 @@ export default function TwoPriceImagePage() {
             }
           });
 
-          if (operation === "set") {
+          if (operation === 'set') {
             // "Set" (空のテーブルへのインポート): 全てリセットし、新しい ID をすべて追加
             nextModified.clear();
             newRows.forEach((r) => nextModified.add(r.id));
             setJobId(null);
             setJobStatus(null);
             clearSavedSession();
-          } else if (operation === "append") {
+          } else if (operation === 'append') {
             // "Append" (CSV追記インポート): 新しい ID を追加、ジョブはリセットしない
             const addedRows = newRows.slice(prevRows.length);
             addedRows.forEach((row) => nextModified.add(row.id));
             // ここでは jobId やセッションをリセットしない
-          } else if (operation === "reset") {
+          } else if (operation === 'reset') {
             // "Reset" (最後の行の削除): 全てリセット
             nextModified.clear();
             nextModified.add(newRows[0].id);
@@ -310,7 +285,7 @@ export default function TwoPriceImagePage() {
         return newRows;
       });
     },
-    [setJobStatus, clearSavedSession] // 依存関係は不変
+    [setJobStatus, clearSavedSession], // 依存関係は不変
   );
   // -----------------------------------------------------------
 
@@ -330,7 +305,7 @@ export default function TwoPriceImagePage() {
       toast.dismiss(rcabinetUploadToastIdRef.current);
       rcabinetUploadToastIdRef.current = null;
     }
-    if (jobStatus?.status === "Completed") {
+    if (jobStatus?.status === 'Completed') {
       clearSavedSession();
     }
   }, [stopPolling, jobStatus, clearSavedSession]);
@@ -344,7 +319,7 @@ export default function TwoPriceImagePage() {
       !productRows[0].startDate &&
       !productRows[0].regularPrice
     ) {
-      toast.info("テーブルは既に空です。");
+      toast.info('テーブルは既に空です。');
       return;
     }
     setShowResetConfirm(true);
@@ -353,8 +328,8 @@ export default function TwoPriceImagePage() {
   const handleResetConfirm = (confirm: boolean) => {
     setShowResetConfirm(false);
     if (confirm) {
-      initializeEmptyRow("manual-reset");
-      toast.success("テーブルをリセットしました。");
+      initializeEmptyRow('manual-reset');
+      toast.success('テーブルをリセットしました。');
     }
   };
   // ---------------------------------------
@@ -366,7 +341,7 @@ export default function TwoPriceImagePage() {
     setErrors(validationErrors);
     setShowErrors(true);
     if (!isValid) {
-      setGlobalAlert("入力内容にエラーがあります。確認してください。");
+      setGlobalAlert('入力内容にエラーがあります。確認してください。');
       return;
     }
 
@@ -383,11 +358,11 @@ export default function TwoPriceImagePage() {
       let currentJobId = jobId;
       if (!currentJobId) {
         // --- POST ロジック (新規ジョブ作成) ---
-        console.log(">>> [DEBUG][Page] 新規ジョブを作成中 (POST)");
+        console.log('>>> [DEBUG][Page] 新規ジョブを作成中 (POST)');
         const payload = { productRows };
-        const response = await fetch("/api/tools/03/jobs", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+        const response = await fetch('/api/tools/03/jobs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
 
@@ -396,67 +371,60 @@ export default function TwoPriceImagePage() {
           try {
             const errorData = await response.json();
             errorDetail = errorData.detail || errorDetail;
-          } catch (e) { /* JSON パースエラーは無視 */ }
+          } catch (e) {
+            /* JSON パースエラーは無視 */
+          }
           throw new Error(errorDetail);
         }
 
-        const data: { jobId: string; totalItems: number } =
-          await response.json();
+        const data: { jobId: string; totalItems: number } = await response.json();
         const newJobId = data.jobId;
 
         setJobId(newJobId);
         setJobStatus({
           jobId: newJobId,
-          status: "Pending", // この状態で "待機中..." と表示される
+          status: 'Pending', // この状態で "待機中..." と表示される
           progress: 0,
           total: data.totalItems,
           results: {},
           startTime: Date.now() / 1000,
           endTime: null,
           message: null,
-          ftpUploadStatusGold: "idle",
+          ftpUploadStatusGold: 'idle',
           ftpUploadErrorGold: null,
-          ftpUploadStatusRcabinet: "idle",
+          ftpUploadStatusRcabinet: 'idle',
           ftpUploadErrorRcabinet: null,
         });
         setIsApiLoading(false);
         setModifiedRowIds(new Set());
-        console.log(">>> [DEBUG][Page] 新規ジョブ作成完了, Job ID:", newJobId);
+        console.log('>>> [DEBUG][Page] 新規ジョブ作成完了, Job ID:', newJobId);
       } else {
         // --- PATCH ロジック (ジョブ更新) ---
-        console.log(
-          ">>> [DEBUG][Page] ジョブを更新中 (PATCH), Job ID:",
-          currentJobId
-        );
-        console.log(
-          ">>> [DEBUG] PATCH フィルター前の modifiedRowIds:",
-          modifiedRowIds
-        );
-        const rowsToUpdate = productRows.filter((row) =>
-          modifiedRowIds.has(row.id)
-        );
-        console.log(">>> [DEBUG] PATCH 対象の rowsToUpdate:", rowsToUpdate);
+        console.log('>>> [DEBUG][Page] ジョブを更新中 (PATCH), Job ID:', currentJobId);
+        console.log('>>> [DEBUG] PATCH フィルター前の modifiedRowIds:', modifiedRowIds);
+        const rowsToUpdate = productRows.filter((row) => modifiedRowIds.has(row.id));
+        console.log('>>> [DEBUG] PATCH 対象の rowsToUpdate:', rowsToUpdate);
 
         if (rowsToUpdate.length > 0) {
           setJobStatus((prev) => ({
             jobId: currentJobId,
             startTime: prev?.startTime ?? Date.now() / 1000,
-            status: "Processing", // "Processing" (画像生成中...) に設定
+            status: 'Processing', // "Processing" (画像生成中...) に設定
             progress: 0,
             total: productRows.length,
             results: prev?.results ?? {},
             message: null,
             endTime: null,
-            ftpUploadStatusGold: "idle",
+            ftpUploadStatusGold: 'idle',
             ftpUploadErrorGold: null,
-            ftpUploadStatusRcabinet: "idle",
+            ftpUploadStatusRcabinet: 'idle',
             ftpUploadErrorRcabinet: null,
           }));
 
           const payload = { productRows: rowsToUpdate };
           const response = await fetch(`/api/tools/03/jobs/${currentJobId}`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
           });
 
@@ -465,26 +433,28 @@ export default function TwoPriceImagePage() {
             try {
               const errorData = await response.json();
               errorDetail = errorData.detail || errorDetail;
-            } catch (e) { /* JSON パースエラーは無視 */ }
+            } catch (e) {
+              /* JSON パースエラーは無視 */
+            }
             throw new Error(errorDetail);
           }
 
           setIsApiLoading(false);
           setModifiedRowIds(new Set());
           console.log(
-            ">>> [DEBUG][Page] ジョブ更新を開始しました。ポーリングが続行/再開されます。"
+            '>>> [DEBUG][Page] ジョブ更新を開始しました。ポーリングが続行/再開されます。',
           );
         } else {
-          console.log(">>> [DEBUG][Page] 変更された行がないため、PATCH をスキップします。");
+          console.log('>>> [DEBUG][Page] 変更された行がないため、PATCH をスキップします。');
           setIsApiLoading(false);
         }
       }
     } catch (error) {
-      console.error("ジョブの開始または更新に失敗しました:", error);
+      console.error('ジョブの開始または更新に失敗しました:', error);
       toast.error(
         `ジョブの開始/更新に失敗しました: ${
-          error instanceof Error ? error.message : "不明なエラー"
-        }`
+          error instanceof Error ? error.message : '不明なエラー'
+        }`,
       );
       setIsApiLoading(false);
       setIsPreviewModalOpen(false);
@@ -493,84 +463,75 @@ export default function TwoPriceImagePage() {
 
   // ダウンロード/アップロード関数 (変更なし)
   const handleDownloadZip = () => {
-    if (!jobId || jobStatus?.status === "Failed") {
-      toast.error("ダウンロードするジョブが見つからないか、失敗しました。");
+    if (!jobId || jobStatus?.status === 'Failed') {
+      toast.error('ダウンロードするジョブが見つからないか、失敗しました。');
       return;
     }
-    window.open(`/api/tools/03/jobs/${jobId}/download`, "_blank");
+    window.open(`/api/tools/03/jobs/${jobId}/download`, '_blank');
   };
 
-  const handleUploadFTP = async (target: "gold" | "rcabinet") => {
+  const handleUploadFTP = async (target: 'gold' | 'rcabinet') => {
     if (
       !jobId ||
       !jobStatus ||
-      !["Completed", "Completed with errors"].includes(jobStatus.status)
+      !['Completed', 'Completed with errors'].includes(jobStatus.status)
     ) {
-      toast.error("アップロードするジョブが見つからないか、まだ完了していません。");
+      toast.error('アップロードするジョブが見つからないか、まだ完了していません。');
       return;
     }
-    const targetName = target === "gold" ? "Rakuten GOLD" : "R-Cabinet";
-    const toastIdRef =
-      target === "gold" ? goldUploadToastIdRef : rcabinetUploadToastIdRef;
-    const ftpStatusKey =
-      target === "gold" ? "ftpUploadStatusGold" : "ftpUploadStatusRcabinet";
-    const ftpErrorKey =
-      target === "gold" ? "ftpUploadErrorGold" : "ftpUploadErrorRcabinet";
+    const targetName = target === 'gold' ? 'Rakuten GOLD' : 'R-Cabinet';
+    const toastIdRef = target === 'gold' ? goldUploadToastIdRef : rcabinetUploadToastIdRef;
+    const ftpStatusKey = target === 'gold' ? 'ftpUploadStatusGold' : 'ftpUploadStatusRcabinet';
+    const ftpErrorKey = target === 'gold' ? 'ftpUploadErrorGold' : 'ftpUploadErrorRcabinet';
 
-    if (toastIdRef.current || jobStatus[ftpStatusKey] === "uploading") {
+    if (toastIdRef.current || jobStatus[ftpStatusKey] === 'uploading') {
       toast.info(`${targetName} へのアップロードは既に進行中です。`);
       return;
     }
     setJobStatus((prev) =>
-      prev ? { ...prev, [ftpStatusKey]: "uploading", [ftpErrorKey]: null } : null
+      prev ? { ...prev, [ftpStatusKey]: 'uploading', [ftpErrorKey]: null } : null,
     );
-    toastIdRef.current = toast.loading(
-      `${targetName} へのアップロードを開始しています...`
-    );
+    toastIdRef.current = toast.loading(`${targetName} へのアップロードを開始しています...`);
 
     try {
       const response = await fetch(`/api/tools/03/jobs/${jobId}/upload`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ target: target }),
       });
       if (response.status === 202) {
         console.log(
-          `>>> [DEBUG][Page] ${targetName} アップロード開始。ポーリングでステータスを追跡します。`
+          `>>> [DEBUG][Page] ${targetName} アップロード開始。ポーリングでステータスを追跡します。`,
         );
       } else {
         let errorDetail = `HTTPエラー! status: ${response.status}`;
         try {
           const errorData = await response.json();
           errorDetail = errorData.detail || errorDetail;
-        } catch (e) { /* 無視 */ }
+        } catch (e) {
+          /* 無視 */
+        }
         if (toastIdRef.current) {
-          toast.error(
-            `${targetName} へのアップロード開始に失敗しました: ${errorDetail}`,
-            { id: toastIdRef.current }
-          );
+          toast.error(`${targetName} へのアップロード開始に失敗しました: ${errorDetail}`, {
+            id: toastIdRef.current,
+          });
           toastIdRef.current = null;
         }
         setJobStatus((prev) =>
-          prev
-            ? { ...prev, [ftpStatusKey]: "failed", [ftpErrorKey]: errorDetail }
-            : null
+          prev ? { ...prev, [ftpStatusKey]: 'failed', [ftpErrorKey]: errorDetail } : null,
         );
       }
     } catch (error) {
       console.error(`${target} アップロードの開始に失敗:`, error);
       const errorMessage = error instanceof Error ? error.message : String(error);
       if (toastIdRef.current) {
-        toast.error(
-          `${targetName} へのアップロード開始に失敗しました: ${errorMessage}`,
-          { id: toastIdRef.current }
-        );
+        toast.error(`${targetName} へのアップロード開始に失敗しました: ${errorMessage}`, {
+          id: toastIdRef.current,
+        });
         toastIdRef.current = null;
       }
       setJobStatus((prev) =>
-        prev
-          ? { ...prev, [ftpStatusKey]: "failed", [ftpErrorKey]: errorMessage }
-          : null
+        prev ? { ...prev, [ftpStatusKey]: 'failed', [ftpErrorKey]: errorMessage } : null,
       );
     }
   };
@@ -580,17 +541,15 @@ export default function TwoPriceImagePage() {
 
   // --- LAZY LOAD (START) ---
   // ジョブが実行中かどうかを判断 (テーブルを無効化するため)
-  const isJobRunning =
-    jobStatus?.status === "Processing" || jobStatus?.status === "Pending";
+  const isJobRunning = jobStatus?.status === 'Processing' || jobStatus?.status === 'Pending';
   // 全体のローディング状態 (最初の API 呼び出しも含む)
-  const isProcessing =
-    isApiLoading || (isPollingLoading && !jobStatus) || isJobRunning;
+  const isProcessing = isApiLoading || (isPollingLoading && !jobStatus) || isJobRunning;
   // --- LAZY LOAD (END) ---
 
   // --- JSX Return ---
   return (
     <div className="space-y-6">
-
+      <h1 className="text-xl font-bold text-gray-800">二重価格セール画像生成</h1>
       {/* テンプレート選択 (変更なし) */}
       <Card>
         <CardHeader title="1. テンプレート選択" />
@@ -598,10 +557,7 @@ export default function TwoPriceImagePage() {
           <div className="relative">
             <div className="flex items-start gap-4 overflow-x-auto pb-4">
               {templates.map((template) => (
-                <div
-                  key={template.id}
-                  className="flex-shrink-0 text-center w-auto"
-                >
+                <div key={template.id} className="flex-shrink-0 text-center w-auto">
                   <div
                     className="flex items-start gap-2 cursor-pointer"
                     onClick={() => setSelectedImages(template.imgs)}
@@ -615,9 +571,7 @@ export default function TwoPriceImagePage() {
                       />
                     ))}
                   </div>
-                  <p className="text-sm font-medium text-gray-700">
-                    {template.name}
-                  </p>
+                  <p className="text-sm font-medium text-gray-700">{template.name}</p>
                 </div>
               ))}
             </div>
@@ -642,9 +596,7 @@ export default function TwoPriceImagePage() {
         />
       )}
       {isClient && showRestorePopup && (
-        <div className="text-center p-10 text-gray-500">
-          セッションデータを読み込み中...
-        </div>
+        <div className="text-center p-10 text-gray-500">セッションデータを読み込み中...</div>
       )}
 
       {/* グローバルアラート */}
@@ -716,8 +668,8 @@ export default function TwoPriceImagePage() {
         productRows={productRows}
         onDownloadZip={handleDownloadZip}
         onUploadFTP={handleUploadFTP}
-        isUploadingGold={jobStatus?.ftpUploadStatusGold === "uploading"}
-        isUploadingRcabinet={jobStatus?.ftpUploadStatusRcabinet === "uploading"}
+        isUploadingGold={jobStatus?.ftpUploadStatusGold === 'uploading'}
+        isUploadingRcabinet={jobStatus?.ftpUploadStatusRcabinet === 'uploading'}
         // --- LAZY LOAD (START) ---
         // State とハンドラ関数を渡す
         visibleCount={visibleCount}
@@ -726,14 +678,10 @@ export default function TwoPriceImagePage() {
       />
 
       {/* セッション復元ポップアップ (変更なし) */}
-      {showRestorePopup && (
-        <RestoreSessionPopup onResponse={handleRestoreSession} />
-      )}
+      {showRestorePopup && <RestoreSessionPopup onResponse={handleRestoreSession} />}
 
       {/* Reset popup (変更なし) */}
-      {showResetConfirm && (
-        <ResetConfirmPopup onResponse={handleResetConfirm} />
-      )}
+      {showResetConfirm && <ResetConfirmPopup onResponse={handleResetConfirm} />}
 
       {/* Sonner Toaster (変更なし) */}
       <Toaster richColors position="top-right" />

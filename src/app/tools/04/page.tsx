@@ -3,7 +3,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { FormikProvider, useFormik } from 'formik';
 import * as Yup from 'yup';
-import { useHeader } from '@/app/context/HeaderContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/component/common/Tabs';
 import TabItem1 from './components/TabItem1';
 import TabItem2 from './components/TabItem2';
@@ -40,12 +39,6 @@ type feature = {
   url: string;
 };
 const page = () => {
-  const { setTitle } = useHeader();
-
-  useEffect(() => {
-    setTitle('楽天GOLD ヘッダー生成');
-  }, [setTitle]);
-
   const tabsRef = useRef<any>(null);
   const [isTab1Valid, setIsTab1Valid] = useState(false);
 

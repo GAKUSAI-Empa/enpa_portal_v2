@@ -8,15 +8,8 @@ import SliderImage from '@/app/tools/05/components/SliderImage';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/component/common/Tabs';
 import { TextBox } from '@/component/common/TextBox';
 import React, { useEffect } from 'react';
-import { useHeader } from '@/app/context/HeaderContext';
 
 const page = () => {
-  const { setTitle } = useHeader();
-
-  useEffect(() => {
-    setTitle('ランキング受賞バナー自動掲載');
-  }, [setTitle]);
-
   const settings = {
     dots: false,
     infinite: false,
