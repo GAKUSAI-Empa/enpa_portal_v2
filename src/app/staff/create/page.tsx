@@ -9,7 +9,7 @@ import { FormikProvider, useFormik } from 'formik';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import * as Yup from 'yup';
-import useStaffAPI from './api/useStaffAPI';
+import useStaffAPI from '../api/useStaffMainteAPI';
 import { toast } from 'sonner';
 
 const page = () => {
@@ -21,7 +21,6 @@ const page = () => {
     initialValues: {
       username: '',
       email: '',
-      chatworkId: '',
       isAdmin: '0',
       password: '',
       retypePassword: '',
@@ -30,14 +29,11 @@ const page = () => {
       username: Yup.string()
         .trim()
         .required('ユーザー名を入力してください。')
+        .matches(/^[a-zA-Z0-9_]+$/, 'ユーザー名には英数字とアンダースコア（_）のみ使用できます。')
         .max(20, 'ユーザー名は20文字以内で入力してください。'),
       email: Yup.string()
         .email('メールアドレスの形式が正しくありません。')
         .required('メールアドレスを入力してください。'),
-      chatworkId: Yup.string()
-        .trim()
-        .matches(/^[A-Za-z0-9\-_]+$/, '半角英数字と「-」「_」のみ使用できます。')
-        .required('ChatWorkルームIDを入力してください。'),
       isAdmin: Yup.string().trim().required('権限を選択してください。'),
       password: Yup.string()
         .trim()
@@ -45,7 +41,7 @@ const page = () => {
         //   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/,
         //   'パスワードは英大文字・英小文字・数字を含めてください。',
         // )
-        // .min(8, 'パスワードは8文字以上で入力してください。')
+        .min(8, 'パスワードは8文字以上で入力してください。')
         .required('パスワードを入力してください。'),
       retypePassword: Yup.string()
         .trim()
@@ -58,13 +54,15 @@ const page = () => {
         const resData = await createStaff(
           values.username,
           values.email,
-          values.chatworkId,
           values.isAdmin,
           values.password,
         );
-        toast.success(resData.detail);
-      } catch (e) {
-        toast.error('エラーが発生しました。もう一度お試しください。');
+        toast.success(resData.message);
+        router.push('/staff');
+      } catch (e: any) {
+        const backendMessage =
+          e?.response?.data?.message || 'エラーが発生しました。もう一度お試しください。';
+        toast.error(backendMessage);
       } finally {
         setIsLoading(false);
       }
@@ -99,7 +97,7 @@ const page = () => {
                   <TextBox
                     id="email"
                     name="email"
-                    type="text"
+                    type="email"
                     isRequired={true}
                     label={'メールアドレス'}
                     value={formik.values.email}
@@ -109,21 +107,6 @@ const page = () => {
                     error={formik.errors.email}
                     touched={formik.touched.email}
                   />
-                  <TextBox
-                    id="chatworkId"
-                    name="chatworkId"
-                    type="text"
-                    isRequired={true}
-                    label={'ChatWorkルームID'}
-                    value={formik.values.chatworkId}
-                    placeholder="01234567"
-                    direction="vertical"
-                    onChange={formik.handleChange}
-                    error={formik.errors.chatworkId}
-                    touched={formik.touched.chatworkId}
-                  />
-                </div>
-                <div>
                   <SelectBox
                     id="isAdmin"
                     name="isAdmin"
@@ -144,6 +127,8 @@ const page = () => {
                       <Hint message={'料金支払い、スタッフの追加ができるようになります。\n'} />
                     }
                   />
+                </div>
+                <div>
                   <TextBox
                     id="password"
                     name="password"
@@ -156,16 +141,6 @@ const page = () => {
                     onChange={formik.handleChange}
                     error={formik.errors.password}
                     touched={formik.touched.password}
-                    suffix={
-                      <Hint
-                        message={
-                          'あなたの他の個人情報と似ているパスワードにはできません。\n' +
-                          'パスワードは最低 8 文字以上必要です。\n' +
-                          'よく使われるパスワードにはできません。\n' +
-                          '数字だけのパスワードにはできません。\n'
-                        }
-                      />
-                    }
                   />
                   <TextBox
                     id="retypePassword"
