@@ -41,7 +41,7 @@ const page = () => {
         //   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/,
         //   'パスワードは英大文字・英小文字・数字を含めてください。',
         // )
-        .min(8, 'パスワードは8文字以上で入力してください。')
+        // .min(8, 'パスワードは8文字以上で入力してください。')
         .required('パスワードを入力してください。'),
       retypePassword: Yup.string()
         .trim()
@@ -57,11 +57,12 @@ const page = () => {
           values.isAdmin,
           values.password,
         );
-        toast.success(resData.message);
+        toast.success(resData.detail);
         router.push('/staff');
       } catch (e: any) {
+        console.log(e);
         const backendMessage =
-          e?.response?.data?.message || 'エラーが発生しました。もう一度お試しください。';
+          e?.response?.data?.detail || 'エラーが発生しました。もう一度お試しください。';
         toast.error(backendMessage);
       } finally {
         setIsLoading(false);

@@ -10,8 +10,10 @@ declare module 'next-auth' {
       username: string;
       email: string;
       role_id: number;
+      role_name: string;
       chatwork_id: string;
       company_id: number;
+      company_name: string;
       accessToken: string;
       sub?: string;
       iat?: number;

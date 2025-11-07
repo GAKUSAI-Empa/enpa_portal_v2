@@ -3,6 +3,7 @@
 import React, { ReactNode } from 'react';
 import { Toaster } from 'sonner';
 import { SessionProvider } from 'next-auth/react';
+import { ConfirmProvider } from 'material-ui-confirm';
 
 interface Props {
   children: ReactNode;
@@ -10,7 +11,9 @@ interface Props {
 const providers = ({ children }: Props) => {
   return (
     <React.Fragment>
-      <SessionProvider>{children}</SessionProvider>
+      <ConfirmProvider>
+        <SessionProvider>{children}</SessionProvider>
+      </ConfirmProvider>
       <Toaster position="top-right" richColors={true} closeButton={true} />
     </React.Fragment>
   );

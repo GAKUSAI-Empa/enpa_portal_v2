@@ -4,23 +4,38 @@ import { Card, CardContent, CardHeader } from '@/component/common/Card';
 import { Table } from '@/component/common/Table';
 import { IconPlus, IconTrash } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
-import useStaffAPI from './api/useStaffMainteAPI';
+import React from 'react';
 import { toast } from 'sonner';
 import { useSession } from 'next-auth/react';
 import useStaffListAPI from './api/useStaffListAPI';
-
+import useStaffMainteAPI from './api/useStaffMainteAPI';
+import { confirm } from 'material-ui-confirm';
 const page = () => {
   const router = useRouter();
-  const [staffs, setStaffs] = useState([]);
   const { data: session } = useSession();
   const { data: list, error, isLoading, mutate } = useStaffListAPI(session?.user.company_id);
+  const { deleteStaff } = useStaffMainteAPI();
+
+  const handleDelete = async (username: string) => {
+    try {
+      await confirm({
+        title: `削除`,
+        description: '削除します。よろしいでしょうか?',
+      });
+
+      const resData = await deleteStaff(username);
+      mutate();
+      toast.success(resData.detail);
+    } catch (e) {
+      toast.error('エラーが発生しました。もう一度お試しください。');
+    }
+  };
 
   return (
     <>
       <Card>
         <CardHeader
-          title="エンパタウン株式会社 スタッフ一覧"
+          title={`${session?.user.company_name ? session.user.company_name : ''}スタッフ一覧`}
           buttonGroup={
             <Button
               onClick={() => router.push('/staff/create')}
@@ -45,14 +60,18 @@ const page = () => {
             </Table.Head>
             <Table.Body>
               {list?.map((item: any, index: number) => (
-                <Table.Row>
-                  <Table.Td>{index}</Table.Td>
+                <Table.Row key={item.id}>
+                  <Table.Td>{index + 1}</Table.Td>
                   <Table.Td>{item.username}</Table.Td>
                   <Table.Td>{item.email}</Table.Td>
-                  <Table.Td>{item.company_id}</Table.Td>
-                  <Table.Button>
-                    <IconTrash size={20} />
-                  </Table.Button>
+                  <Table.Td>{item.company_name}</Table.Td>
+                  {item.username !== session?.user.username ? (
+                    <Table.Button onClick={() => handleDelete(item.username)}>
+                      <IconTrash size={20} />
+                    </Table.Button>
+                  ) : (
+                    <Table.Td></Table.Td>
+                  )}
                 </Table.Row>
               ))}
             </Table.Body>
