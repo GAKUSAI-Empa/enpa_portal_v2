@@ -4,7 +4,10 @@ import { NextRequest, NextResponse } from 'next/server';
 export default withAuth(
   // `withAuth` augments your `Request` with the user's token.
   function middleware(req) {
-    if (req.nextUrl.pathname.startsWith('/admin') && (req.nextauth.token as any)?.role_id !== 1)
+    if (
+      req.nextUrl.pathname.startsWith('/admin') &&
+      (req.nextauth.token as any)?.role_name !== 'ROLE_ADMIN'
+    )
       return NextResponse.rewrite(
         new URL('/404', req.url), //Not admin redirect to 404
       );
