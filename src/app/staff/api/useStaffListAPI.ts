@@ -2,7 +2,7 @@ import useAxiosClient from '@/lib/axios/useAxiosClient';
 import { getSession } from 'next-auth/react';
 import useSWR from 'swr';
 
-const useStaffListAPI = (company_id?: number) => {
+const useStaffListAPI = (company_id?: string) => {
   const URL = '/staff/list';
   const axiosClient = useAxiosClient();
   const fetcher = async (url: string) => {
