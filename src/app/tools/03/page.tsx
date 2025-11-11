@@ -307,7 +307,7 @@ export default function TwoPriceImagePage() {
       toast.dismiss(rcabinetUploadToastIdRef.current);
       rcabinetUploadToastIdRef.current = null;
     }
-    if (jobStatus?.status === 'Completed') {
+    if (jobStatus?.status === 'COMPLETED') {
       clearSavedSession();
     }
   }, [stopPolling, jobStatus, clearSavedSession]);
@@ -368,7 +368,7 @@ export default function TwoPriceImagePage() {
         setJobId(newJobId);
         setJobStatus({
           jobId: newJobId,
-          status: 'Pending', // この状態で "待機中..." と表示される
+          status: 'PENDING', // この状態で "待機中..." と表示される
           progress: 0,
           total: data.totalItems,
           results: {},
@@ -437,7 +437,7 @@ export default function TwoPriceImagePage() {
 
   // ダウンロード/アップロード関数 (変更なし)
   const handleDownloadZip = () => {
-    if (!jobId || jobStatus?.status === 'Failed') {
+    if (!jobId || jobStatus?.status === 'FAILED') {
       toast.error('ダウンロードするジョブが見つからないか、失敗しました。');
       return;
     }
@@ -448,7 +448,7 @@ export default function TwoPriceImagePage() {
     if (
       !jobId ||
       !jobStatus ||
-      !['Completed', 'Completed with errors'].includes(jobStatus.status)
+      !['COMPLETED', 'COMPLETED_WITH_ERRORS'].includes(jobStatus.status)
     ) {
       toast.error('アップロードするジョブが見つからないか、まだ完了していません。');
       return;
@@ -458,7 +458,7 @@ export default function TwoPriceImagePage() {
     const ftpStatusKey = target === 'gold' ? 'ftpUploadStatusGold' : 'ftpUploadStatusRcabinet';
     const ftpErrorKey = target === 'gold' ? 'ftpUploadErrorGold' : 'ftpUploadErrorRcabinet';
 
-    if (toastIdRef.current || jobStatus[ftpStatusKey] === 'uploading') {
+    if (toastIdRef.current || jobStatus[ftpStatusKey] === 'UPLOADING') {
       toast.info(`${targetName} へのアップロードは既に進行中です。`);
       return;
     }
@@ -519,7 +519,7 @@ export default function TwoPriceImagePage() {
 
   // --- LAZY LOAD (START) ---
   // ジョブが実行中かどうかを判断 (テーブルを無効化するため)
-  const isJobRunning = jobStatus?.status === 'Processing' || jobStatus?.status === 'Pending';
+  const isJobRunning = jobStatus?.status === 'Processing' || jobStatus?.status === 'PENDING';
   // 全体のローディング状態 (最初の API 呼び出しも含む)
   const isProcessing = isApiLoading || (isPollingLoading && !jobStatus) || isJobRunning;
   // --- LAZY LOAD (END) ---
@@ -646,8 +646,8 @@ export default function TwoPriceImagePage() {
         productRows={productRows}
         onDownloadZip={handleDownloadZip}
         onUploadFTP={handleUploadFTP}
-        isUploadingGold={jobStatus?.ftpUploadStatusGold === 'uploading'}
-        isUploadingRcabinet={jobStatus?.ftpUploadStatusRcabinet === 'uploading'}
+        isUploadingGold={jobStatus?.ftpUploadStatusGold === 'UPLOADING'}
+        isUploadingRcabinet={jobStatus?.ftpUploadStatusRcabinet === 'UPLOADING'}
         // --- LAZY LOAD (START) ---
         // State とハンドラ関数を渡す
         visibleCount={visibleCount}
