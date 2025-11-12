@@ -1,3 +1,4 @@
+import { useFormikContext } from 'formik';
 import React from 'react';
 import { cn } from '../../lib/utils';
 
@@ -9,14 +10,13 @@ const widthClass: Record<string, string> = {
   full: 'w-full',
 };
 interface SelectBoxProps extends React.InputHTMLAttributes<HTMLSelectElement> {
-  label?: string;
   id: string;
+  label?: string;
+  name: string;
   options: { value: string; label: string }[];
   isRequired?: boolean;
   width?: 'sm' | 'md' | 'lg' | 'full';
   direction?: 'vertical' | 'horizontal';
-  error?: string;
-  touched?: boolean;
   classNameSelect?: string;
   classNameParent?: string;
   suffix?: React.ReactNode;
@@ -24,14 +24,13 @@ interface SelectBoxProps extends React.InputHTMLAttributes<HTMLSelectElement> {
 const SelectBox = React.forwardRef<HTMLSelectElement, SelectBoxProps>(
   (
     {
-      label = '',
       id,
+      label = '',
+      name,
       options,
       isRequired = false,
       width = 'md',
       direction = 'vertical',
-      error = '',
-      touched = false,
       classNameSelect = '',
       classNameParent = '',
       suffix,
@@ -39,6 +38,16 @@ const SelectBox = React.forwardRef<HTMLSelectElement, SelectBoxProps>(
     },
     ref,
   ) => {
+    const { values, errors, touched, setFieldValue } = useFormikContext<any>();
+
+    const fieldValue = values?.[name] ?? '';
+    const fieldError = errors?.[name] as string | undefined;
+    const fieldTouched = touched?.[name] as boolean | undefined;
+
+    const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+      setFieldValue(name, e.target.value);
+    };
+
     return (
       <div
         className={cn(
@@ -68,6 +77,8 @@ const SelectBox = React.forwardRef<HTMLSelectElement, SelectBoxProps>(
         <div className="flex items-center">
           <select
             id={id}
+            value={fieldValue}
+            onChange={handleChange}
             {...props}
             className={cn(
               'flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm',
@@ -85,7 +96,7 @@ const SelectBox = React.forwardRef<HTMLSelectElement, SelectBoxProps>(
           </select>
           {suffix && <div className="ml-2">{suffix}</div>}
         </div>
-        {touched && error && <p className="text-red-500 text-sm">{error}</p>}
+        {fieldTouched && fieldError && <p className="text-red-500 text-sm">{fieldError}</p>}
       </div>
     );
   },

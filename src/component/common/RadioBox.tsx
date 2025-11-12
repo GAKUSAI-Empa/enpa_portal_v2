@@ -1,5 +1,8 @@
-import { cn } from "@/lib/utils";
-import React, { createContext, useContext, useState } from "react";
+'use client';
+
+import { cn } from '@/lib/utils';
+import { useFormikContext } from 'formik';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 
 interface RadioContextType {
   selectedValue: string;
@@ -10,54 +13,67 @@ interface RadioContextType {
 const RadioContext = createContext<RadioContextType | null>(null);
 
 interface RadioGroupProps {
-  label?: string,
-  isRequired?: Boolean,
-  name?: string;
-  defaultValue?: string;
-  onChange?: (value: string) => void;
-  direction?: "vertical" | "horizontal";
+  label?: string;
+  isRequired?: Boolean;
+  name: string;
+  direction?: 'vertical' | 'horizontal';
   children: React.ReactNode;
   className?: string;
 }
 
 const Group: React.FC<RadioGroupProps> = ({
-  label = "",
+  label = '',
   isRequired = false,
   name,
-  defaultValue,
-  onChange,
-  direction = "vertical",
+  direction = 'vertical',
   children,
-  className = "",
+  className = '',
 }) => {
-  const [selectedValue, setSelectedValue] = useState(defaultValue || "");
+  const { values, errors, touched, setFieldValue } = useFormikContext<any>();
+  const fieldValue = values?.[name] ?? '';
+  const fieldError = errors?.[name] as string | undefined;
+  const fieldTouched = touched?.[name] as boolean | undefined;
+
+  const [selectedValue, setSelectedValue] = useState(fieldValue || '');
+
+  // const handleChange = (value: string) => {
+  //   setSelectedValue(value);
+  //   onChange && onChange(value);
+  // };
 
   const handleChange = (value: string) => {
     setSelectedValue(value);
-    onChange && onChange(value);
+    setFieldValue(name, value);
   };
+
+  useEffect(() => {
+    if (fieldValue !== selectedValue) {
+      setSelectedValue(fieldValue);
+    }
+  }, [fieldValue]);
 
   return (
     <RadioContext.Provider value={{ selectedValue, onChange: handleChange, name }}>
       {label && (
         <label
           className={cn(
-            "block text-sm font-medium text-gray-800 mb-2",
-            direction === "horizontal" && "whitespace-nowrap"
+            'block text-sm font-medium text-gray-800 mb-2',
+            direction === 'horizontal' && 'whitespace-nowrap',
           )}
         >
           {label}
-          {isRequired && <span className="text-red-500 ml-1">【必須】</span>}
+          {isRequired && <span className="text-red-500 ml-1">*</span>}
         </label>
       )}
       <div
         className={cn(
-          `flex ${direction === "horizontal" ? "flex-row space-x-4" : "flex-col space-y-2"}`,
-          className
+          `flex ${direction === 'horizontal' ? 'flex-row space-x-4' : 'flex-col space-y-2'}`,
+          className,
         )}
       >
         {children}
       </div>
+      {fieldTouched && fieldError && <p className="text-red-500 text-sm">{fieldError}</p>}
     </RadioContext.Provider>
   );
 };
@@ -69,17 +85,17 @@ interface OptionProps {
   className?: string;
 }
 
-const Option: React.FC<OptionProps> = ({ value, disabled = false, children, className = "" }) => {
+const Option: React.FC<OptionProps> = ({ value, disabled = false, children, className = '' }) => {
   const context = useContext(RadioContext);
-  if (!context) throw new Error("Radio.Option must be used inside Radio.Group");
+  if (!context) throw new Error('Radio.Option must be used inside Radio.Group');
 
   const checked = context.selectedValue === value;
 
   return (
     <label
       className={cn(
-        "flex items-center cursor-pointer",
-        disabled ? "opacity-50 cursor-not-allowed" : "",
+        'flex items-center cursor-pointer',
+        disabled ? 'opacity-50 cursor-not-allowed' : '',
         className,
       )}
     >
@@ -93,9 +109,8 @@ const Option: React.FC<OptionProps> = ({ value, disabled = false, children, clas
         className="hidden"
       />
       <span
-        className={`w-5 h-5 flex items-center justify-center border-2 rounded-full mr-2 
-          ${checked ? "border-primary bg-primary" : "border-gray-400"}`
-        }
+        className={`w-5 h-5 flex items-center justify-center border-2 rounded-full mr-2
+          ${checked ? 'border-primary bg-primary' : 'border-gray-400'}`}
       >
         {checked && <span className="w-2.5 h-2.5 bg-white rounded-full" />}
       </span>
