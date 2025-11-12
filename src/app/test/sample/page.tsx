@@ -25,6 +25,7 @@ const page = () => {
       radioboxValue: '',
     },
     validationSchema: Yup.object({
+      datePickerValue: Yup.date().required('date Picker Valueを入力してください。'),
       textboxValue: Yup.string().trim().required('Text box sampleを入力してください。'),
       textareaValue: Yup.string().trim().required('Text area sample入力してください。'),
 
@@ -44,7 +45,7 @@ const page = () => {
   return (
     <FormikProvider value={formik}>
       <form onSubmit={formik.handleSubmit}>
-        <div className="flex flex-col justify-center w-full h-screen">
+        <div className="flex flex-col justify-center w-full">
           <div className="flex flex-col items-center justify-center h-full flex-1">
             <div className="w-full xl:max-w-[50%]">
               <Card>
@@ -53,7 +54,14 @@ const page = () => {
                   description="Copy paste sử dụng các component dưới đây"
                 />
                 <CardContent>
-                  <DatePicker id="" name="" label={'Date picker sample'} />
+                  <DatePicker
+                    id="datePickerValue"
+                    name="datePickerValue"
+                    value={formik.values.datePickerValue}
+                    onChange={(date) => formik.setFieldValue('datePickerValue', date)}
+                    error={formik.errors.datePickerValue}
+                    touched={formik.touched.datePickerValue}
+                  />
                   <TextBox
                     id="textboxValue"
                     name="textboxValue"

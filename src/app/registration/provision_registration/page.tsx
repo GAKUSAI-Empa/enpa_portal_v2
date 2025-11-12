@@ -3,8 +3,6 @@
 import { Button } from '@/component/common/Button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/component/common/Card';
 import { CheckboxGroup } from '@/component/common/CheckboxGroup';
-import RadioBox from '@/component/common/RadioBox';
-import SelectBox from '@/component/common/SelectBox';
 import { TextArea } from '@/component/common/TextArea';
 import { TextBox } from '@/component/common/TextBox';
 import { IconLoader2 } from '@tabler/icons-react';
@@ -26,8 +24,6 @@ const page = () => {
       note: 'aaaaa',
       terms_of_use_check: [],
       privacy_policy_check: [],
-      selectboxValue: 'apple',
-      radioboxValue: '1',
     },
     validationSchema: Yup.object({
       companyName: Yup.string().trim().required('企業名を入力してください。'),
@@ -36,8 +32,6 @@ const page = () => {
       terms_of_use_check: Yup.array()
         .min(1, '利用規約に同意してください')
         .required('利用規約に同意してください'),
-      selectboxValue: Yup.string().trim().required('入力してください。'),
-      radioboxValue: Yup.string().trim().required('入力してください。'),
     }),
     onSubmit: async (values) => {
       setIsLoading(true);
@@ -110,26 +104,6 @@ const page = () => {
                       options={[{ label: '同意する', value: 'true' }]}
                       direction="horizontal"
                     />
-                    <SelectBox
-                      id="selectboxValue"
-                      label="消費税 1円未満端数"
-                      name="selectboxValue"
-                      width="full"
-                      options={[
-                        { value: '', label: 'choose' },
-                        { value: 'apple', label: 'apple' },
-                        { value: 'banana', label: 'banana' },
-                        { value: 'orange', label: 'orange' },
-                      ]}
-                      isRequired={true}
-                    />
-                    <RadioBox.Group label="label1" name="radioboxValue">
-                      <RadioBox.Option value="1">Option 1</RadioBox.Option>
-                      <RadioBox.Option value="2">Option 2</RadioBox.Option>
-                      <RadioBox.Option value="3" disabled={true}>
-                        Option 3 (Disabled)
-                      </RadioBox.Option>
-                    </RadioBox.Group>
                   </CardContent>
                   <CardFooter className="flex gap-2">
                     <Button type="submit" disabled={isLoading} onClick={formik.submitForm}>
