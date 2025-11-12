@@ -1,17 +1,16 @@
 'use client';
-import React, { useEffect, useState } from 'react';
-import { getSession, signIn, useSession } from 'next-auth/react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { TextBox } from '@/component/common/TextBox';
-import { Card, CardContent, CardHeader } from '@/component/common/Card';
-import Image from 'next/image';
-import { Button } from '@/component/common/Button';
-import Link from 'next/link';
-import { FormikProvider, useFormik } from 'formik';
-import * as Yup from 'yup';
-import { IconLoader2 } from '@tabler/icons-react';
-import { toast } from 'sonner';
 import { Alert } from '@/component/common/Alert';
+import { Button } from '@/component/common/Button';
+import { TextBox } from '@/component/common/TextBox';
+import { IconLoader2 } from '@tabler/icons-react';
+import { FormikProvider, useFormik } from 'formik';
+import { getSession, signIn, useSession } from 'next-auth/react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import * as Yup from 'yup';
 
 const page = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -95,12 +94,8 @@ const page = () => {
                   type="text"
                   isRequired={true}
                   label={'ユーザー名'}
-                  value={formik.values.username}
                   placeholder="EnpaPortal"
                   direction="vertical"
-                  onChange={formik.handleChange}
-                  error={formik.errors.username}
-                  touched={formik.touched.username}
                 />
                 {/* Password */}
                 <TextBox
@@ -109,12 +104,8 @@ const page = () => {
                   type="password"
                   isRequired={true}
                   label={'パスワード'}
-                  value={formik.values.password}
                   placeholder=""
                   direction="vertical"
-                  onChange={formik.handleChange}
-                  error={formik.errors.password}
-                  touched={formik.touched.password}
                 />
               </div>
               <div className="flex items-center justify-center">

@@ -1,7 +1,6 @@
 'use client';
-import { IconEye, IconEyeOff } from '@tabler/icons-react';
-import { getIn, useFormikContext } from 'formik';
-import React, { useState } from 'react';
+import { useFormikContext } from 'formik';
+import React from 'react';
 import { cn } from '../../lib/utils';
 
 const widthClass: Record<string, string> = {
@@ -11,17 +10,18 @@ const widthClass: Record<string, string> = {
   lg: 'w-64',
   full: 'w-full',
 };
-interface TextBoxProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
   showLabel?: Boolean;
   isRequired?: Boolean;
   id: string;
   name: string;
   width?: 'sm' | 'md' | 'lg' | 'full';
+  rows?: number;
   direction?: 'vertical' | 'horizontal';
   suffix?: React.ReactNode;
 }
-const TextBox = React.forwardRef<HTMLInputElement, TextBoxProps>(
+const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
   (
     {
       label = 'No label',
@@ -30,44 +30,22 @@ const TextBox = React.forwardRef<HTMLInputElement, TextBoxProps>(
       id,
       name,
       width = 'full',
+      rows = 3,
       direction = 'vertical',
       suffix,
       className = '',
-      type,
       ...props
     },
     ref,
   ) => {
-    const [showPassword, setShowPassword] = useState(false);
-
-    const toggleShowPassword = () => {
-      setShowPassword((prev) => !prev);
-    };
-
-    const inputType = type === 'password' ? (showPassword ? 'text' : 'password') : type;
-
     const { values, errors, touched, setFieldValue } = useFormikContext<any>();
 
-    const fieldValue = getIn(values, name) ?? '';
-    const fieldError = getIn(errors, name) as string | undefined;
-    const fieldTouched = getIn(touched, name) as boolean | undefined;
+    const fieldValue = values?.[name] ?? '';
+    const fieldError = errors?.[name] as string | undefined;
+    const fieldTouched = touched?.[name] as boolean | undefined;
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       setFieldValue(name, e.target.value);
-    };
-
-    const renderFieldError = (error: any) => {
-      if (!error) return null;
-      if (typeof error === 'string') return <p className="text-red-500 text-sm">{error}</p>;
-      if (Array.isArray(error))
-        return error.map((err, idx) =>
-          typeof err === 'string' ? (
-            <p key={idx} className="text-red-500 text-sm">
-              {err}
-            </p>
-          ) : null,
-        );
-      return null;
     };
 
     return (
@@ -98,14 +76,14 @@ const TextBox = React.forwardRef<HTMLInputElement, TextBoxProps>(
           )}
           <div className="flex items-center">
             <div className="relative w-full">
-              <input
+              <textarea
                 id={id}
                 name={name}
+                rows={rows}
                 value={fieldValue}
                 onChange={handleChange}
-                type={inputType}
                 className={cn(
-                  'h-10 rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm',
+                  'rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm',
                   'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 focus:border-red-500',
                   'disabled:cursor-not-allowed disabled:bg-gray-100',
                   widthClass[width],
@@ -114,25 +92,15 @@ const TextBox = React.forwardRef<HTMLInputElement, TextBoxProps>(
                 ref={ref}
                 {...props}
               />
-              {type === 'password' && (
-                <button
-                  type="button"
-                  onClick={toggleShowPassword}
-                  className="absolute right-3 top-3 text-gray-500 hover:text-gray-700 transition-opacity duration-150"
-                  tabIndex={-1}
-                >
-                  {showPassword ? <IconEyeOff size={18} /> : <IconEye size={18} />}
-                </button>
-              )}
             </div>
             {suffix && <div className="ml-2">{suffix}</div>}
           </div>
-          {fieldTouched && renderFieldError(fieldError)}
+          {fieldTouched && fieldError && <p className="text-red-500 text-sm">{fieldError}</p>}
         </div>
       </>
     );
   },
 );
-TextBox.displayName = 'TextBox';
+TextArea.displayName = 'TextArea';
 
-export { TextBox };
+export { TextArea };

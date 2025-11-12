@@ -1,20 +1,19 @@
 'use client';
 
-import Image from 'next/image';
-import * as Yup from 'yup';
-import { Field, FormikProvider, useFormik } from 'formik';
-import { IconAdjustments, IconAdOff } from '@tabler/icons-react';
-import Link from 'next/link';
-import RadioBox from '@/component/common/RadioBox';
-import { Card, CardContent, CardFooter, CardHeader } from '@/component/common/Card';
-import { Button } from '@/component/common/Button';
-import { TextBox } from '@/component/common/TextBox';
-import SelectBox from '@/component/common/SelectBox';
 import { Alert } from '@/component/common/Alert';
 import { Badge } from '@/component/common/Badge';
+import { Button } from '@/component/common/Button';
+import { Card, CardContent, CardFooter, CardHeader } from '@/component/common/Card';
 import { Grid, GridCol, GridRow } from '@/component/common/Grid';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/component/common/Tabs';
+import RadioBox from '@/component/common/RadioBox';
+import SelectBox from '@/component/common/SelectBox';
 import { Table } from '@/component/common/Table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/component/common/Tabs';
+import { TextBox } from '@/component/common/TextBox';
+import { IconAdjustments, IconAdOff } from '@tabler/icons-react';
+import { FormikProvider, useFormik } from 'formik';
+import Link from 'next/link';
+import * as Yup from 'yup';
 // import { ErrorMessage, Field, Form, Formik } from 'formik';
 
 export default function Home() {
@@ -54,7 +53,7 @@ export default function Home() {
         </TabsList>
 
         <TabsContent value="tab1">
-          <RadioBox.Group defaultValue="2" onChange={(value) => console.log('Selected:', value)}>
+          <RadioBox.Group name="">
             <RadioBox.Option value="1">Option 1</RadioBox.Option>
             <RadioBox.Option value="2">Option 2</RadioBox.Option>
             <RadioBox.Option value="3" disabled={true}>

@@ -1,8 +1,26 @@
 {
+  // Format & editor settings
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.tabSize": 2,
   "editor.insertSpaces": true,
   "files.trimTrailingWhitespace": true,
   "files.insertFinalNewline": true
+
+  // ⚠ VS Code stable chưa hỗ trợ nhưng sẽ sớm có trong tương lai
+  "typescript.preferences.autoImportFileExcludePatterns": [
+    "@mui/**"
+  ],
+  "javascript.preferences.autoImportFileExcludePatterns": [
+    "@mui/**"
+  ]
+
+  // ⚙️ Tự động sắp xếp import khi lưu file
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": true
+  },
+
+  🔧 Đảm bảo vẫn bật auto import cho project của bạn
+  "typescript.suggest.autoImports": true,
+  "javascript.suggest.autoImports": true
 }
