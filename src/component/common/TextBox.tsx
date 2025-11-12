@@ -56,6 +56,20 @@ const TextBox = React.forwardRef<HTMLInputElement, TextBoxProps>(
       setFieldValue(name, e.target.value);
     };
 
+    const renderFieldError = (error: any) => {
+      if (!error) return null;
+      if (typeof error === 'string') return <p className="text-red-500 text-sm">{error}</p>;
+      if (Array.isArray(error))
+        return error.map((err, idx) =>
+          typeof err === 'string' ? (
+            <p key={idx} className="text-red-500 text-sm">
+              {err}
+            </p>
+          ) : null,
+        );
+      return null;
+    };
+
     return (
       <>
         <div
@@ -113,7 +127,7 @@ const TextBox = React.forwardRef<HTMLInputElement, TextBoxProps>(
             </div>
             {suffix && <div className="ml-2">{suffix}</div>}
           </div>
-          {fieldTouched && fieldError && <p className="text-red-500 text-sm">{fieldError}</p>}
+          {fieldTouched && renderFieldError(fieldError)}
         </div>
       </>
     );

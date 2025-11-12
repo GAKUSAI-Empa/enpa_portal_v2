@@ -508,7 +508,7 @@ const page = () => {
           </Tabs>
           <div className="flex items-center justify-end">
             <Button
-              // disabled={!formik.isValid || formik.isSubmitting}
+              disabled={!formik.isValid || formik.isSubmitting}
               size="lg"
               type="submit"
               onClick={formik.submitForm}
