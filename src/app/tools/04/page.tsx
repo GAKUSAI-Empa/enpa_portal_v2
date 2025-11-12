@@ -1,16 +1,16 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
-import { FormikProvider, useFormik } from 'formik';
-import * as Yup from 'yup';
+import { Button } from '@/component/common/Button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/component/common/Tabs';
+import { FormikProvider, useFormik } from 'formik';
+import { useEffect, useRef, useState } from 'react';
+import * as Yup from 'yup';
 import TabItem1 from './components/TabItem1';
 import TabItem2 from './components/TabItem2';
 import TabItem3 from './components/TabItem3';
 import TabItem4 from './components/TabItem4';
 import TabItem5 from './components/TabItem5';
 import TabItem6 from './components/TabItem6';
-import { Button } from '@/component/common/Button';
 
 type navigationMenu = {
   id: number;
@@ -508,7 +508,7 @@ const page = () => {
           </Tabs>
           <div className="flex items-center justify-end">
             <Button
-              disabled={!formik.isValid || formik.isSubmitting}
+              // disabled={!formik.isValid || formik.isSubmitting}
               size="lg"
               type="submit"
               onClick={formik.submitForm}

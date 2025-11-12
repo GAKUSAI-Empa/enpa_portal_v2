@@ -1,6 +1,6 @@
 'use client';
 import { IconEye, IconEyeOff } from '@tabler/icons-react';
-import { useFormikContext } from 'formik';
+import { getIn, useFormikContext } from 'formik';
 import React, { useState } from 'react';
 import { cn } from '../../lib/utils';
 
@@ -48,9 +48,9 @@ const TextBox = React.forwardRef<HTMLInputElement, TextBoxProps>(
 
     const { values, errors, touched, setFieldValue } = useFormikContext<any>();
 
-    const fieldValue = values?.[name] ?? '';
-    const fieldError = errors?.[name] as string | undefined;
-    const fieldTouched = touched?.[name] as boolean | undefined;
+    const fieldValue = getIn(values, name) ?? '';
+    const fieldError = getIn(errors, name) as string | undefined;
+    const fieldTouched = getIn(touched, name) as boolean | undefined;
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       setFieldValue(name, e.target.value);
