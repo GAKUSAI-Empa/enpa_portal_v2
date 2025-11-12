@@ -5,7 +5,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader } from '../../../component/common/Card';
 import { Button } from '../../../component/common/Button';
 import { Toaster, toast } from 'sonner';
-import { useHeader } from '@/app/context/HeaderContext';
+// import { useHeader } from '@/app/context/HeaderContext';
 
 // --- IMPORT CÁC COMPONENT VÀ LOGIC ---
 import EditableProductTable from './components/EditableProductTable';
@@ -54,11 +54,11 @@ export default function CouponImagePage() {
 
   const isProcessing = isModalLoading || !!jobId;
 
-  const { setTitle } = useHeader();
+  // const { setTitle } = useHeader();
 
-  useEffect(() => {
-    setTitle('クーポン画像作成二重価格画像作成');
-  }, [setTitle]);
+  // useEffect(() => {
+  //   setTitle('クーポン画像作成二重価格画像作成');
+  // }, [setTitle]);
 
   // SESSION LOGIC
   const loadSession = useCallback(() => {
