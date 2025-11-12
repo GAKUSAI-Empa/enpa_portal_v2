@@ -18,6 +18,7 @@ RUN npm ci --ignore-scripts
 # Copy toàn bộ mã nguồn
 COPY . .
 
+ENV NEXT_FONT_GOOGLE_DOWNLOAD_URL="http://localhost:12345"
 # Build dự án Next.js
 RUN npm run build
 
