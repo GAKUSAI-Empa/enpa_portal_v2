@@ -20,7 +20,7 @@
     "source.organizeImports": true
   },
 
-  🔧 Đảm bảo vẫn bật auto import cho project của bạn
+  // 🔧 Đảm bảo vẫn bật auto import cho project của bạn
   "typescript.suggest.autoImports": true,
   "javascript.suggest.autoImports": true
 }
