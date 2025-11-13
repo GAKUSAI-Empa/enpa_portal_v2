@@ -46,7 +46,7 @@ const TextBox = React.forwardRef<HTMLInputElement, TextBoxProps>(
 
     const inputType = type === 'password' ? (showPassword ? 'text' : 'password') : type;
 
-    const { values, errors, touched, setFieldValue } = useFormikContext<any>();
+    const { values, errors, touched, setFieldValue, isSubmitting } = useFormikContext<any>();
 
     const fieldValue = getIn(values, name) ?? '';
     const fieldError = getIn(errors, name) as string | undefined;

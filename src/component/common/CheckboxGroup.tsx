@@ -18,6 +18,7 @@ interface CheckboxGroupProps {
   direction?: 'vertical' | 'horizontal';
   directionOption?: 'vertical' | 'horizontal';
   className?: string;
+  disabled?: boolean;
 }
 
 const CheckboxGroup = ({
@@ -30,6 +31,7 @@ const CheckboxGroup = ({
   direction = 'vertical',
   directionOption = 'horizontal',
   className = '',
+  disabled: checkboxDisabled = false,
 }: CheckboxGroupProps) => {
   const { values, errors, touched, setFieldValue } = useFormikContext<any>();
   const selected: (string | number)[] = values[name] || [];
@@ -45,48 +47,49 @@ const CheckboxGroup = ({
   const isTouched = touched[name];
 
   return (
-    <div
-      id={id}
-      className={cn(
-        'flex mb-3',
-        direction === 'vertical' ? 'flex-col gap-1' : 'flex-row items-center gap-3',
-        className,
-      )}
-    >
-      {showLabel && (
-        <div
-          className={cn(
-            'flex items-center mb-1',
-            direction === 'horizontal' && 'whitespace-nowrap',
-          )}
-        >
-          <span className="text-sm font-medium text-gray-800">{label}</span>
-          {isRequired && <span className="text-red-500">*</span>}
-        </div>
-      )}
-
+    <div className="mb-3">
       <div
+        id={id}
         className={cn(
-          'flex gap-4 flex-wrap',
-          directionOption === 'vertical' ? 'flex-col' : 'flex-row',
+          'flex',
+          direction === 'vertical' ? 'flex-col gap-1' : 'flex-row items-center gap-3',
+          className,
         )}
       >
-        {options.map((option) => (
-          <label key={option.value} className="flex items-center gap-2 w-auto">
-            <input
-              type="checkbox"
-              name={name}
-              value={option.value}
-              checked={selected.includes(option.value)}
-              onChange={() => handleChange(option.value)}
-              disabled={option.disabled}
-              className="w-4 h-4 accent-primary"
-            />
-            {option.label}
-          </label>
-        ))}
-      </div>
+        {showLabel && (
+          <div
+            className={cn(
+              'flex items-center mb-1',
+              direction === 'horizontal' && 'whitespace-nowrap',
+            )}
+          >
+            <span className="text-sm font-medium text-gray-800">{label}</span>
+            {isRequired && <span className="text-red-500">*</span>}
+          </div>
+        )}
 
+        <div
+          className={cn(
+            'flex gap-4 flex-wrap',
+            directionOption === 'vertical' ? 'flex-col' : 'flex-row',
+          )}
+        >
+          {options.map((option) => (
+            <label key={option.value} className="flex items-center text-gray-700 gap-2 w-auto">
+              <input
+                type="checkbox"
+                name={name}
+                value={option.value}
+                checked={selected.includes(option.value)}
+                onChange={() => handleChange(option.value)}
+                disabled={option.disabled || checkboxDisabled}
+                className="w-4 h-4 accent-primary disabled:cursor-not-allowed disabled:bg-gray-100"
+              />
+              {option.label}
+            </label>
+          ))}
+        </div>
+      </div>
       {isTouched && error && (
         <p className="text-red-500 text-sm mt-1">{`${Array.isArray(error) ? error[0] : error}`}</p>
       )}
