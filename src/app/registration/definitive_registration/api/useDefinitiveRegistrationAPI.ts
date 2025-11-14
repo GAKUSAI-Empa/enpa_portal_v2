@@ -28,7 +28,6 @@ const useDefinitiveRegistrationAPI = () => {
     default_tax_rate: string,
     tax_rounding: string,
     username: string,
-    email: string,
   ) => {
     try {
       const body = {
@@ -39,7 +38,6 @@ const useDefinitiveRegistrationAPI = () => {
         default_tax_rate,
         tax_rounding,
         username,
-        email,
       };
       const headers = {};
       const response = await axiosClient.post(URL_PREFIX + '/definitive_registration', body, {
