@@ -7,10 +7,10 @@ import { TextBox } from '@/component/common/TextBox';
 import { IconLoader2 } from '@tabler/icons-react';
 import { FormikProvider, useFormik } from 'formik';
 import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { toast } from 'sonner';
 import * as Yup from 'yup';
 import useStaffMainteAPI from '../api/useStaffMainteAPI';
-import { toast } from 'sonner';
 
 const page = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -88,12 +88,8 @@ const page = () => {
                     type="text"
                     isRequired={true}
                     label={'ユーザー名'}
-                    value={formik.values.username}
                     placeholder="enpaportal"
                     direction="vertical"
-                    onChange={formik.handleChange}
-                    error={formik.errors.username}
-                    touched={formik.touched.username}
                   />
                   <TextBox
                     id="email"
@@ -101,12 +97,8 @@ const page = () => {
                     type="email"
                     isRequired={true}
                     label={'メールアドレス'}
-                    value={formik.values.email}
                     placeholder="enpaportal@gmail.com"
                     direction="vertical"
-                    onChange={formik.handleChange}
-                    error={formik.errors.email}
-                    touched={formik.touched.email}
                   />
                   <SelectBox
                     id="isAdmin"
@@ -114,12 +106,8 @@ const page = () => {
                     type="text"
                     isRequired={true}
                     label={'管理者権限'}
-                    value={formik.values.isAdmin}
                     direction="vertical"
                     width="full"
-                    onChange={formik.handleChange}
-                    error={formik.errors.isAdmin}
-                    touched={formik.touched.isAdmin}
                     options={[
                       { value: '0', label: '無効' },
                       { value: '1', label: '有効' },
@@ -136,12 +124,8 @@ const page = () => {
                     type="password"
                     isRequired={true}
                     label={'パスワード'}
-                    value={formik.values.password}
                     placeholder=""
                     direction="vertical"
-                    onChange={formik.handleChange}
-                    error={formik.errors.password}
-                    touched={formik.touched.password}
                   />
                   <TextBox
                     id="retypePassword"
@@ -149,12 +133,8 @@ const page = () => {
                     type="password"
                     isRequired={true}
                     label={'パスワード(確認用)'}
-                    value={formik.values.retypePassword}
                     placeholder=""
                     direction="vertical"
-                    onChange={formik.handleChange}
-                    error={formik.errors.retypePassword}
-                    touched={formik.touched.retypePassword}
                   />
                 </div>
               </div>

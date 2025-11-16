@@ -43,12 +43,8 @@ const TabItem6 = ({
               type="text"
               width="full"
               label={'見出し'}
-              value={formik.values.featureTitle}
               placeholder="例：新商品"
               direction="vertical"
-              onChange={formik.handleChange}
-              error={formik.errors.featureTitle}
-              touched={formik.touched.featureTitle}
             />
             <SelectBox
               id=""
@@ -75,12 +71,8 @@ const TabItem6 = ({
                     width="full"
                     isRequired={true}
                     label={'ボタン文言'}
-                    value={formik.values.buttonText}
                     placeholder="例：楽天に遷移する"
                     direction="vertical"
-                    onChange={formik.handleChange}
-                    error={formik.errors.buttonText}
-                    touched={formik.touched.buttonText}
                   />
                 </div>
                 <div>
@@ -91,12 +83,8 @@ const TabItem6 = ({
                     width="full"
                     isRequired={true}
                     label={'ボタンリンク先'}
-                    value={formik.values.buttonLink}
                     placeholder="例：https://www.rakuten.co.jp/"
                     direction="vertical"
-                    onChange={formik.handleChange}
-                    error={formik.errors.buttonLink}
-                    touched={formik.touched.buttonLink}
                   />
                 </div>
               </React.Fragment>
