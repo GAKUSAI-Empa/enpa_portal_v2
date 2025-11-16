@@ -15,7 +15,7 @@ export type ProductRow = {
   salePrice: string; // Giá sale (số dưới dạng string) (セール価格)
   saleText: string; // Text hiển thị cho sale (セール文言)
   discount: string; // Text hiển thị discount (tự động tính, vd: "20%OFF", "1000円OFF")
-  discountType: "percent" | "yen" | ""; // Loại discount được chọn ('percent' hoặc 'yen') (割引表示)
+  discountType: 'percent' | 'yen' | ''; // Loại discount được chọn ('percent' hoặc 'yen') (割引表示)
   mobileStartDate: string; // Thời gian bắt đầu trên mobile (YYYY-MM-DDTHH:mm) (楽天モバイル開始日時)
   mobileEndDate: string; // Thời gian kết thúc trên mobile (YYYY-MM-DDTHH:mm) (楽天モバイル終了日時)
 };
@@ -42,7 +42,8 @@ export type AllErrors = { [key: string]: RowErrors };
  * Định nghĩa cấu trúc kết quả xử lý ảnh từ backend cho một item.
  */
 export type BackendImageResult = {
-  status: "Processing" | "Success" | "Error" | "Pending"; // Trạng thái xử lý
+  // === (SỬA LỖI) Sửa lại status của item (backend worker có thể trả về 'Success' hoặc 'Error') ===
+  status: 'Processing' | 'Success' | 'Error' | 'Pending';
   filename: string | null; // Tên file ảnh đã tạo (nếu thành công)
   message: string | null; // Thông báo lỗi (nếu có)
 };
@@ -50,27 +51,33 @@ export type BackendImageResult = {
 /**
  * Định nghĩa các trạng thái có thể có của quá trình upload FTP.
  */
-export type FtpUploadStatus = "idle" | "uploading" | "success" | "failed";
+// === (SỬA LỖI) FTP Status cũng dùng chữ thường (theo logic cũ) hoặc chữ hoa?
+// Tạm thời giả định là chữ thường (idle, uploading, success, failed)
+// Nếu FTP cũng dùng chữ hoa, bạn cần sửa lại ở đây.
+export type FtpUploadStatus = 'IDLE' | 'UPLOADING' | 'SUCCESS' | 'FAILED';
 
 /**
  * Định nghĩa cấu trúc đầy đủ cho trạng thái của một job xử lý ảnh từ backend.
  */
 export type BackendJobStatus = {
   jobId: string; // ID của job
+  // === (SỬA LỖI) Đổi sang chữ IN HOA để khớp với backend ===
   status:
-    | "Pending" // Đang chờ xử lý
-    | "Processing" // Đang xử lý
-    | "Completed" // Hoàn thành tất cả
-    | "Completed with errors" // Hoàn thành nhưng có lỗi ở một số item
-    | "Failed"; // Job thất bại hoàn toàn
-  progress: number; // Số lượng item đã xử lý (thành công hoặc lỗi)
-  total: number; // Tổng số item cần xử lý
-  results: { [rowId: string]: BackendImageResult }; // Kết quả chi tiết cho từng item (map từ rowId)
-  startTime: number; // Thời gian bắt đầu job (timestamp)
-  endTime: number | null; // Thời gian kết thúc job (timestamp, null nếu chưa xong)
-  message: string | null; // Thông báo lỗi chung của cả job (nếu có)
-  ftpUploadStatusGold?: FtpUploadStatus; // Trạng thái upload lên Rakuten GOLD
-  ftpUploadErrorGold?: string | null; // Lỗi khi upload lên GOLD
-  ftpUploadStatusRcabinet?: FtpUploadStatus; // Trạng thái upload lên R-Cabinet
-  ftpUploadErrorRcabinet?: string | null; // Lỗi khi upload lên R-Cabinet
+    | 'PENDING'
+    | 'Processing' // (Giữ lại 'Processing' của frontend)
+    | 'RUNNING'
+    | 'COMPLETED'
+    | 'COMPLETED_WITH_ERRORS'
+    | 'FAILED';
+  // === (KẾT THÚC SỬA LỖI) ===
+  progress: number;
+  total: number;
+  results: { [rowId: string]: BackendImageResult };
+  startTime: number;
+  endTime: number | null;
+  message: string | null;
+  ftpUploadStatusGold?: FtpUploadStatus | 'idle'; // (Thêm 'idle' làm mặc định)
+  ftpUploadErrorGold?: string | null;
+  ftpUploadStatusRcabinet?: FtpUploadStatus | 'idle'; // (Thêm 'idle' làm mặc định)
+  ftpUploadErrorRcabinet?: string | null;
 };

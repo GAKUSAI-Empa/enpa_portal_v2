@@ -14,32 +14,26 @@ import {
 
 /**
  * Tạo một đối tượng ProductRow mới với giá trị mặc định.
- * @param idPrefix - Tiền tố cho ID (thường là baseId từ useId).
- * @returns Một đối tượng ProductRow mới.
  */
 export const createNewProductRow = (idPrefix: string): ProductRow => ({
-  id: `${idPrefix}-${Date.now()}`, // Tạo ID duy nhất dựa trên thời gian
+  id: `${idPrefix}-${Date.now()}`,
   productCode: '',
-  template: templates[0]?.name || '', // Lấy template đầu tiên làm mặc định
+  template: templates[0]?.name || '',
   startDate: '',
   endDate: '',
-  priceType: '当店通常価格', // Giá trị mặc định
+  priceType: '当店通常価格',
   customPriceType: '',
   regularPrice: '',
   salePrice: '',
   saleText: '',
-  discount: '', // Sẽ được tính toán sau
-  discountType: 'percent', // Mặc định là %
+  discount: '',
+  discountType: 'percent',
   mobileStartDate: '',
   mobileEndDate: '',
 });
 
 /**
  * Tính toán và định dạng chuỗi hiển thị giảm giá (%OFF hoặc 円OFF).
- * @param regularPriceStr - Giá gốc (dạng string).
- * @param salePriceStr - Giá sale (dạng string).
- * @param type - Loại giảm giá ('percent' hoặc 'yen').
- * @returns Chuỗi hiển thị giảm giá hoặc chuỗi rỗng.
  */
 export const calculateDiscountDisplay = (
   regularPriceStr: string,
@@ -48,86 +42,60 @@ export const calculateDiscountDisplay = (
 ): string => {
   const regularPrice = parseFloat(regularPriceStr);
   const salePrice = parseFloat(salePriceStr);
-  // Kiểm tra tính hợp lệ của giá và loại giảm giá
-  if (
-    type &&
-    !isNaN(regularPrice) &&
-    !isNaN(salePrice) &&
-    regularPrice > salePrice // Chỉ tính khi giá gốc > giá sale
-  ) {
+  if (type && !isNaN(regularPrice) && !isNaN(salePrice) && regularPrice > salePrice) {
     if (type === 'percent') {
-      // Thêm kiểm tra regularPrice > 0 trước khi chia
       if (regularPrice > 0) {
-        const percentage = Math.round(
-          // Làm tròn phần trăm
-          ((regularPrice - salePrice) / regularPrice) * 100,
-        );
-        // Đảm bảo kết quả phép toán là số trước khi dùng trong template literal
-        if (!isNaN(percentage)) {
-          return `${percentage}%OFF`;
-        }
+        const percentage = Math.round(((regularPrice - salePrice) / regularPrice) * 100);
+        if (!isNaN(percentage)) return `${percentage}%OFF`;
       }
     } else {
-      // type === 'yen'
-      const difference = Math.round(regularPrice - salePrice); // Làm tròn số tiền Yên
-      // Đảm bảo kết quả phép toán là số
-      if (!isNaN(difference)) {
-        return `${difference.toLocaleString()}円OFF`; // Định dạng số tiền và thêm ký hiệu Yên
-      }
+      const difference = Math.round(regularPrice - salePrice);
+      if (!isNaN(difference)) return `${difference.toLocaleString()}円OFF`;
     }
   }
-  return ''; // Trả về rỗng nếu không hợp lệ hoặc chia cho 0
+  return '';
 };
 
 /**
- * Chuyển đổi chuỗi ngày tháng tiếng Nhật (vd: "10月27日16:44") sang định dạng ISO (YYYY-MM-DDTHH:mm).
- * Giả định năm là năm hiện tại hoặc năm sau nếu tháng nhập vào nhỏ hơn tháng hiện tại.
- * @param dateStr - Chuỗi ngày tháng tiếng Nhật.
- * @returns Chuỗi định dạng ISO hoặc chuỗi rỗng nếu không parse được.
+ * Chuyển đổi chuỗi ngày tháng tiếng Nhật sang định dạng ISO (YYYY-MM-DDTHH:mm).
  */
 export const parseJapaneseDate = (dateStr: string): string => {
-  if (!dateStr || !dateStr.includes('月')) return ''; // Kiểm tra cơ bản
-  // Regex để trích xuất tháng, ngày, giờ, phút
+  if (!dateStr || !dateStr.includes('月')) return '';
   const match = dateStr.match(/(\d{1,2})月(\d{1,2})日(\d{1,2}):(\d{1,2})/);
   if (!match) return '';
 
-  const [, month, day, hour, minute] = match.map(Number); // Chuyển các group thành số
-
+  const [, month, day, hour, minute] = match.map(Number);
   const now = new Date();
   const currentYear = now.getFullYear();
-  const currentMonth = now.getMonth() + 1; // getMonth trả về 0-11
-
-  // Xác định năm: nếu tháng nhập < tháng hiện tại => năm sau, ngược lại là năm hiện tại
+  const currentMonth = now.getMonth() + 1;
   const year = month < currentMonth ? currentYear + 1 : currentYear;
 
-  // Định dạng các thành phần thành 2 chữ số (vd: '01', '09')
   const formattedMonth = String(month).padStart(2, '0');
   const formattedDay = String(day).padStart(2, '0');
   const formattedHour = String(hour).padStart(2, '0');
   const formattedMinute = String(minute).padStart(2, '0');
 
-  // Trả về định dạng YYYY-MM-DDTHH:mm
   return `${year}-${formattedMonth}-${formattedDay}T${formattedHour}:${formattedMinute}`;
 };
 
 /**
  * Trả về Icon tương ứng với trạng thái của Job.
- * @param status - Trạng thái Job ('Pending', 'Processing', 'Completed', etc.).
- * @returns React Node của Icon hoặc null.
  */
 export const getJobStatusIcon = (
-  status: BackendJobStatus['status'] | 'Pending',
+  status: BackendJobStatus['status'] | 'PENDING',
 ): React.ReactNode => {
   switch (status) {
-    case 'Pending':
+    case 'PENDING':
       return <IconLoader2 className="h-5 w-5 text-gray-500" />;
     case 'Processing':
       return <IconLoader2 className="h-5 w-5 animate-spin text-blue-500" />;
-    case 'Completed':
+    case 'RUNNING':
+      return <IconLoader2 className="h-5 w-5 animate-spin text-blue-500" />;
+    case 'COMPLETED':
       return <IconCircleCheck className="h-5 w-5 text-green-500" />;
-    case 'Completed with errors':
+    case 'COMPLETED_WITH_ERRORS':
       return <IconAlertCircle className="h-5 w-5 text-yellow-500" />;
-    case 'Failed':
+    case 'FAILED':
       return <IconX className="h-5 w-5 text-red-500" />;
     default:
       return null;
@@ -135,21 +103,20 @@ export const getJobStatusIcon = (
 };
 
 /**
- * Trả về Text mô tả tương ứng với trạng thái của Job (Tiếng Nhật).
- * @param status - Trạng thái Job.
- * @returns Chuỗi mô tả trạng thái.
+ * Trả về Text mô tả trạng thái của Job (Tiếng Nhật).
  */
-export const getJobStatusText = (status: BackendJobStatus['status'] | 'Pending'): string => {
+export const getJobStatusText = (status: BackendJobStatus['status'] | 'PENDING'): string => {
   switch (status) {
-    case 'Pending':
+    case 'PENDING':
       return '待機中...';
     case 'Processing':
+    case 'RUNNING':
       return '生成中...';
-    case 'Completed':
+    case 'COMPLETED':
       return '完了';
-    case 'Completed with errors':
+    case 'COMPLETED_WITH_ERRORS':
       return '完了 (一部エラー)';
-    case 'Failed':
+    case 'FAILED':
       return '失敗';
     default:
       return status || '不明';
@@ -158,17 +125,16 @@ export const getJobStatusText = (status: BackendJobStatus['status'] | 'Pending')
 
 /**
  * Trả về Icon tương ứng với trạng thái Upload FTP.
- * @param status - Trạng thái FTP ('idle', 'uploading', 'success', 'failed').
- * @returns React Node của Icon hoặc null.
  */
-export const getFtpStatusIcon = (status?: FtpUploadStatus): React.ReactNode => {
+export const getFtpStatusIcon = (status?: FtpUploadStatus | 'idle'): React.ReactNode => {
   switch (status) {
-    case 'uploading':
+    case 'UPLOADING':
       return <IconCloudUpload className="h-4 w-4 animate-pulse text-blue-500" />;
-    case 'success':
+    case 'SUCCESS':
       return <IconCloudCheck className="h-4 w-4 text-green-500" />;
-    case 'failed':
+    case 'FAILED':
       return <IconCloudOff className="h-4 w-4 text-red-500" />;
+    case 'IDLE':
     case 'idle':
     default:
       return null;
@@ -176,23 +142,20 @@ export const getFtpStatusIcon = (status?: FtpUploadStatus): React.ReactNode => {
 };
 
 /**
- * Trả về Text mô tả tương ứng với trạng thái Upload FTP (Tiếng Nhật).
- * @param status - Trạng thái FTP.
- * @param error - Thông báo lỗi (nếu có).
- * @returns Chuỗi mô tả trạng thái hoặc null.
+ * Trả về Text mô tả trạng thái Upload FTP (Tiếng Nhật).
  */
 export const getFtpStatusText = (
-  status?: FtpUploadStatus,
+  status?: FtpUploadStatus | 'idle',
   error?: string | null,
 ): string | null => {
   switch (status) {
-    case 'uploading':
+    case 'UPLOADING':
       return 'アップロード中...';
-    case 'success':
+    case 'SUCCESS':
       return '完了';
-    case 'failed':
-      // Nếu có thông báo lỗi cụ thể thì hiển thị, không thì hiện "失敗"
+    case 'FAILED':
       return error ? `失敗: ${error}` : '失敗';
+    case 'IDLE':
     case 'idle':
     default:
       return null;
