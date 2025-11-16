@@ -127,6 +127,7 @@ const page = () => {
                 <Button
                   size="lg"
                   className="w-80 py-2 bg-white rounded-full border border-primary text-primary hover:bg-primary hover:text-white transition"
+                  onClick={() => router.push('/registration/automatic_registration')}
                 >
                   新規申し込み
                 </Button>

@@ -29,7 +29,6 @@ const page = () => {
       default_tax_rate: '',
       tax_rounding: '',
       username: '',
-      email: '',
     },
     validationSchema: Yup.object({
       prov_reg_id: Yup.string().trim().required('企業名を入力してください。'),
@@ -51,16 +50,22 @@ const page = () => {
         .trim()
         .max(20, 'ユーザー名は20文字以内で入力してください。')
         .required('ユーザー名を入力してください。'),
-      email: Yup.string()
-        .trim()
-        .email('有効なメールアドレスを入力してください。')
-        .max(30, 'ユーザー名は30文字以内で入力してください。')
-        .required('ユーザーメールアドレスを入力してください。'),
     }),
     onSubmit: async (values) => {
       try {
+        console.log(values);
         setIsLoading(true);
-        // const dataRes = await definitiveRegistration();
+        const dataRes = await definitiveRegistration(
+          values.prov_reg_id,
+          values.store_id,
+          values.store_url,
+          values.store_name,
+          values.default_tax_rate,
+          values.tax_rounding,
+          values.username,
+        );
+        toast.success(dataRes.detail);
+        router.push('/login');
       } catch (e: any) {
         console.log(e);
         const backendMessage =
@@ -158,23 +163,12 @@ const page = () => {
                         placeholder="empo-user01"
                         direction="vertical"
                       />
-                      <TextBox
-                        id="email"
-                        name="email"
-                        type="email"
-                        isRequired={true}
-                        label={'ユーザーメールアドレス'}
-                        placeholder="xxx@example.com"
-                        direction="vertical"
-                      />
                     </CardContent>
                     <CardFooter className="flex gap-2">
                       <Button type="submit" disabled={isLoading} onClick={formik.submitForm}>
                         {isLoading ? <IconLoader2 className="animate-spin" /> : <>確認</>}
                       </Button>
-                      <Button color="grey" onClick={() => router.push('/staff')}>
-                        戻る
-                      </Button>
+                      <Button color="grey">戻る</Button>
                     </CardFooter>
                   </Card>
                 </div>
