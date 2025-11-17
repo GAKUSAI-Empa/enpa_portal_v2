@@ -1,5 +1,6 @@
 // src/app/tools/03/hooks/useJobPolling.ts
-import { useState, useEffect, useRef, useCallback } from 'react';
+
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { tool03API } from '../api/tool03API';
 import type { BackendJobStatus } from '../types';
@@ -9,6 +10,7 @@ interface UseJobPollingProps {
   isOpen: boolean;
   onJobNotFound?: () => void;
   onPollingError?: (error: Error) => void;
+
   onFtpSuccess?: (target: 'gold' | 'rcabinet', message: string) => void;
   onFtpError?: (target: 'gold' | 'rcabinet', message: string) => void;
 }
@@ -188,18 +190,21 @@ export function useJobPolling({
           firstRunTimeoutId = null;
         }, 100);
         pollingIntervalRef.current = setInterval(runPollingIteration, 3000);
+
         console.log('[Hook] start interval (polling needed)');
       }
     } else {
       if (firstRunTimeoutId) clearTimeout(firstRunTimeoutId);
       if (pollingIntervalRef.current) {
         stopPolling();
+
         console.log('[Hook] stop interval (polling no longer needed)');
       }
     }
     return () => {
       if (firstRunTimeoutId) clearTimeout(firstRunTimeoutId);
       stopPolling();
+
       console.log('[Hook] interval cleanup on unmount/deps change');
     };
   }, [isOpen, jobId, jobStatus, stopPolling, runPollingIteration]);

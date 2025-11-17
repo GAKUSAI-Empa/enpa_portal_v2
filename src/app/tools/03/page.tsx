@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+
 import { Card, CardContent, CardHeader } from '@/component/common/Card';
 import { Button } from '@/component/common/Button';
 import { Alert } from '@/component/common/Alert';
@@ -35,6 +36,7 @@ const BATCH_SIZE = 10;
 
 export default function TwoPriceImagePage() {
   // --- State の宣言 ---
+
   // const { setTitle } = useHeader();
 
   // useEffect(() => {

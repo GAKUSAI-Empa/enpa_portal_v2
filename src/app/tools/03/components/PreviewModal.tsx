@@ -1,21 +1,19 @@
 // src/app/tools/03/components/PreviewModal.tsx
-import React from 'react';
 import { Button } from '@/component/common/Button';
 import { cn } from '@/lib/utils';
-import type { BackendJobStatus, FtpUploadStatus, ProductRow } from '../types';
 import {
-  IconLoader2,
-  IconCircleCheck,
   IconAlertCircle,
-  IconX,
-  IconDownload,
-  IconUpload,
+  IconChevronDown,
+  IconCircleCheck,
   IconCircleX,
-  IconCloudUpload,
   IconCloudCheck,
   IconCloudOff,
-  IconChevronDown,
+  IconCloudUpload,
+  IconDownload,
+  IconLoader2,
+  IconUpload,
 } from '@tabler/icons-react';
+import type { BackendJobStatus, ProductRow } from '../types';
 // === (SỬA LỖI) Xóa import hàm cũ, vì chúng ta sẽ định nghĩa lại bên trong ===
 // import {
 //   getJobStatusIcon,
