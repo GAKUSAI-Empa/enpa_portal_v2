@@ -1,20 +1,21 @@
 'use client';
 
-import { cn } from '@/lib/utils';
-import React, { useEffect, useRef, useState } from 'react';
-import { signOut, useSession } from 'next-auth/react';
-import Link from 'next/link';
-import Image from 'next/image';
 import { Button } from '@/component/common/Button';
-import { useRouter } from 'next/navigation';
+import { cn } from '@/lib/utils';
 import { IconLogout, IconUser } from '@tabler/icons-react';
+import { signOut, useSession } from 'next-auth/react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
+import AppNotification from './AppNotification/AppNotification';
 
 interface AppHeaderProps {
   isExpandedSideBar: boolean;
 }
 const AppHeader = ({ isExpandedSideBar }: AppHeaderProps) => {
   const { data: session, update, status } = useSession();
-  const [open, setOpen] = useState(false);
+  const [openUserDropdown, setOpenUserDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -22,7 +23,7 @@ const AppHeader = ({ isExpandedSideBar }: AppHeaderProps) => {
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setOpen(false);
+        setOpenUserDropdown(false);
       }
     };
     document.addEventListener('click', handleClickOutside);
@@ -49,13 +50,14 @@ const AppHeader = ({ isExpandedSideBar }: AppHeaderProps) => {
             <>
               <Button onClick={() => router.push('/staff')}>スタッフ管理</Button>
               <Button>店舗管理</Button>
+              <AppNotification />
               <div
                 className="relative h-20 flex items-center aligns justify-center"
                 ref={dropdownRef}
               >
                 {/* avatar */}
                 <button
-                  onClick={() => setOpen(!open)}
+                  onClick={() => setOpenUserDropdown(!openUserDropdown)}
                   className="flex items-center gap-2 focus:outline-none"
                 >
                   <Image
@@ -70,7 +72,7 @@ const AppHeader = ({ isExpandedSideBar }: AppHeaderProps) => {
                   <p>{session.user.username}</p>
                   <svg
                     className={`w-4 h-4 ml-2 transition-transform duration-200 ${
-                      open ? 'rotate-180' : ''
+                      openUserDropdown ? 'rotate-180' : ''
                     }`}
                     fill="none"
                     stroke="currentColor"
@@ -88,7 +90,7 @@ const AppHeader = ({ isExpandedSideBar }: AppHeaderProps) => {
                 {/* Menu xổ xuống */}
                 <div
                   className={`absolute right-0 mt-2 w-44 bg-white border border-gray-200 rounded-md shadow-md transition-all duration-200 origin-top-right ${
-                    open
+                    openUserDropdown
                       ? 'opacity-100 scale-100 translate-y-[70px]'
                       : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
                   }`}
@@ -97,14 +99,14 @@ const AppHeader = ({ isExpandedSideBar }: AppHeaderProps) => {
                     <Link
                       href="/account"
                       className="block px-4 py-2 hover:bg-gray-100 flex gap-2"
-                      onClick={() => setOpen(false)}
+                      onClick={() => setOpenUserDropdown(false)}
                     >
                       <IconUser />
                       Profile
                     </Link>
                     <button
                       onClick={() => {
-                        setOpen(false);
+                        setOpenUserDropdown(false);
                         handleLogOut();
                       }}
                       className="w-full text-left px-4 py-2 hover:bg-gray-100 flex gap-2"
