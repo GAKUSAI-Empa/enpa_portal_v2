@@ -22,7 +22,6 @@ const page = () => {
 
   const formik = useFormik({
     initialValues: {
-      prov_reg_id: '',
       store_id: '',
       store_url: '',
       store_name: '',
@@ -31,7 +30,6 @@ const page = () => {
       username: '',
     },
     validationSchema: Yup.object({
-      prov_reg_id: Yup.string().trim().required('企業名を入力してください。'),
       store_id: Yup.string()
         .trim()
         .max(6, 'ショップIDは6文字以内で入力してください。')
@@ -56,7 +54,7 @@ const page = () => {
         console.log(values);
         setIsLoading(true);
         const dataRes = await definitiveRegistration(
-          values.prov_reg_id,
+          provis_regis_id,
           values.store_id,
           values.store_url,
           values.store_name,
@@ -97,7 +95,7 @@ const page = () => {
 
   return (
     <>
-      {isProvisRegisIdValid ? (
+      {isProvisRegisIdValid && (
         <FormikProvider value={formik}>
           <form onSubmit={formik.handleSubmit}>
             <div className="flex flex-col justify-center w-full mt-2">
@@ -113,6 +111,7 @@ const page = () => {
                         label={'ショップID'}
                         placeholder="123456"
                         direction="vertical"
+                        disabled={formik.isSubmitting}
                       />
                       <TextBox
                         id="store_url"
@@ -121,6 +120,7 @@ const page = () => {
                         label={'店舗URL'}
                         placeholder="empotown"
                         direction="vertical"
+                        disabled={formik.isSubmitting}
                       />
                       <TextBox
                         id="store_name"
@@ -129,6 +129,7 @@ const page = () => {
                         label={'店舗名'}
                         placeholder="エンパタウン"
                         direction="vertical"
+                        disabled={formik.isSubmitting}
                       />
                       <SelectBox
                         id="default_tax_rate"
@@ -141,6 +142,7 @@ const page = () => {
                           { value: '0.10', label: '10%' },
                         ]}
                         isRequired={true}
+                        disabled={formik.isSubmitting}
                       />
                       <SelectBox
                         id="tax_rounding"
@@ -154,6 +156,7 @@ const page = () => {
                           { value: 'off', label: '四捨五入' },
                         ]}
                         isRequired={true}
+                        disabled={formik.isSubmitting}
                       />
                       <TextBox
                         id="username"
@@ -162,13 +165,13 @@ const page = () => {
                         label={'ユーザー名'}
                         placeholder="empo-user01"
                         direction="vertical"
+                        disabled={formik.isSubmitting}
                       />
                     </CardContent>
                     <CardFooter className="flex gap-2">
-                      <Button type="submit" disabled={isLoading} onClick={formik.submitForm}>
+                      <Button type="submit" disabled={isLoading}>
                         {isLoading ? <IconLoader2 className="animate-spin" /> : <>確認</>}
                       </Button>
-                      <Button color="grey">戻る</Button>
                     </CardFooter>
                   </Card>
                 </div>
@@ -176,7 +179,8 @@ const page = () => {
             </div>
           </form>
         </FormikProvider>
-      ) : (
+      )}
+      {!isProvisRegisIdValid && (
         <div className="flex flex-col justify-center w-full mt-2">
           <div className="flex flex-col items-center justify-center h-full flex-1">
             <div className="w-full xl:max-w-[50%]">

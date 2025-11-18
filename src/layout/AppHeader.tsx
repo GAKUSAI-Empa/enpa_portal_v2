@@ -8,7 +8,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import AppNotification from './AppNotification';
+import AppNotification from './AppNotification/AppNotification';
 
 interface AppHeaderProps {
   isExpandedSideBar: boolean;
