@@ -48,8 +48,12 @@ const AppHeader = ({ isExpandedSideBar }: AppHeaderProps) => {
         <div className="flex items-center aligns justify-end gap-2">
           {session?.user ? (
             <>
-              <Button onClick={() => router.push('/staff')}>スタッフ管理</Button>
-              <Button>店舗管理</Button>
+              {session.user.role_name !== 'ROLE_STAFF' && (
+                <>
+                  <Button onClick={() => router.push('/manage/staff')}>スタッフ管理</Button>
+                  <Button>店舗管理</Button>
+                </>
+              )}
               <AppNotification />
               <div
                 className="relative h-20 flex items-center aligns justify-center"

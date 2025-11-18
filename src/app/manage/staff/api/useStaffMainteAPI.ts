@@ -1,6 +1,5 @@
 import useAxiosClient from '@/lib/axios/useAxiosClient';
 import { getSession } from 'next-auth/react';
-import useSWR from 'swr';
 
 const useStaffMainteAPI = () => {
   const URL_PREFIX = '/staff';
@@ -9,7 +8,7 @@ const useStaffMainteAPI = () => {
   const createStaff = async (
     username: string,
     email: string,
-    is_admin: string,
+    is_manager: string,
     password: string,
   ) => {
     try {
@@ -17,7 +16,7 @@ const useStaffMainteAPI = () => {
       const body = {
         username,
         email,
-        is_admin,
+        is_manager,
         password,
       };
       const headers = {
