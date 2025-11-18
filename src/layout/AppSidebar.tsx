@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
-import Image from "next/image";
-import { cn } from "@/lib/utils";
-import NavItem from "./NavItem";
-import navItems from "./navItemList";
-import Link from "next/link";
+import { cn } from '@/lib/utils';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useState } from 'react';
+import NavItem from './NavItem';
+import navItems from './navItemList';
 
 interface AppSidebarProps {
-  isExpandedSideBar: boolean
+  isExpandedSideBar: boolean;
   setIsExpandedSideBar: (value: boolean) => void;
 }
 const AppSidebar = ({ isExpandedSideBar, setIsExpandedSideBar }: AppSidebarProps) => {
@@ -22,14 +22,14 @@ const AppSidebar = ({ isExpandedSideBar, setIsExpandedSideBar }: AppSidebarProps
     <>
       <aside
         className={cn(
-          "bg-white border-r border-gray-200 flex flex-col transition-all duration-300 overflow-hidden",
-          isExpandedSideBar ? "w-64" : "w-16"
+          'bg-white border-r border-gray-200 flex flex-col transition-all duration-300 overflow-hidden',
+          isExpandedSideBar ? 'w-64' : 'w-16',
         )}
         onMouseEnter={() => setIsExpandedSideBar(true)}
         onMouseLeave={() => setIsExpandedSideBar(false)}
       >
         {/* --- Logo --- */}
-        <Link href="/" className="block">
+        <Link href="/tools/dashboard" className="block">
           <div className="relative h-20 px-4 border-b border-gray-200 flex items-center space-x-3">
             <Image
               src="/img/logo/emportal_logo.png"
@@ -41,8 +41,8 @@ const AppSidebar = ({ isExpandedSideBar, setIsExpandedSideBar }: AppSidebarProps
 
             <div
               className={cn(
-                "overflow-hidden transition-all duration-300",
-                isExpandedSideBar ? "opacity-100 w-[150px]" : "opacity-0 w-0"
+                'overflow-hidden transition-all duration-300',
+                isExpandedSideBar ? 'opacity-100 w-[150px]' : 'opacity-0 w-0',
               )}
             >
               <Image
