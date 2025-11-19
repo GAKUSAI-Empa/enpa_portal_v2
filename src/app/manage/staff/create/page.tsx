@@ -21,7 +21,7 @@ const page = () => {
     initialValues: {
       username: '',
       email: '',
-      isAdmin: '0',
+      isManager: '0',
       password: '',
       retypePassword: '',
     },
@@ -34,7 +34,7 @@ const page = () => {
       email: Yup.string()
         .email('メールアドレスの形式が正しくありません。')
         .required('メールアドレスを入力してください。'),
-      isAdmin: Yup.string().trim().required('権限を選択してください。'),
+      isManager: Yup.string().trim().required('権限を選択してください。'),
       password: Yup.string()
         .trim()
         // .matches(
@@ -54,11 +54,11 @@ const page = () => {
         const resData = await createStaff(
           values.username,
           values.email,
-          values.isAdmin,
+          values.isManager,
           values.password,
         );
         toast.success(resData.detail);
-        router.push('/staff');
+        router.push('/manage/staff');
       } catch (e: any) {
         console.log(e);
         const backendMessage =
@@ -101,8 +101,8 @@ const page = () => {
                     direction="vertical"
                   />
                   <SelectBox
-                    id="isAdmin"
-                    name="isAdmin"
+                    id="isManager"
+                    name="isManager"
                     type="text"
                     isRequired={true}
                     label={'管理者権限'}

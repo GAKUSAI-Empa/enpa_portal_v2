@@ -3,13 +3,12 @@ import { Button } from '@/component/common/Button';
 import { Card, CardContent, CardHeader } from '@/component/common/Card';
 import { Table } from '@/component/common/Table';
 import { IconPlus, IconTrash } from '@tabler/icons-react';
-import { useRouter } from 'next/navigation';
-import React from 'react';
-import { toast } from 'sonner';
+import { confirm } from 'material-ui-confirm';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import useStaffListAPI from './api/useStaffListAPI';
 import useStaffMainteAPI from './api/useStaffMainteAPI';
-import { confirm } from 'material-ui-confirm';
 const page = () => {
   const router = useRouter();
   const { data: session } = useSession();
@@ -38,7 +37,7 @@ const page = () => {
           title={`${session?.user.company_name ? session.user.company_name : ''}スタッフ一覧`}
           buttonGroup={
             <Button
-              onClick={() => router.push('/staff/create')}
+              onClick={() => router.push('/manage/staff/create')}
               prefixIcon={IconPlus}
               color="primary"
               size="sm"
