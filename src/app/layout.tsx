@@ -1,16 +1,13 @@
+// src/app/layout.tsx
+
 import type { Metadata } from 'next';
-import { Noto_Sans_JP } from 'next/font/google';
+// !!! XÓA import { Noto_Sans_JP } từ google font
 import 'slick-carousel/slick/slick-theme.css';
 import 'slick-carousel/slick/slick.css';
 import './globals.css';
 import Providers from './providers';
 
-const notoSansJp = Noto_Sans_JP({
-  subsets: ['latin'],
-  weight: ['400', '500', '700'],
-  display: 'swap',
-  variable: '--font-noto-sans-jp',
-});
+// !!! XÓA toàn bộ code liên quan đến Noto_Sans_JP({...})
 
 export const metadata: Metadata = {
   title: 'EmpaPortal V2',
@@ -24,8 +21,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
+      {/* Áp dụng phông chữ mới và xóa các class/biến font cũ */}
       <body
-        className={`${notoSansJp.variable} font-sans bg-background-subtle`}
+        className={`font-sans bg-background-subtle`}
+        // Thêm style trực tiếp để sử dụng phông chữ bạn vừa định nghĩa
+        style={{ fontFamily: 'Noto Sans JP Custom, sans-serif' }}
         suppressHydrationWarning={true}
       >
         <Providers>{children}</Providers>

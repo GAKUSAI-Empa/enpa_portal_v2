@@ -1,30 +1,32 @@
 'use client';
-import axios from 'axios';
-import { getSession, signIn, signOut, useSession } from 'next-auth/react';
-import { useEffect } from 'react';
-import { AxiosError } from 'axios';
+import axios, { AxiosError } from 'axios';
+import { signOut } from 'next-auth/react';
+import { useEffect, useMemo } from 'react';
 
-const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_DOMAIN;
-const axiosAuth = axios.create({
-  //axios instance create
-  //Stater config for axios calling
-  baseURL: BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
 const useAxiosClient = () => {
-  //================================
-  //    INTERCEPTOR: BEFORE SENDING REQUEST & AFTER SENDING REQUEST
-  //================================
-  const { data: session, update } = useSession();
+  // Base URL thông minh
+  // Production: Dùng relative path '/api-be'
+  // Dev: Dùng localhost hoặc biến môi trường
+  const baseURL = useMemo(() => {
+    if (process.env.NODE_ENV === 'production') {
+      return '/api-be';
+    }
+    return process.env.NEXT_PUBLIC_BACKEND_DOMAIN || 'http://localhost:8000';
+  }, []);
 
-  //========================================
-  //With 401 status error from apis
-  //========================================
+  const axiosAuth = useMemo(() => {
+    return axios.create({
+      baseURL: baseURL,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+  }, [baseURL]);
+
   const handle401Error = async (error: AxiosError) => {
     await signOut({ callbackUrl: '/login?isSessionExpired=true' }); // clear session
   };
+
   useEffect(() => {
     //Response interceptor & handle error occur
     const responseIntercept = axiosAuth.interceptors.response.use(
@@ -41,9 +43,10 @@ const useAxiosClient = () => {
     return () => {
       //clean up hook
       // axiosAuth.interceptors.request.eject(requestIntercept);
+
       axiosAuth.interceptors.response.eject(responseIntercept);
     };
-  }, [session]);
+  }, [axiosAuth]);
 
   return axiosAuth;
 };

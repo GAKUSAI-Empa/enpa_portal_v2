@@ -1,7 +1,7 @@
 // src/app/tools/03/hooks/useJobPolling.ts
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { tool03API } from '../api/tool03API';
+import useTool03API from '../api/tool03API'; // [CHANGE]: Import Hook thay vì static object
 import type { BackendJobStatus } from '../types';
 
 interface UseJobPollingProps {
@@ -39,6 +39,9 @@ export function useJobPolling({
   onFtpSuccess,
   onFtpError,
 }: UseJobPollingProps) {
+  // [CHANGE]: Khởi tạo API Hook
+  const api = useTool03API();
+
   const [jobStatus, setJobStatus] = useState<BackendJobStatus | null>(null);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const previousJobStatusRef = useRef<BackendJobStatus | null>(null);
@@ -81,7 +84,8 @@ export function useJobPolling({
     try {
       let newData: BackendJobStatus;
       try {
-        newData = await tool03API.getJobStatus(targetJobId);
+        // [CHANGE]: Sử dụng api instance từ hook thay vì tool03API static
+        newData = await api.getJobStatus(targetJobId);
       } catch (error: any) {
         if (error.response && error.response.status === 404) {
           toast.error('ジョブが見つかりません。');
@@ -165,7 +169,7 @@ export function useJobPolling({
       console.error('[Hook] polling error:', error);
       onPollingErrorRef.current?.(error as Error);
     }
-  }, [stopPolling]);
+  }, [stopPolling, api]); // [CHANGE]: Thêm 'api' vào dependency array
 
   useEffect(() => {
     const shouldPoll =

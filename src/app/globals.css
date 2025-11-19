@@ -2,6 +2,48 @@
 @tailwind components;
 @tailwind utilities;
 
+/* --- BẮT ĐẦU THÊM ĐỊNH NGHĨA PHÔNG CHỮ CỤC BỘ --- */
+
+/* Trọng lượng 400 (Regular) */
+@font-face {
+  font-family: 'Noto Sans JP Custom';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/static/NotoSansJP-Regular.ttf') format('truetype');
+}
+
+/* Trọng lượng 500 (Medium) */
+@font-face {
+  font-family: 'Noto Sans JP Custom';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/static/NotoSansJP-Medium.ttf') format('truetype');
+}
+
+/* Trọng lượng 700 (Bold) */
+@font-face {
+  font-family: 'Noto Sans JP Custom';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/static/NotoSansJP-Bold.ttf') format('truetype');
+}
+
+/* --- KẾT THÚC THÊM ĐỊNH NGHĨA PHÔNG CHỮ CỤC BỘ --- */
+
+/* disable up down value  */
+/* Chrome, Safari, Edge, Opera */
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* disable up down value  */
 /* Chrome, Safari, Edge, Opera */
 input[type='number']::-webkit-outer-spin-button,
@@ -10,6 +52,10 @@ input[type='number']::-webkit-inner-spin-button {
   margin: 0;
 }
 
+/* Firefox */
+input[type='number'] {
+  -moz-appearance: textfield;
+}
 /* Firefox */
 input[type='number'] {
   -moz-appearance: textfield;

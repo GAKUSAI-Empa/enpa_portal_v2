@@ -1,26 +1,27 @@
 // src/app/tools/03/page.tsx
 'use client';
 
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { Card, CardContent, CardHeader } from '@/component/common/Card';
-import { Button } from '@/component/common/Button';
 import { Alert } from '@/component/common/Alert';
+import { Button } from '@/component/common/Button';
+import { Card, CardContent, CardHeader } from '@/component/common/Card';
 import { IconLoader2, IconRefresh } from '@tabler/icons-react';
-import { Toaster, toast } from 'sonner';
-import debounce from 'lodash/debounce';
 import axios from 'axios';
-import { tool03API } from './api/tool03API';
+import debounce from 'lodash/debounce';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Toaster, toast } from 'sonner';
+// --- [CHANGE 1]: Import Hook thay vì Static Object ---
+import useTool03API from './api/tool03API';
 
 // コンポーネントとロジックの分離
 import EditableProductTable from './components/EditableProductTable';
 import PreviewModal from './components/PreviewModal';
-import RestoreSessionPopup from './components/RestoreSessionPopup';
 import ResetConfirmPopup from './components/ResetConfirmPopup';
-import { useJobPolling } from './hooks/useJobPolling';
-import { validateRows } from './lib/validation';
-import { createNewProductRow } from './lib/utils';
+import RestoreSessionPopup from './components/RestoreSessionPopup';
 import { templates } from './constants';
-import type { ProductRow, AllErrors, BackendJobStatus } from './types';
+import { useJobPolling } from './hooks/useJobPolling';
+import { createNewProductRow } from './lib/utils';
+import { validateRows } from './lib/validation';
+import type { AllErrors, ProductRow } from './types';
 
 // Sonner toast ID の型
 type SonnerToastId = string | number;
@@ -34,12 +35,10 @@ const BATCH_SIZE = 10;
 // --- LAZY LOAD (END) ---
 
 export default function TwoPriceImagePage() {
-  // --- State の宣言 ---
-  // const { setTitle } = useHeader();
+  // --- [CHANGE 2]: Khởi tạo API Hook ---
+  const api = useTool03API();
 
-  // useEffect(() => {
-  //   setTitle('二重価格セール画像生成');
-  // }, [setTitle]);
+  // --- State の宣言 ---
   const [isClient, setIsClient] = useState(false);
   const [selectedImages, setSelectedImages] = useState<string[] | null>(null);
   const [errors, setErrors] = useState<AllErrors>({});
@@ -335,6 +334,7 @@ export default function TwoPriceImagePage() {
     }
   };
   // ---------------------------------------
+
   // handlePreviewClick 関数 (修正済み)
   const handlePreviewClick = async () => {
     setGlobalAlert(null);
@@ -361,8 +361,8 @@ export default function TwoPriceImagePage() {
         // --- POST ロジック (新規ジョブ作成) ---
         console.log('>>> [DEBUG][Page] 新規ジョブを作成中 (POST)');
 
-        // 変更点: tool03API を使用してジョブを作成
-        const data = await tool03API.createJob(productRows);
+        // --- [CHANGE 3]: Sử dụng api.createJob (Hook) ---
+        const data = await api.createJob(productRows);
         const newJobId = data.jobId;
 
         setJobId(newJobId);
@@ -406,8 +406,8 @@ export default function TwoPriceImagePage() {
             ftpUploadErrorRcabinet: null,
           }));
 
-          // 変更点: tool03API を使用してジョブを更新
-          await tool03API.updateJob(currentJobId, rowsToUpdate);
+          // --- [CHANGE 4]: Sử dụng api.updateJob (Hook) ---
+          await api.updateJob(currentJobId, rowsToUpdate);
 
           setIsApiLoading(false);
           setModifiedRowIds(new Set());
@@ -441,7 +441,8 @@ export default function TwoPriceImagePage() {
       toast.error('ダウンロードするジョブが見つからないか、失敗しました。');
       return;
     }
-    window.open(tool03API.getDownloadUrl(jobId), '_blank');
+    // --- [CHANGE 5]: Sử dụng api.getDownloadUrl (Hook) ---
+    window.open(api.getDownloadUrl(jobId), '_blank');
   };
 
   const handleUploadFTP = async (target: 'gold' | 'rcabinet') => {
@@ -470,17 +471,13 @@ export default function TwoPriceImagePage() {
     toastIdRef.current = toast.loading(`${targetName} へのアップロードを開始しています...`);
 
     try {
-      // --- [SỬA ĐỔI QUAN TRỌNG START] ---
-      // Sử dụng tool03API.uploadFTP thay vì fetch.
-      // tool03API dùng axios, nó sẽ tự ném lỗi nếu status không phải 2xx.
-      // Nếu thành công (202), nó sẽ chạy tiếp xuống dưới.
-      await tool03API.uploadFTP(jobId, target);
+      // --- [CHANGE 6]: Sử dụng api.uploadFTP (Hook) ---
+      await api.uploadFTP(jobId, target);
 
       console.log(
         `>>> [DEBUG][Page] ${targetName} アップロード開始。ポーリングでステータスを追跡します。`,
       );
       // Không cần làm gì thêm ở đây, polling sẽ tự cập nhật trạng thái tiếp theo.
-      // --- [SỬA ĐỔI QUAN TRỌNG END] ---
     } catch (error: any) {
       console.error(`${target} アップロードの開始に失敗:`, error);
 
