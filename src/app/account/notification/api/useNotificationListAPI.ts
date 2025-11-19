@@ -23,11 +23,8 @@ const useNotificationListAPI = (page: number = 1, page_size: number = 3) => {
   };
 
   const { data, mutate, isLoading, error } = useSWR(URL, fetcher, {
-    // Tắt tự động revalidate
-    revalidateOnFocus: false,
+    revalidateOnFocus: true,
     revalidateOnReconnect: false,
-    refreshInterval: 0, // không tự refresh
-    shouldRetryOnError: false, // không tự retry
   });
 
   return {

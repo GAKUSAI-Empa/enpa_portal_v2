@@ -1,34 +1,22 @@
 'use client';
+import { Button } from '@/component/common/Button';
 import { Card, CardContent, CardHeader } from '@/component/common/Card';
-import { IconAlertTriangle, IconBell, IconCheck, IconPackage, IconUser } from '@tabler/icons-react';
+import { cn } from '@/lib/utils';
+import {
+  IconAlertTriangle,
+  IconBell,
+  IconCheckbox,
+  IconPackage,
+  IconUser,
+} from '@tabler/icons-react';
+import { formatDistanceToNow, parseISO } from 'date-fns';
+import { ja } from 'date-fns/locale';
+import { useSession } from 'next-auth/react';
+import useNotificationListAPI from './api/useNotificationListAPI';
 
 export default function NotificationsPage() {
-  const fakeNotifications = [
-    {
-      id: '1',
-      title: 'User registered',
-      content: 'New user: Nguyen Van A',
-      noti_type: 'USER_REGISTER',
-      is_read: false,
-      create_datetime: '2025-01-10 09:30',
-    },
-    {
-      id: '2',
-      title: 'Order created',
-      content: 'Order #1234 created successfully.',
-      noti_type: 'ORDER_CREATED',
-      is_read: true,
-      create_datetime: '2025-01-09 14:20',
-    },
-    {
-      id: '3',
-      title: 'System Alert',
-      content: 'Server CPU usage is high!',
-      noti_type: 'SYSTEM_ALERT',
-      is_read: false,
-      create_datetime: '2025-01-08 10:00',
-    },
-  ];
+  const { data: session, update, status } = useSession();
+  const { data: notificationHistoryList, error, isLoading, mutate } = useNotificationListAPI(1, 99);
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -43,57 +31,60 @@ export default function NotificationsPage() {
     }
   };
 
+  const formatTimeAgo = (isoString: string) => {
+    const date = parseISO(isoString);
+    return formatDistanceToNow(date, { locale: ja, addSuffix: true });
+  };
+
   return (
     <Card>
-      <CardHeader title="Notification" />
+      <CardHeader
+        title="通知"
+        buttonGroup={
+          <Button size="sm" prefixIcon={IconCheckbox}>
+            すべて既読にする
+          </Button>
+        }
+      />
       <CardContent>
         <div className="flex min-h-screen p-6">
-          {/* Sidebar */}
-          <aside className="w-60 bg-white shadow-md rounded-lg p-4 h-fit">
-            <h2 className="text-lg font-semibold mb-4">Filters</h2>
-
-            <button className="w-full text-left px-3 py-2 rounded-md mb-2 bg-primary text-white">
-              All
-            </button>
-            <button className="w-full text-left px-3 py-2 rounded-md mb-2 hover:bg-gray-200">
-              User Register
-            </button>
-            <button className="w-full text-left px-3 py-2 rounded-md mb-2 hover:bg-gray-200">
-              Order
-            </button>
-            <button className="w-full text-left px-3 py-2 rounded-md hover:bg-gray-200">
-              System Alert
-            </button>
-          </aside>
-
           {/* Main content */}
           <main className="flex-1 ml-8">
-            <div className="flex justify-between items-center mb-4">
-              <h1 className="text-2xl font-bold">Notifications</h1>
-
-              <button className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
-                <IconCheck size={20} />
-                Mark all as read
-              </button>
-            </div>
-
             {/* Notifications list */}
             <div className="bg-white shadow-md rounded-lg divide-y">
-              {fakeNotifications.map((notif) => (
+              {notificationHistoryList?.map((notif: any) => (
                 <div
                   key={notif.id}
-                  className={`flex gap-4 p-4 cursor-pointer hover:bg-gray-100 ${
-                    !notif.is_read ? 'bg-blue-50' : ''
-                  }`}
+                  className={cn(
+                    `relative flex gap-4 p-4 cursor-pointer`,
+                    !notif.is_read ? 'bg-blue-50' : '',
+                  )}
                 >
-                  {/* Icon */}
                   <div className="text-2xl">{getIcon(notif.noti_type)}</div>
+                  <div className="flex-1">
+                    <p
+                      className={cn(
+                        `text-sm`,
+                        !notif.is_read ? 'font-bold text-gray-900' : 'text-gray-700',
+                      )}
+                    >
+                      {notif.title}
+                    </p>
 
-                  {/* Content */}
-                  <div>
-                    <p className="font-semibold">{notif.title}</p>
-                    <p className="text-gray-600 text-sm">{notif.content}</p>
-                    <span className="text-xs text-gray-400">{notif.create_datetime}</span>
+                    <div
+                      className={cn(
+                        `text-sm space-y-1 mt-1`,
+                        notif.is_read ? 'text-gray-500' : 'text-gray-800',
+                      )}
+                      dangerouslySetInnerHTML={{ __html: notif.content }}
+                    />
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-xs text-gray-400">
+                        {notif.create_datetime ? formatTimeAgo(notif.create_datetime) : '今'}
+                      </span>
+
+                      {!notif.is_read && <span className="w-2 h-2 bg-blue-500 rounded-full"></span>}
+                    </div>
                   </div>
                 </div>
               ))}

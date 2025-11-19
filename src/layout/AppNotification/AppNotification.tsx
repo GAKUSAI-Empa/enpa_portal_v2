@@ -1,9 +1,12 @@
 'use client';
+import { cn } from '@/lib/utils';
 import { IconBell } from '@tabler/icons-react';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { ja } from 'date-fns/locale';
 import { useSession } from 'next-auth/react';
+import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
+import useNotificationCountAPI from './api/useNotificationCountAPI';
 import useNotificationListAPI from './api/useNotificationListAPI';
 
 interface NotificationMessage {
@@ -18,6 +21,13 @@ const AppNotification = () => {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { data: notificationHistoryList, error, isLoading, mutate } = useNotificationListAPI(1, 5);
+  const {
+    readCount,
+    unreadCount,
+    mutate: mutateCount,
+    isLoading: isLoadingCount,
+    error: errorCount,
+  } = useNotificationCountAPI();
   const [liveNoti, setliveNoti] = useState<NotificationMessage[]>([]);
 
   useEffect(() => {
@@ -85,20 +95,21 @@ const AppNotification = () => {
         onClick={() => setOpen(!open)}
       >
         <IconBell size={22} />
-        {}
-        <span
-          className="absolute -top-0.5 -right-0.5 bg-red-600 text-white text-xs
-                     w-5 h-5 flex items-center justify-center rounded-full shadow-md"
-        >
-          5
-        </span>
+        {unreadCount > 0 && (
+          <span
+            className="absolute px-1.5 -top-0.5 -right-0.5 bg-red-600 text-white text-xs
+               w-5 h-5 flex items-center justify-center rounded-full shadow-md"
+          >
+            {unreadCount > 99 ? '99+' : unreadCount}
+          </span>
+        )}
       </button>
 
       {/* Dropdown */}
       {open && (
         <div
           className="
-            absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-xl border
+            absolute right-0 mt-3 w-96 bg-white rounded-xl shadow-xl border
             animate-fadeIn overflow-hidden
           "
         >
@@ -109,50 +120,70 @@ const AppNotification = () => {
             {liveNoti?.map((noti: any, index: number) => (
               <div
                 key={noti.id}
-                className="flex items-start gap-3 px-4 py-3 hover:bg-gray-50 cursor-pointer"
+                // onClick={() => handleRead(noti.id)}
+                className={cn(
+                  `flex items-start gap-3 px-4 py-3 cursor-pointer`,
+                  `${!noti.is_read ? 'bg-blue-50' : 'hover:bg-gray-50'}`,
+                )}
               >
                 <img
                   src={`data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKUAAACUCAMAAADF0xngAAAAMFBMVEXFxcX////CwsL7+/vKysrZ2dni4uLQ0ND19fX4+Pjc3Nzw8PDp6enf39/T09Ps7Oyn78KlAAADlUlEQVR4nO2b2ZKrIBCGpQF3x/d/25F4Ui5jUvZKcorvaiZXfwG9t1VVKBQKhUKhUCgUCoX/C4Ddn7t/PodFU4hxGofOe98Nc93H5vHrBwHQ1EPrjvhhjB+kE0LduWv8GHKrewDQjy8krgxTyH6gEN5rTLQ/mWXe0PjQ2WTUCPFsMa/wdT7PdO8gV4Ymi0wIM0Lkcpwxg0xo7t52Rpnw45EiF/pvEOlcbXuaQNG4YGpCYSCq9JYOHuOCjnRmcR16ssjFb1odZsMQ6dxkpBLnzc90JjEdIkukc6PJnWNjzh8M7BwmrkgTA3pVPHzSYbJfZWJUFsk18BWvbeYNKcs4M+leOdQSIt2gKrICappxxOtG8yAi0jnVtB14IXxjVlVJT9mOdKoq2dHxqVJRpJxK3fAjEB5XFD0myPj0hGI1CT9SIl2tJpJX8BSV36hSIrnUV0nrDl2qVPSXQUylZoYJYl6911QpFSG9ZvMNJKqeRKuaE/GLcQOVYrm6chdGyHx0e8LfUZ1VMtFHu+0WRHyR9uRHpD5rtZvrIBEklRswCb79qDezRKoKkwka92Wqv8oEu5DUTId2MnnBfLbQmOAYkIHprLC8kYEXesqMZJk2I6l/UJ/mYLqqRUzavaXGBMVrmnhKrkztrPIKtNs0c5RHmbiuUa4dR2juV0E+5tGYZFb1Tcc559lye+ps7hjRkO8gHyKr18u2O8aQceMaQpzv3bifY6a1W6h6TD3Z9ln2rSO2zdFZv06AmlKXt6Z7t9BQO4SGHunmYvU1RiEIGl5FbrHGDOQEeGPStnbsYvU1s67zxC9WX9OqNv/FplKKm7eCY0jFDoekSLXldZm1rA2NganYqGdDoc0hN3TekE4/BCfjB5mipyk4GD8g6pAEN3TOMiXdu8zE7Aq5TUyxHbwrpFqFoiHnLzJBSO9Rrsg8TfK3PHeR6LwK7Su/gz+lAqntgnfwk2Lt+06w3ZGufT/hZnFiK7ZvaVkaDUxnhWNAJqazwjEgq6PkJO7aUWcPPQKpZhlnyFmH4VHSJ9JmBr5CNPMgthJ6C9oXvEoF2WtopZpFBN9DiuamtpOg2I+x7SQo9mOTZ+wh5BxSX5hhQF95hgsnXLnct1sIsJvXWo2h92DbRgrdyjtgO5qW6dAG8pNtmSVlNMiFoyzPMj1MjEjzTOMJKuMQ+/YEC+orY8hz4cuVo1RmEukcRqVdHX4GYeTZjOeV+fwCWMExTqQ7micAAAAASUVORK5CYII=`}
                   className="w-10 h-10 rounded-full"
                 />
-                <div>
-                  <p className="text-sm text-gray-800">
-                    <b>{noti.sender_username}</b>
-                    {noti.title}
+                <div className="flex-1">
+                  <p
+                    className={`text-sm flex flex-col ${!noti.is_read ? 'font-bold text-black' : 'text-gray-800'}`}
+                  >
+                    <span>{noti.sender_username}</span>
+                    <span className="line-clamp-1">{noti.title}</span>
                   </p>
+
                   <p className="text-xs text-gray-500 mt-1">
                     {noti.create_datetime ? formatTimeAgo(noti.create_datetime) : '今'}
                   </p>
                 </div>
+
+                {!noti.is_read && <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>}
               </div>
             ))}
             {/* history  */}
             {notificationHistoryList?.map((noti: any, index: number) => (
               <div
                 key={noti.id}
-                className="flex items-start gap-3 px-4 py-3 hover:bg-gray-50 cursor-pointer"
+                // onClick={() => handleRead(noti.id)}
+                className={cn(
+                  `flex items-start gap-3 px-4 py-3 cursor-pointer`,
+                  `${!noti.is_read ? 'bg-blue-50' : 'hover:bg-gray-50'}`,
+                )}
               >
                 <img
                   src={`data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKUAAACUCAMAAADF0xngAAAAMFBMVEXFxcX////CwsL7+/vKysrZ2dni4uLQ0ND19fX4+Pjc3Nzw8PDp6enf39/T09Ps7Oyn78KlAAADlUlEQVR4nO2b2ZKrIBCGpQF3x/d/25F4Ui5jUvZKcorvaiZXfwG9t1VVKBQKhUKhUCgUCoX/C4Ddn7t/PodFU4hxGofOe98Nc93H5vHrBwHQ1EPrjvhhjB+kE0LduWv8GHKrewDQjy8krgxTyH6gEN5rTLQ/mWXe0PjQ2WTUCPFsMa/wdT7PdO8gV4Ymi0wIM0Lkcpwxg0xo7t52Rpnw45EiF/pvEOlcbXuaQNG4YGpCYSCq9JYOHuOCjnRmcR16ssjFb1odZsMQ6dxkpBLnzc90JjEdIkukc6PJnWNjzh8M7BwmrkgTA3pVPHzSYbJfZWJUFsk18BWvbeYNKcs4M+leOdQSIt2gKrICappxxOtG8yAi0jnVtB14IXxjVlVJT9mOdKoq2dHxqVJRpJxK3fAjEB5XFD0myPj0hGI1CT9SIl2tJpJX8BSV36hSIrnUV0nrDl2qVPSXQUylZoYJYl6911QpFSG9ZvMNJKqeRKuaE/GLcQOVYrm6chdGyHx0e8LfUZ1VMtFHu+0WRHyR9uRHpD5rtZvrIBEklRswCb79qDezRKoKkwka92Wqv8oEu5DUTId2MnnBfLbQmOAYkIHprLC8kYEXesqMZJk2I6l/UJ/mYLqqRUzavaXGBMVrmnhKrkztrPIKtNs0c5RHmbiuUa4dR2juV0E+5tGYZFb1Tcc559lye+ps7hjRkO8gHyKr18u2O8aQceMaQpzv3bifY6a1W6h6TD3Z9ln2rSO2zdFZv06AmlKXt6Z7t9BQO4SGHunmYvU1RiEIGl5FbrHGDOQEeGPStnbsYvU1s67zxC9WX9OqNv/FplKKm7eCY0jFDoekSLXldZm1rA2NganYqGdDoc0hN3TekE4/BCfjB5mipyk4GD8g6pAEN3TOMiXdu8zE7Aq5TUyxHbwrpFqFoiHnLzJBSO9Rrsg8TfK3PHeR6LwK7Su/gz+lAqntgnfwk2Lt+06w3ZGufT/hZnFiK7ZvaVkaDUxnhWNAJqazwjEgq6PkJO7aUWcPPQKpZhlnyFmH4VHSJ9JmBr5CNPMgthJ6C9oXvEoF2WtopZpFBN9DiuamtpOg2I+x7SQo9mOTZ+wh5BxSX5hhQF95hgsnXLnct1sIsJvXWo2h92DbRgrdyjtgO5qW6dAG8pNtmSVlNMiFoyzPMj1MjEjzTOMJKuMQ+/YEC+orY8hz4cuVo1RmEukcRqVdHX4GYeTZjOeV+fwCWMExTqQ7micAAAAASUVORK5CYII=`}
                   className="w-10 h-10 rounded-full"
                 />
-                <div>
-                  <p className="text-sm text-gray-800">
-                    <b>{noti.sender_username}</b>
-                    {noti.title}
+                <div className="flex-1">
+                  <p
+                    className={`text-sm flex flex-col ${!noti.is_read ? 'font-bold text-black' : 'text-gray-800'}`}
+                  >
+                    <span>{noti.sender_username}</span>
+                    <span className="line-clamp-1">{noti.title}</span>
                   </p>
+
                   <p className="text-xs text-gray-500 mt-1">
                     {noti.create_datetime ? formatTimeAgo(noti.create_datetime) : '今'}
                   </p>
                 </div>
+
+                {!noti.is_read && <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>}
               </div>
             ))}
           </div>
 
           {/* Footer */}
-          <div className="px-4 py-2 text-sm text-blue-600 text-center border-t hover:bg-gray-50 cursor-pointer">
-            全て見る
-          </div>
+          <Link href={'/account/notification'}>
+            <div className="px-4 py-2 text-sm text-blue-600 text-center border-t hover:bg-gray-50 cursor-pointer">
+              全て見る
+            </div>
+          </Link>
         </div>
       )}
     </div>
