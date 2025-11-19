@@ -1,3 +1,4 @@
+'use client';
 import { IconAlertCircle } from '@tabler/icons-react';
 import React from 'react';
 import { cn } from '../../lib/utils';
