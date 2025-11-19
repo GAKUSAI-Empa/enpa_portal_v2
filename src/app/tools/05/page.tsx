@@ -1,14 +1,12 @@
 'use client';
 
-
+import SliderImage from '@/app/tools/05/components/SliderImage';
 import { Button } from '@/component/common/Button';
 import { Card, CardContent, CardHeader } from '@/component/common/Card';
 import RadioBox from '@/component/common/RadioBox';
 import SelectBox from '@/component/common/SelectBox';
-import SliderImage from '@/app/tools/05/components/SliderImage';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/component/common/Tabs';
 import { TextBox } from '@/component/common/TextBox';
-import React, { useEffect } from 'react';
 
 const page = () => {
   const settings = {
@@ -78,7 +76,6 @@ const page = () => {
 
               <div className="border-t border-gray-200 my-4"></div>
 
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 mt-10">
                 <div>
                   <TextBox
@@ -125,6 +122,5 @@ const page = () => {
     </>
   );
 };
-
 
 export default page;

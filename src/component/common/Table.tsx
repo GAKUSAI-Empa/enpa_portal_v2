@@ -1,22 +1,15 @@
-import React from "react";
-import { cn } from "../../lib/utils";
-import { IconAlertCircle, IconTrash } from "@tabler/icons-react";
+import { IconAlertCircle } from '@tabler/icons-react';
+import React from 'react';
+import { cn } from '../../lib/utils';
 
 // ==================== Container ====================
-const TableContainer = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ children, className, ...props }, ref) => (
-  <div
-    className={cn("w-full overflow-x-hidden bg-white mb-1", className)}
-    {...props}
-    ref={ref}
-  >
-    <table className={cn("w-full min-w-[600px] border-collapse")}>
-      {children}
-    </table>
-  </div>
-));
+const TableContainer = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ children, className, ...props }, ref) => (
+    <div className={cn('w-full overflow-x-hidden bg-white mb-1', className)} {...props} ref={ref}>
+      <table className={cn('w-full min-w-[600px] border-collapse')}>{children}</table>
+    </div>
+  ),
+);
 
 // ==================== Head ====================
 const TableHead: React.FC<React.HTMLAttributes<HTMLTableSectionElement>> = ({
@@ -24,7 +17,7 @@ const TableHead: React.FC<React.HTMLAttributes<HTMLTableSectionElement>> = ({
   className,
   ...props
 }) => (
-  <thead className={cn("h-10", className)} {...props}>
+  <thead className={cn('h-10', className)} {...props}>
     {children}
   </thead>
 );
@@ -46,14 +39,13 @@ const TableRow: React.FC<React.HTMLAttributes<HTMLTableRowElement>> = ({
   className,
   ...props
 }) => (
-  <tr className={cn("border-t border-gray-300", className)} {...props}>
+  <tr className={cn('border-t border-gray-300', className)} {...props}>
     {children}
   </tr>
 );
 
 // ==================== Th ====================
-interface TableHeadCellProps
-  extends React.ThHTMLAttributes<HTMLTableCellElement> {
+interface TableHeadCellProps extends React.ThHTMLAttributes<HTMLTableCellElement> {
   width?: string; // Tailwind width class
   center?: boolean;
 }
@@ -65,12 +57,7 @@ const TableHeadCell: React.FC<TableHeadCellProps> = ({
   ...props
 }) => (
   <th
-    className={cn(
-      "p-3 bg-gray-50 font-medium border",
-      width,
-      center && "text-center",
-      className
-    )}
+    className={cn('p-3 bg-gray-50 font-medium border', width, center && 'text-center', className)}
     {...props}
   >
     {children}
@@ -79,27 +66,27 @@ const TableHeadCell: React.FC<TableHeadCellProps> = ({
 
 // ==================== Td ====================
 interface TableCellProps extends React.TdHTMLAttributes<HTMLTableCellElement> {
-  position?: "left" | "center" | "right";
+  position?: 'left' | 'center' | 'right';
   center?: boolean;
 }
 const tdPositionClass: Record<string, string> = {
-  left: "text-left",
-  center: "text-center",
-  right: "text-right",
+  left: 'text-left',
+  center: 'text-center',
+  right: 'text-right',
 };
 const TableCell: React.FC<TableCellProps> = ({
   children,
-  position = "center",
+  position = 'center',
   center,
   className,
   ...props
 }) => (
   <td
     className={cn(
-      "border px-2 py-2 h-[40px]",
+      'border px-2 py-2 h-[40px]',
       tdPositionClass[position],
-      center && "text-center",
-      className
+      center && 'text-center',
+      className,
     )}
     {...props}
   >
@@ -109,33 +96,30 @@ const TableCell: React.FC<TableCellProps> = ({
 
 // ==================== InputCell ====================
 interface TableInputCellProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  errorMsg?: string,
+  errorMsg?: string;
 }
-const TableInputCell: React.FC<TableInputCellProps> = ({
-  className,
-  errorMsg = "",
-  ...props
-}) => (
+const TableInputCell: React.FC<TableInputCellProps> = ({ className, errorMsg = '', ...props }) => (
   <td className="border h-[40px]">
     <div className="flex items-center">
       <input
         {...props}
         className={cn(
-          "w-full h-10 bg-transparent px-2 py-2 text-sm text-black placeholder-gray-400",
-          "focus:outline focus:outline-2 focus:outline-[#e6372e]",
+          'w-full h-10 bg-transparent px-2 py-2 text-sm text-black placeholder-gray-400',
+          'focus:outline focus:outline-2 focus:outline-[#e6372e]',
           className,
         )}
       />
       {errorMsg && (
         <div className="group relative flex items-center pr-2">
           <IconAlertCircle size={16} className="text-red-500 cursor-pointer" />
-          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 
-                  max-w-xs w-max bg-red-100 text-red-800 text-xs rounded-md px-2 py-1 shadow-md z-10 break-words">
-            Đây là thông báo lỗi! scsacascascascascascascascas
-            Đây là thông báo lỗi! scsacascascascascascascascas
-            Đây là thông báo lỗi! scsacascascascascascascascas
-            Đây là thông báo lỗi! scsacascascascascascascascas
-            Đây là thông báo lỗi! scsacascascascascascascascas
+          <div
+            className="absolute bottom-full left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200
+                  max-w-xs w-max bg-red-100 text-red-800 text-xs rounded-md px-2 py-1 shadow-md z-10 break-words"
+          >
+            Đây là thông báo lỗi! scsacascascascascascascascas Đây là thông báo lỗi!
+            scsacascascascascascascascas Đây là thông báo lỗi! scsacascascascascascascascas Đây là
+            thông báo lỗi! scsacascascascascascascascas Đây là thông báo lỗi!
+            scsacascascascascascascascas
           </div>
         </div>
       )}
@@ -144,24 +128,19 @@ const TableInputCell: React.FC<TableInputCellProps> = ({
 );
 
 // ==================== TableSelect ====================
-interface TableSelectProps
-  extends React.SelectHTMLAttributes<HTMLSelectElement> {
+interface TableSelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   children:
-  | React.ReactElement<typeof TableSelectOption>
-  | React.ReactElement<typeof TableSelectOption>[];
+    | React.ReactElement<typeof TableSelectOption>
+    | React.ReactElement<typeof TableSelectOption>[];
 }
-const TableSelect: React.FC<TableSelectProps> = ({
-  className,
-  children,
-  ...props
-}) => (
+const TableSelect: React.FC<TableSelectProps> = ({ className, children, ...props }) => (
   <td className="border h-[40px]">
     <select
       {...props}
       className={cn(
-        "w-full h-10 bg-transparent px-2 py-2 text-sm text-black placeholder-gray-400",
-        "focus:outline focus:outline-2 focus:outline-[#e6372e]",
-        className
+        'w-full h-10 bg-transparent px-2 py-2 text-sm text-black placeholder-gray-400',
+        'focus:outline focus:outline-2 focus:outline-[#e6372e]',
+        className,
       )}
     >
       {children}
@@ -170,51 +149,33 @@ const TableSelect: React.FC<TableSelectProps> = ({
 );
 
 // ==================== TableSelectOption ====================
-interface TableSelectOptionProps
-  extends React.OptionHTMLAttributes<HTMLOptionElement> {
+interface TableSelectOptionProps extends React.OptionHTMLAttributes<HTMLOptionElement> {
   children: React.ReactNode;
 }
-const TableSelectOption: React.FC<TableSelectOptionProps> = ({
-  className,
-  children,
-  ...props
-}) => (
-  <option {...props} className={cn("", className)}>
+const TableSelectOption: React.FC<TableSelectOptionProps> = ({ className, children, ...props }) => (
+  <option {...props} className={cn('', className)}>
     {children}
   </option>
 );
 
 // ==================== TableImageCell ====================
-interface TableImageCellProps
-  extends React.ImgHTMLAttributes<HTMLImageElement> {
-  src: string
+interface TableImageCellProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+  src: string;
 }
-const TableImageCell: React.FC<TableImageCellProps> = ({
-  className,
-  children,
-  src,
-  ...props
-}) => (
+const TableImageCell: React.FC<TableImageCellProps> = ({ className, children, src, ...props }) => (
   <td className="border h-[40px]">
-    {src && (
-      <img
-        {...props}
-        src={src}
-        className={cn("h-full w-full", className)}
-      />
-    )}
+    {src && <img {...props} src={src} className={cn('h-full w-full', className)} />}
   </td>
 );
 
 // ==================== ButtonCell ====================
-interface TableActionButtonCellProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface TableActionButtonCellProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
 }
 const TableActionButtonCell: React.FC<TableActionButtonCellProps> = ({
   className,
   children,
-  type = "button",
+  type = 'button',
   ...props
 }) => (
   <td className="border text-center">
@@ -222,8 +183,8 @@ const TableActionButtonCell: React.FC<TableActionButtonCellProps> = ({
       type={type}
       {...props}
       className={cn(
-        "text-sm bg-transparent border-none text-gray-700 hover:text-red-500",
-        className
+        'text-sm bg-transparent border-none text-gray-700 hover:text-red-500',
+        className,
       )}
     >
       {children}

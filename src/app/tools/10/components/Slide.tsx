@@ -1,17 +1,17 @@
 'use client';
 
-import { template } from 'lodash';
-import React, { useRef } from 'react';
+import { useRef, useState } from 'react';
 import Slider from 'react-slick';
 
 const Slide = () => {
   const sliderRef = useRef<Slider>(null);
+  const [fullscreenImg, setFullscreenImg] = useState<string | null>(null);
 
   const settings = {
     dots: false,
     infinite: false,
     speed: 50,
-    slidesToShow: 8,
+    slidesToShow: 7,
     slidesToScroll: 1,
     autoplay: false,
   };
@@ -36,13 +36,17 @@ const Slide = () => {
   ];
 
   return (
-    <div className="relative w-full mx-2">
+    <div className="relative w-full mx-4">
       <Slider ref={sliderRef} {...settings}>
-        {templates?.map((item) => (
+        {templates.map((item) => (
           <div className="px-1" key={item.id}>
-            <img src={item.imgSrc} className="w-[200px] h-[200px] object-cover mx-auto" alt="" />
-
-            <div className="flex justify-center items-center">
+            <img
+              src={item.imgSrc}
+              className="w-[200px] h-[200px] object-cover mx-auto cursor-pointer"
+              alt=""
+              onClick={() => setFullscreenImg(item.imgSrc)}
+            />
+            <div className="flex justify-center items-center mt-1">
               <div>{item.templateName}</div>
             </div>
           </div>
@@ -62,6 +66,15 @@ const Slide = () => {
       >
         ▶
       </button>
+
+      {fullscreenImg && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-90 flex justify-center items-center z-50 cursor-pointer"
+          onClick={() => setFullscreenImg(null)}
+        >
+          <img src={fullscreenImg} className="max-w-full max-h-full" alt="fullscreen" />
+        </div>
+      )}
     </div>
   );
 };

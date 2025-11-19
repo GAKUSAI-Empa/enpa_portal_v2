@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
-import { FormikProvider, useFormik } from 'formik';
-import * as Yup from 'yup';
-import Slide from './components/Slide';
-import { CardContent, CardHeader } from '@/component/common/Card';
 import { Button } from '@/component/common/Button';
+import { Card, CardContent, CardHeader } from '@/component/common/Card';
 import { Table } from '@/component/common/Table';
 import { IconTrash } from '@tabler/icons-react';
+import { useFormik } from 'formik';
+import { useState } from 'react';
+import * as Yup from 'yup';
+import Slide from './components/Slide';
 
 type TableItem = {
   id: number;
@@ -22,41 +22,42 @@ type TableItem = {
 };
 
 const page = () => {
-  // const formik = useFormik({
-  //     initialValues: {
-  //       // 1.基本設定
-  //       topMessage: '',
-  //       storeLogoUrl: '',
-  //       hexColor: '#3B82F6',
-  //       awards: [''],
-  //       featureTitle: '',
-  //       buttonText: '',
-  //       buttonLink: '',
-  //       colWidth: '2',
-  //     },
-  //     validationSchema: Yup.object({
-  //       topMessage: Yup.string().trim().required('最上部メッセージを入力してください。'),
-  //       storeLogoUrl: Yup.string().trim().required('店舗ロゴURLを入力してください。'),
-  //       hexColor: Yup.string().trim().required('メインカラーを選択してください。'),
-  //       featureTitle: Yup.string().trim(),
-  //       buttonText: showButtonSetting
-  //         ? Yup.string().trim().required('入力してください。')
-  //         : Yup.string().trim(),
-  //       buttonLink: showButtonSetting
-  //         ? Yup.string().trim().required('入力してください。')
-  //         : Yup.string().trim(),
-  //     }),
-  //     onSubmit: async (values) => {
-  //       // Lấy template HTML
-  //       const responseHtml = await fetch('/template_html/tools/4/header.html');
-  //       let templateHtml = await responseHtml.text();
+  const requestUrl = 'http://127.0.0.1:8000/';
 
-  //       templateHtml = editHtmlContent(templateHtml, values);
-
-  //       reviewLivePage(templateHtml);
-  //     },
-  //   });
-
+  const formik = useFormik({
+    initialValues: {
+      id: 1,
+      templateName: '',
+      content1: '',
+      content2: '',
+      discount: 0,
+      discountUnit: '',
+      condition: '',
+      startDate: '',
+      endDate: '',
+    },
+    validationSchema: Yup.object({
+      couponList: Yup.array()
+        .of(
+          Yup.object().shape({
+            templateName: Yup.string().trim().required('テンプレート名を入力してください。'),
+            content1: Yup.string().trim().required('文言１を入力してください。'),
+            content2: Yup.string().trim().required('文言１を入力してください。'),
+            discount: Yup.number()
+              .typeError('割引は数値で入力してください。')
+              .min(0, '割引は0以上である必要があります。')
+              .required('割引を入力してください。'),
+            discountUnit: Yup.string().trim().required('割引単位を選択してください。'),
+            startDate: Yup.string().trim().required('開始時間を選択してください。'),
+            endDate: Yup.string().trim().required('終了時間を選択してください。'),
+          }),
+        )
+        .min(1, '商品情報を最低１行入力してください。'),
+    }),
+    onSubmit: (values) => {
+      console.log('Form submitted with values:', values);
+    },
+  });
   const [TableList, setTableList] = useState<TableItem[]>([
     {
       id: 1,
@@ -98,17 +99,31 @@ const page = () => {
       return filtered.map((r, index) => ({ ...r, id: index + 1 }));
     });
   };
+
+  const handleSubmit = () => {
+    console.log('data', TableList);
+    fetch(requestUrl, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json, text/plain, */*',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ TableList }),
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        console.log('data >>>>', TableList);
+      });
+  };
   return (
     <>
-      <div className="mx-5">
-        <div className="p-5  bg-white">
-          <CardHeader title="1.テンプレート" />
-          <Slide />
-        </div>
-      </div>
+      <Card className="truncate pb-5">
+        <CardHeader title="1.テンプレート" />
+        <Slide />
+      </Card>
 
-      <div className="mx-5 mt-[50px]">
-        <div className="p-5  bg-white">
+      <form method="POST" action={'#'}>
+        <Card>
           <CardHeader
             title="2. 商品情報入力"
             buttonGroup={
@@ -123,6 +138,7 @@ const page = () => {
               </>
             }
           />
+
           <CardContent>
             <Table.Container>
               <Table.Head>
@@ -210,6 +226,7 @@ const page = () => {
                       }}
                     />
                     <Table.InputCell
+                      type="datetime-local"
                       value={item.startDate}
                       onChange={(e) => {
                         setTableList((provRows) =>
@@ -220,6 +237,7 @@ const page = () => {
                       }}
                     />
                     <Table.InputCell
+                      type="datetime-local"
                       value={item.endDate}
                       onChange={(e) => {
                         setTableList((provRows) =>
@@ -236,17 +254,14 @@ const page = () => {
                 ))}
               </Table.Body>
             </Table.Container>
-            {/* <Button
-              disabled={!formik.isValid || formik.isSubmitting}
-              size="lg"
-              type="submit"
-              onClick={formik.submitForm}
-            >
-              プレビュー
-            </Button> */}
           </CardContent>
+        </Card>
+        <div className="flex items-center justify-center">
+          <Button className={'flex flexEnd'} size="lg" type="submit" onClick={() => handleSubmit()}>
+            プレビュー
+          </Button>
         </div>
-      </div>
+      </form>
     </>
   );
 };
