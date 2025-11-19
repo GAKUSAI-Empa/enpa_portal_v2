@@ -12,13 +12,14 @@ import {
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { ja } from 'date-fns/locale';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import useNotificationListAPI from './api/useNotificationListAPI';
 import useNotificationMainteAPI from './api/useNotificationMainteAPI';
 
 export default function NotificationsPage() {
   const router = useRouter();
   const { data: notificationHistoryList, error, isLoading, mutate } = useNotificationListAPI(1, 99);
-  const { markAsRead } = useNotificationMainteAPI();
+  const { markAsRead, markAllAsRead } = useNotificationMainteAPI();
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -45,12 +46,24 @@ export default function NotificationsPage() {
     router.push(`/account/notification/detail/${id}`);
   };
 
+  const handleClickMarkAllRead = async () => {
+    try {
+      const resData = await markAllAsRead();
+      toast.success(resData.detail);
+      mutate();
+    } catch (e: any) {
+      const backendMessage =
+        e?.response?.data?.detail || 'エラーが発生しました。もう一度お試しください。';
+      toast.error(backendMessage);
+    }
+  };
+
   return (
     <Card>
       <CardHeader
         title="通知"
         buttonGroup={
-          <Button size="sm" prefixIcon={IconCheckbox}>
+          <Button size="sm" prefixIcon={IconCheckbox} onClick={() => handleClickMarkAllRead()}>
             すべて既読にする
           </Button>
         }

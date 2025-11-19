@@ -25,8 +25,27 @@ const useNotificationMainteAPI = () => {
     }
   };
 
+  const markAllAsRead = async () => {
+    try {
+      const session = await getSession();
+      const body = {};
+      const headers = {
+        Authorization: `${session?.user.accessToken}`,
+      };
+      const params = {};
+      const response = await axiosClient.put(URL_PREFIX + '/mark-all-as-read', body, {
+        headers,
+        params,
+      });
+      return response.data;
+    } catch (e: any) {
+      throw e;
+    }
+  };
+
   return {
     markAsRead,
+    markAllAsRead,
   };
 };
 
