@@ -2,7 +2,7 @@
 
 import { Button } from '@/component/common/Button';
 import { cn } from '@/lib/utils';
-import { IconLogout, IconUser } from '@tabler/icons-react';
+import { IconBuildingStore, IconLogout, IconUser, IconUsers } from '@tabler/icons-react';
 import { signOut, useSession } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -50,8 +50,11 @@ const AppHeader = ({ isExpandedSideBar }: AppHeaderProps) => {
             <>
               {session.user.role_name !== 'ROLE_STAFF' && (
                 <>
-                  <Button onClick={() => router.push('/manage/staff')}>スタッフ管理</Button>
-                  <Button>店舗管理</Button>
+                  <Button onClick={() => router.push('/manage/staff')} prefixIcon={IconUsers}>
+                    スタッフ管理
+                  </Button>
+                  <Button prefixIcon={IconBuildingStore}>店舗管理</Button>
+                  <Button prefixIcon={IconBuildingStore}>管理画面</Button>
                 </>
               )}
               <AppNotification />
@@ -106,7 +109,7 @@ const AppHeader = ({ isExpandedSideBar }: AppHeaderProps) => {
                       onClick={() => setOpenUserDropdown(false)}
                     >
                       <IconUser />
-                      Profile
+                      マイページ
                     </Link>
                     <button
                       onClick={() => {
@@ -116,7 +119,7 @@ const AppHeader = ({ isExpandedSideBar }: AppHeaderProps) => {
                       className="w-full text-left px-4 py-2 hover:bg-gray-100 flex gap-2"
                     >
                       <IconLogout />
-                      Logout
+                      ログアウト
                     </button>
                   </div>
                 </div>

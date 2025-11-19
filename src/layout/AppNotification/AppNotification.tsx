@@ -128,13 +128,22 @@ const AppNotification = () => {
         >
           <div className="px-4 py-3 font-semibold text-gray-700 bg-gray-100 border-b">通知</div>
 
-          <div className="max-h-80 overflow-y-auto">
+          <div className="max-h-80 overflow-y-auto py-2">
+            {liveNoti.length === 0 && notificationHistoryList.length === 0 && (
+              <div className="flex flex-col items-center justify-center w-full">
+                <img
+                  src="\img\notification\noti-empty.jpg"
+                  alt="No notifications"
+                  className="w-32 h-32 object-contain opacity-50"
+                />
+                <p className="mt-4 text-gray-500 text-md">通知はありません</p>
+              </div>
+            )}
             {/* live web socket notification list */}
             {liveNoti?.map((noti: any, index: number) => (
               <div
                 onClick={() => toDetail(noti.id, noti.is_read)}
                 key={noti.id}
-                // onClick={() => handleRead(noti.id)}
                 className={cn(
                   `flex items-start gap-3 px-4 py-3 cursor-pointer`,
                   `${!noti.is_read ? 'bg-blue-50' : 'hover:bg-gray-50'}`,
@@ -165,7 +174,6 @@ const AppNotification = () => {
               <div
                 onClick={() => toDetail(noti.id, noti.is_read)}
                 key={noti.id}
-                // onClick={() => handleRead(noti.id)}
                 className={cn(
                   `flex items-start gap-3 px-4 py-3 cursor-pointer`,
                   `${!noti.is_read ? 'bg-blue-50' : 'hover:bg-gray-50'}`,
@@ -194,11 +202,14 @@ const AppNotification = () => {
           </div>
 
           {/* Footer */}
-          <Link href={'/account/notification'}>
-            <div className="px-4 py-2 text-sm text-blue-600 text-center border-t hover:bg-gray-50 cursor-pointer">
-              全て見る
-            </div>
-          </Link>
+          {liveNoti.length !== 0 ||
+            (notificationHistoryList.length !== 0 && (
+              <Link href={'/account/notification'}>
+                <div className="px-4 py-2 text-sm text-blue-600 text-center border-t hover:bg-gray-50 cursor-pointer">
+                  全て見る
+                </div>
+              </Link>
+            ))}
         </div>
       )}
     </div>
