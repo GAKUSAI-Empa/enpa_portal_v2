@@ -11,12 +11,14 @@ import {
 } from '@tabler/icons-react';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { ja } from 'date-fns/locale';
-import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import useNotificationListAPI from './api/useNotificationListAPI';
+import useNotificationMainteAPI from './api/useNotificationMainteAPI';
 
 export default function NotificationsPage() {
-  const { data: session, update, status } = useSession();
+  const router = useRouter();
   const { data: notificationHistoryList, error, isLoading, mutate } = useNotificationListAPI(1, 99);
+  const { markAsRead } = useNotificationMainteAPI();
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -34,6 +36,13 @@ export default function NotificationsPage() {
   const formatTimeAgo = (isoString: string) => {
     const date = parseISO(isoString);
     return formatDistanceToNow(date, { locale: ja, addSuffix: true });
+  };
+
+  const toDetail = async (id: string, is_read: boolean) => {
+    if (!is_read) {
+      await markAsRead(id);
+    }
+    router.push(`/account/notification/detail/${id}`);
   };
 
   return (
@@ -54,6 +63,7 @@ export default function NotificationsPage() {
             <div className="bg-white shadow-md rounded-lg divide-y">
               {notificationHistoryList?.map((notif: any) => (
                 <div
+                  onClick={() => toDetail(notif.id, notif.is_read)}
                   key={notif.id}
                   className={cn(
                     `relative flex gap-4 p-4 cursor-pointer`,
