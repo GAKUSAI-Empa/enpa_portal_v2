@@ -143,7 +143,7 @@ const page = () => {
               <Button type="submit" disabled={isLoading} onClick={formik.submitForm}>
                 {isLoading ? <IconLoader2 className="animate-spin" /> : <>追加</>}
               </Button>
-              <Button color="grey" onClick={() => router.push('/staff')}>
+              <Button color="grey" onClick={() => router.push('/manage/staff')}>
                 戻る
               </Button>
             </CardFooter>

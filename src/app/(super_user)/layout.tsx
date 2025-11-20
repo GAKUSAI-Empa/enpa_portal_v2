@@ -1,13 +1,13 @@
 'use client';
-import LayoutPortal from '@/layout/LayoutPortal';
-import React, { ReactNode, useEffect } from 'react';
+import LayoutSuperUser from '@/layout/LayoutSuperUser/LayoutSuperUser';
+import React, { ReactNode } from 'react';
 
 interface IToolsLayoutProps {
   children: ReactNode;
 }
 
 const ToolsLayout: React.FC<IToolsLayoutProps> = ({ children }) => {
-  return <LayoutPortal>{children}</LayoutPortal>;
+  return <LayoutSuperUser>{children}</LayoutSuperUser>;
 };
 
 export default ToolsLayout;

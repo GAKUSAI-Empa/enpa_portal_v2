@@ -1,12 +1,11 @@
 'use client';
 
-import { useHeader } from '@/app/context/HeaderContext';
 import { Button } from '@/component/common/Button';
-import { Card, CardContent, CardHeader } from '@/component/common/Card';
+import { Card, CardContent } from '@/component/common/Card';
 import { IconCheck, IconLoader2 } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 const page = () => {
@@ -22,7 +21,6 @@ const page = () => {
       setLoading(true);
       setSuccessUpload(false);
       const uploadRakutenHtml = reviewHtml.replace(/<base[^>]*>/i, '');
-
 
       const res = await fetch('/api/tools/04', {
         method: 'POST',
@@ -98,7 +96,6 @@ const page = () => {
               {loading ? <IconLoader2 className="animate-spin" /> : <>Rakutenにアップロード</>}
             </Button>
           </div>
-
         </>
       ) : (
         <div className="flex items-center justify-center">

@@ -1,19 +1,23 @@
 'use client';
 
 import { cn } from '@/lib/utils';
+import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
-import NavItem from './NavItem';
-import navItems from './navItemList';
+import SuperUserNavItem from './SuperUserNavItem';
+import superUserNavItemList from './SuperUserNavItemList';
 
-interface AppSidebarProps {
+interface SuperUserAppSidebarProps {
   isExpandedSideBar: boolean;
   setIsExpandedSideBar: (value: boolean) => void;
 }
-const AppSidebar = ({ isExpandedSideBar, setIsExpandedSideBar }: AppSidebarProps) => {
+const SuperUserAppSidebar = ({
+  isExpandedSideBar,
+  setIsExpandedSideBar,
+}: SuperUserAppSidebarProps) => {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-
+  const { data: session } = useSession();
   const toggleMenu = (label: string) => {
     setOpenDropdown(openDropdown === label ? null : label);
   };
@@ -29,7 +33,7 @@ const AppSidebar = ({ isExpandedSideBar, setIsExpandedSideBar }: AppSidebarProps
         onMouseLeave={() => setIsExpandedSideBar(false)}
       >
         {/* --- Logo --- */}
-        <Link href="/tools/dashboard" className="block">
+        <Link href="/" className="block">
           <div className="relative h-20 px-4 border-b border-gray-200 flex items-center space-x-3">
             <Image
               src="/img/logo/emportal_logo.png"
@@ -45,31 +49,26 @@ const AppSidebar = ({ isExpandedSideBar, setIsExpandedSideBar }: AppSidebarProps
                 isExpandedSideBar ? 'opacity-100 w-[150px]' : 'opacity-0 w-0',
               )}
             >
-              <Image
-                src="/img/logo/emportal_logo_text.png"
-                alt="EmpaPortal text"
-                width={150}
-                height={40}
-                className="object-contain"
-              />
+              <p className="text-gray-800 font-bold text-lg truncate">エンパタウン管理</p>
             </div>
           </div>
         </Link>
         {/* --- Nav --- */}
         <nav className="flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-2 py-3 text-sm space-y-1">
-          {navItems.map((item) => (
-            <NavItem
-              key={item.label}
-              item={item}
-              isExpandedSideBar={isExpandedSideBar}
-              openDropdown={openDropdown}
-              toggleMenu={toggleMenu}
-            />
-          ))}
+          {session?.user &&
+            superUserNavItemList.map((item) => (
+              <SuperUserNavItem
+                key={item.label}
+                item={item}
+                isExpandedSideBar={isExpandedSideBar}
+                openDropdown={openDropdown}
+                toggleMenu={toggleMenu}
+              />
+            ))}
         </nav>
       </aside>
     </>
   );
 };
 
-export default AppSidebar;
+export default SuperUserAppSidebar;

@@ -1,13 +1,13 @@
 import {
+  IconAd,
   IconBell,
   IconBrush,
   IconCalendarEvent,
-  IconAd,
   IconChartBar,
   IconSettings,
 } from '@tabler/icons-react';
 
-const navItems = [
+const toolsNavItemList = [
   {
     label: '自動掲載・通知ツール',
     icon: IconBell,
@@ -76,4 +76,4 @@ const navItems = [
   },
 ];
 
-export default navItems;
+export default toolsNavItemList;

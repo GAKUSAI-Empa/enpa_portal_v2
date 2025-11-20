@@ -1,6 +1,6 @@
 'use client';
-import LayoutPortal from '@/layout/LayoutPortal';
-import React, { ReactNode, useEffect } from 'react';
+import LayoutPortal from '@/layout/LayoutPortal/LayoutPortal';
+import React, { ReactNode } from 'react';
 
 interface IToolsLayoutProps {
   children: ReactNode;
