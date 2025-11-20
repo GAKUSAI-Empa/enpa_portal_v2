@@ -2,13 +2,12 @@
 
 import { Button } from '@/component/common/Button';
 import { cn } from '@/lib/utils';
-import { IconBuildingStore, IconLogout, IconUser, IconUsers } from '@tabler/icons-react';
+import { IconLogout, IconUser } from '@tabler/icons-react';
 import { signOut, useSession } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import AppNotification from '../AppNotification/AppNotification';
 
 interface SuperUserAppHeaderProps {
   isExpandedSideBar: boolean;
@@ -48,20 +47,6 @@ const SuperUserAppHeader = ({ isExpandedSideBar }: SuperUserAppHeaderProps) => {
         <div className="flex items-center aligns justify-end gap-2">
           {session?.user ? (
             <>
-              {session.user.role_name !== 'ROLE_STAFF' && (
-                <>
-                  <Button onClick={() => router.push('/manage/staff')} prefixIcon={IconUsers}>
-                    スタッフ管理
-                  </Button>
-                  <Button prefixIcon={IconBuildingStore}>店舗管理</Button>
-                  {session.user.role_name === 'ROLE_ADMIN' ||
-                    session.user.role_name === 'ROLE_SUPER_USER'}
-                  <Button onClick={() => router.push('/admin')} prefixIcon={IconBuildingStore}>
-                    管理画面
-                  </Button>
-                </>
-              )}
-              <AppNotification />
               <div
                 className="relative h-20 flex items-center aligns justify-center"
                 ref={dropdownRef}

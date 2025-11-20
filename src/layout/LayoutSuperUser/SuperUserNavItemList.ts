@@ -1,12 +1,13 @@
-import { IconSettings } from '@tabler/icons-react';
+import { IconDatabase } from '@tabler/icons-react';
 
 const superUserNavItemList = [
   {
-    label: '基本設定',
-    icon: IconSettings,
+    label: 'データ設定',
+    icon: IconDatabase,
     children: [
-      { label: 'レビュー評価バナー自動掲載', href: '/2' },
-      { label: 'RPP予算消化アラート', href: '/5' },
+      { label: 'ユーザー', href: '/admin/accounts' },
+      { label: '企業', href: '/admin/companies' },
+      { label: 'ストア', href: '/admin/stores' },
     ],
   },
 ];
