@@ -1,5 +1,6 @@
 'use client';
 import { IconAlertCircle } from '@tabler/icons-react';
+import { useField } from 'formik';
 import React from 'react';
 import { cn } from '../../lib/utils';
 
@@ -193,6 +194,106 @@ const TableActionButtonCell: React.FC<TableActionButtonCellProps> = ({
   </td>
 );
 
+// ==================== InputCellTest ====================
+interface TableInputCellTestProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  name: string;
+}
+export const TableInputCellTest: React.FC<TableInputCellTestProps> = ({
+  name,
+  className,
+  ...props
+}) => {
+  const [field, meta] = useField(name);
+  const errorMsg = meta.touched && meta.error ? meta.error : '';
+
+  return (
+    <td className="border h-[40px]">
+      <div className="flex items-center">
+        <input
+          {...field}
+          {...props}
+          className={cn(
+            'w-full h-10 bg-transparent px-2 py-2 text-sm text-black placeholder-gray-400',
+            'focus:outline focus:outline-2 focus:outline-[#e6372e]',
+            className,
+          )}
+        />
+        {errorMsg && (
+          <div className="group relative flex items-center pr-2">
+            <IconAlertCircle size={16} className="text-red-500 cursor-pointer" />
+            <div
+              className="absolute bottom-full left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200
+                  max-w-xs w-max bg-red-100 text-red-800 text-xs rounded-md px-2 py-1 shadow-md z-10 break-words"
+            >
+              {errorMsg}
+            </div>
+          </div>
+        )}
+      </div>
+    </td>
+  );
+};
+
+// ==================== TableSelectTest ====================
+interface TableSelectTestProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
+  name: string;
+  children:
+    | React.ReactElement<typeof TableSelectTestOption>
+    | React.ReactElement<typeof TableSelectTestOption>[];
+}
+const TableSelectTest: React.FC<TableSelectTestProps> = ({
+  className,
+  name,
+  children,
+  ...props
+}) => {
+  const [field, meta] = useField(name);
+  const errorMsg = meta.touched && meta.error ? meta.error : '';
+
+  return (
+    <td className="border h-[40px]">
+      <div className="flex items-center">
+        <select
+          {...field}
+          {...props}
+          className={cn(
+            'w-full h-10 bg-transparent px-2 py-2 text-sm text-black placeholder-gray-400',
+            'focus:outline focus:outline-2 focus:outline-[#e6372e]',
+            className,
+          )}
+        >
+          {children}
+        </select>
+        {errorMsg && (
+          <div className="group relative flex items-center pr-2">
+            <IconAlertCircle size={16} className="text-red-500 cursor-pointer" />
+            <div
+              className="absolute bottom-full left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200
+                  max-w-xs w-max bg-red-100 text-red-800 text-xs rounded-md px-2 py-1 shadow-md z-10 break-words"
+            >
+              {errorMsg}
+            </div>
+          </div>
+        )}
+      </div>
+    </td>
+  );
+};
+
+// ==================== TableSelectTestOption ====================
+interface TableSelectTestOptionProps extends React.OptionHTMLAttributes<HTMLOptionElement> {
+  children: React.ReactNode;
+}
+const TableSelectTestOption: React.FC<TableSelectTestOptionProps> = ({
+  className,
+  children,
+  ...props
+}) => (
+  <option {...props} className={cn('', className)}>
+    {children}
+  </option>
+);
+
 // ==================== Export ====================
 export const Table = {
   Container: TableContainer,
@@ -207,4 +308,8 @@ export const Table = {
   Option: TableSelectOption,
   ImageCell: TableImageCell,
   Button: TableActionButtonCell,
+  // Test
+  InputCellTest: TableInputCellTest,
+  SelectTest: TableSelectTest,
+  SelectTestOption: TableSelectTestOption,
 };
