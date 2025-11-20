@@ -1,31 +1,30 @@
 // src/app/tools/03/page.tsx
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Card, CardContent, CardHeader } from '@/component/common/Card';
-import { Button } from '@/component/common/Button';
 import { Alert } from '@/component/common/Alert';
+import { Button } from '@/component/common/Button';
+import { Card, CardContent, CardHeader } from '@/component/common/Card';
 import { IconLoader2, IconRefresh } from '@tabler/icons-react';
-import { Toaster, toast } from 'sonner';
-import debounce from 'lodash/debounce';
 import axios from 'axios';
+import debounce from 'lodash/debounce';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Toaster, toast } from 'sonner';
+// Import Hook thay vì object tĩnh
 import useTool03API from './api/tool03API';
 
 // コンポーネントとロジックの分離
 import EditableProductTable from './components/EditableProductTable';
 import PreviewModal from './components/PreviewModal';
-import RestoreSessionPopup from './components/RestoreSessionPopup';
 import ResetConfirmPopup from './components/ResetConfirmPopup';
-import { useJobPolling } from './hooks/useJobPolling';
-import { validateRows } from './lib/validation';
-import { createNewProductRow } from './lib/utils';
+import RestoreSessionPopup from './components/RestoreSessionPopup';
 import { templates } from './constants';
-import type { ProductRow, AllErrors } from './types';
+import { useJobPolling } from './hooks/useJobPolling';
+import { createNewProductRow } from './lib/utils';
+import { validateRows } from './lib/validation';
+import type { AllErrors, ProductRow } from './types';
 
-// Sonner toast ID の型
 type SonnerToastId = string | number;
 
-// localStorage のキー
 const LOCAL_STORAGE_KEY = 'tool03_session_data_v2';
 
 // --- LAZY LOAD (START) ---
@@ -34,7 +33,7 @@ const BATCH_SIZE = 10;
 // --- LAZY LOAD (END) ---
 
 export default function TwoPriceImagePage() {
-  //Khởi tạo Hook ở ngay đầu Component
+  // Khởi tạo Hook ở ngay đầu Component
   const tool03API = useTool03API();
 
   // --- State の宣言 ---
@@ -65,7 +64,7 @@ export default function TwoPriceImagePage() {
   const goldUploadToastIdRef = useRef<SonnerToastId | null>(null);
   const rcabinetUploadToastIdRef = useRef<SonnerToastId | null>(null);
 
-  // --- FTP用コールバック (変更なし) ---
+  // --- FTP用コールバック ---
   const handleFtpSuccess = useCallback((target: 'gold' | 'rcabinet', message: string) => {
     const toastIdRef = target === 'gold' ? goldUploadToastIdRef : rcabinetUploadToastIdRef;
     if (toastIdRef.current) {
@@ -86,7 +85,7 @@ export default function TwoPriceImagePage() {
 
   // -----------------------------------
 
-  // --- ポーリング用カスタムフック (変更なし) ---
+  // --- ポーリング用カスタムフック ---
   const handleJobNotFound = useCallback(() => {
     setJobId(null);
     setGlobalAlert('現在のジョブが見つかりませんでした。新しいジョブを開始します。');
@@ -114,7 +113,7 @@ export default function TwoPriceImagePage() {
   });
   //------------------------------------
 
-  // --- localStorage ロジック (変更なし) ---
+  // --- localStorage ロジック ---
   const saveStateToLocalStorage = useCallback(
     debounce((rowsToSave: ProductRow[]) => {
       try {
@@ -180,7 +179,7 @@ export default function TwoPriceImagePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // --- 空行の初期化ロジック (変更なし) ---
+  // --- 空行の初期化ロジック ---
   const initializeEmptyRow = (idPrefix = 'initial-load-empty') => {
     console.log(`[Session] 空行で初期化します (prefix: ${idPrefix}).`);
     const initialRow = createNewProductRow(idPrefix);
@@ -218,7 +217,7 @@ export default function TwoPriceImagePage() {
   }, []);
   // --- localStorage ロジック終了 ---
 
-  // --- handleSetProductRows ロジック (変更なし) ---
+  // --- handleSetProductRows ロジック ---
   const handleSetProductRows = useCallback(
     (newRowsOrFn: ProductRow[] | ((prev: ProductRow[]) => ProductRow[])) => {
       setProductRows((prevRows) => {
@@ -310,7 +309,7 @@ export default function TwoPriceImagePage() {
     }
   }, [stopPolling, jobStatus, clearSavedSession]);
 
-  // --- リセットボタンのロジック (変更なし) ---
+  // --- リセットボタンのロジック ---
   const handleResetClick = () => {
     // テーブルが既に空の場合はポップアップ不要
     if (
@@ -358,6 +357,8 @@ export default function TwoPriceImagePage() {
       if (!currentJobId) {
         // --- POST ロジック (新規ジョブ作成) ---
         console.log('>>> [DEBUG][Page] 新規ジョブを作成中 (POST)');
+
+        // [FIX] Giờ đây tool03API là instance của hook, nên gọi bình thường
         const data = await tool03API.createJob(productRows);
         const newJobId = data.jobId;
 
@@ -402,7 +403,7 @@ export default function TwoPriceImagePage() {
             ftpUploadErrorRcabinet: null,
           }));
 
-          // Gọi qua instance hook
+          // [FIX] Gọi qua instance hook
           await tool03API.updateJob(currentJobId, rowsToUpdate);
 
           setIsApiLoading(false);
@@ -442,15 +443,24 @@ export default function TwoPriceImagePage() {
 
     try {
       // 1. Gọi API tải Blob (đã có Token)
+      // [FIX] Ở đây tool03API là biến instance đã khởi tạo ở đầu hàm, nên không còn lỗi đỏ nữa
       const blob = await tool03API.downloadZip(jobId);
 
       // 2. Tạo URL ảo từ Blob
       const url = window.URL.createObjectURL(new Blob([blob]));
 
+      // --- [UPDATE]: Tạo tên file theo định dạng ngày tháng (YYYYMMDD_image.zip) ---
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      const fileName = `${yyyy}${mm}${dd}_image.zip`;
+      // ------------------------------------------------------------------------
+
       // 3. Tạo thẻ <a> ẩn để kích hoạt download
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `job_${jobId}.zip`); // Đặt tên file
+      link.setAttribute('download', fileName); // Sử dụng tên file mới
       document.body.appendChild(link);
       link.click();
 
@@ -499,6 +509,7 @@ export default function TwoPriceImagePage() {
       console.log(
         `>>> [DEBUG][Page] ${targetName} アップロード開始。ポーリングでステータスを追跡します。`,
       );
+      // Không cần làm gì thêm ở đây, polling sẽ tự cập nhật trạng thái tiếp theo.
     } catch (error: any) {
       console.error(`${target} アップロードの開始に失敗:`, error);
 
@@ -546,7 +557,7 @@ export default function TwoPriceImagePage() {
   return (
     <div className="space-y-6">
       <h1 className="text-xl font-bold text-gray-800">二重価格セール画像生成</h1>
-      {/* テンプレート選択 (変更なし) */}
+      {/* テンプレート選択 */}
       <Card>
         <CardHeader title="1. テンプレート選択" />
         <CardContent>
@@ -667,12 +678,13 @@ export default function TwoPriceImagePage() {
         isUploadingGold={jobStatus?.ftpUploadStatusGold === 'UPLOADING'}
         isUploadingRcabinet={jobStatus?.ftpUploadStatusRcabinet === 'UPLOADING'}
         // --- LAZY LOAD (START) ---
+        // State とハンドラ関数を渡す
         visibleCount={visibleCount}
         onLoadMore={() => setVisibleCount((prev) => prev + BATCH_SIZE)}
         // --- LAZY LOAD (END) ---
       />
 
-      {/* セッション復元ポップアップ*/}
+      {/* セッション復元ポップアップ */}
       {showRestorePopup && <RestoreSessionPopup onResponse={handleRestoreSession} />}
 
       {/* Reset popup */}
