@@ -160,7 +160,7 @@ const page = () => {
                 {TableList?.map((item, index) => (
                   <Table.Row key={`coupon-${index}`}>
                     <Table.Td>{item.id}</Table.Td>
-                    <Table.InputCell
+                    {/* <Table.InputCell
                       value={item.templateName}
                       onChange={(e) => {
                         setTableList((prevRows) =>
@@ -170,7 +170,39 @@ const page = () => {
                         );
                       }}
                       placeholder="テンプレート1"
-                    />
+                    /> */}
+
+                    <Table.SelectBox
+                      name="templateName"
+                      value={item.templateName}
+                      onChange={(e) => {
+                        setTableList((prevRows) =>
+                          prevRows.map((r) =>
+                            r.id === item.id ? { ...r, templateName: e.target.value } : r,
+                          ),
+                        );
+                      }}
+                      className="w-[140px]"
+                    >
+                      <Table.Option value="1">テンプレート1</Table.Option>
+                      <Table.Option value="2">テンプレート2</Table.Option>
+                      <Table.Option value="3">テンプレート3</Table.Option>
+                      <Table.Option value="4">テンプレート4</Table.Option>
+                      <Table.Option value="5">テンプレート5</Table.Option>
+                      <Table.Option value="6">テンプレート6</Table.Option>
+                      <Table.Option value="7">テンプレート7</Table.Option>
+                      <Table.Option value="8">テンプレート8</Table.Option>
+                      <Table.Option value="9">テンプレート9</Table.Option>
+                      <Table.Option value="10">テンプレート10</Table.Option>
+                      <Table.Option value="11">テンプレート11</Table.Option>
+                      <Table.Option value="12">テンプレート12</Table.Option>
+                      <Table.Option value="13">テンプレート13</Table.Option>
+                      <Table.Option value="14">テンプレート14</Table.Option>
+                      <Table.Option value="15">テンプレート15</Table.Option>
+                      <Table.Option value="16">テンプレート16</Table.Option>
+                      <Table.Option value="17">テンプレート17</Table.Option>
+                      <Table.Option value="18">テンプレート18</Table.Option>
+                    </Table.SelectBox>
 
                     <Table.InputCell
                       value={item.content1}
@@ -204,7 +236,9 @@ const page = () => {
                         );
                       }}
                     />
-                    <Table.InputCell
+
+                    <Table.SelectBox
+                      name="couponUnit"
                       value={item.discountUnit}
                       onChange={(e) => {
                         setTableList((prevRows) =>
@@ -213,7 +247,22 @@ const page = () => {
                           ),
                         );
                       }}
-                    />
+                      className="w-[60px] text-center"
+                    >
+                      <Table.Option value="option1">%</Table.Option>
+                      <Table.Option value="option2">円</Table.Option>
+                    </Table.SelectBox>
+
+                    {/* <Table.InputCell
+                      value={item.discountUnit}
+                      onChange={(e) => {
+                        setTableList((prevRows) =>
+                          prevRows.map((r) =>
+                            r.id === item.id ? { ...r, discountUnit: e.target.value } : r,
+                          ),
+                        );
+                      }}
+                    > */}
                     <Table.InputCell
                       value={item.condition}
                       placeholder="3000円以上"
