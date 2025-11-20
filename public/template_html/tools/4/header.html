@@ -1,97 +1,108 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./header_css/destyle.css" type="text/css">
-    <link rel="stylesheet" href="./header_css/header.css" type="text/css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./header_css/destyle.css" type="text/css" />
+    <link rel="stylesheet" href="./header_css/header.css" type="text/css" />
     <!-- フォント関係 -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-        href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&family=Noto+Serif+JP&family=Shippori+Mincho&display=swap"
-        rel="stylesheet">
-    <link href="https://use.fontawesome.com/releases/v6.2.0/css/all.css" rel="stylesheet">
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&family=Noto+Serif+JP&family=Shippori+Mincho&display=swap"
+      rel="stylesheet"
+    />
+    <link href="https://use.fontawesome.com/releases/v6.2.0/css/all.css" rel="stylesheet" />
     <!-- スライダー関係 -->
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css">
-    <link rel="stylesheet" type="text/css"
-        href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.9.0/slick-theme.css">
-    <link rel="stylesheet" href="style.css">
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.9.0/slick-theme.css"
+    />
+    <link rel="stylesheet" href="style.css" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"
+    ></script>
     <script src="./header_js/header.js"></script>
     <title>{{PAGE_TITLE}}</title>
-</head>
+  </head>
 
-<body>
-
+  <body>
     <div id="top-nav" style="background-color:{{MAIN_COLOR}};">
-        <div id="top-nav-container">
-            <div id="top-nav-left">{{TOP_MSG}}</div>
-            <div id="top-nav-right">
-                <div id="top-nav-menu">
-                    <ul>
-                        {{NAVIGATION_MENU}}
-                    </ul>
-                </div>
-                <div class="top-nav-icon"><a href="https://www.rakuten.co.jp/"><img src="./img/r_logo_n.png" alt=""></a>
-                </div>
-                <div class="top-nav-icon"><a href="https://basket.step.rakuten.co.jp/rms/mall/bs/cartall/"><img
-                            src="./img/cart_n.png" alt=""></a></div>
-            </div>
+      <div id="top-nav-container">
+        <div id="top-nav-left">{{TOP_MSG}}</div>
+        <div id="top-nav-right">
+          <div id="top-nav-menu">
+            <ul>
+              {{NAVIGATION_MENU}}
+            </ul>
+          </div>
+          <div class="top-nav-icon">
+            <a href="https://www.rakuten.co.jp/"><img src="./img/r_logo_n.png" alt="" /></a>
+          </div>
+          <div class="top-nav-icon">
+            <a href="https://basket.step.rakuten.co.jp/rms/mall/bs/cartall/"
+              ><img src="./img/cart_n.png" alt=""
+            /></a>
+          </div>
         </div>
+      </div>
     </div>
 
     <div id="main-logo">
-        <div id="main-logo-wrapper">
+      <div id="main-logo-wrapper">
+        <a target="_blank" rel="noopener noreferrer" href="">
+          <img src="{{STORE_LOGO_URL}}" alt="店舗ロゴ" />
+        </a>
 
-            <a target="_blank" rel="noopener noreferrer" href="">
-                <img src="{{STORE_LOGO_URL}}" alt="店舗ロゴ">
-            </a>
-
-            {{IMG_AWARD}}
-
-        </div>
-        <div id="rakuten-logo">
-            <a target="_blank" rel="noopener noreferrer" href="https://www.rakuten.co.jp/"><img src="img\rakuten_logo.jpg" alt="楽天市場"></a>
-        </div>
-
+        {{IMG_AWARD}}
+      </div>
+      <div id="rakuten-logo">
+        <a target="_blank" rel="noopener noreferrer" href="https://www.rakuten.co.jp/"
+          ><img src="img\rakuten_logo.jpg" alt="楽天市場"
+        /></a>
+      </div>
     </div>
     <div id="main-icons">
-        <div id="main-icons-wrapper">
-            {{ICON_MENU}}
-        </div>
+      <div id="main-icons-wrapper">{{ICON_MENU}}</div>
     </div>
-    <div id="search" style="background-color: rgba(14,54,0,0.2);">
-        <div id="search-wrapper">
-            <form method="get" action="https://esearch.rakuten.co.jp/rms/sd/esearch/vc" accept-charset="EUC-JP">
-                <input type="hidden" name="sv" value="6">
-                <input type="hidden" name="sid" value="888888">
-                <input type="hidden" name="su" value="test">
-                <input type="text" name="sitem" placeholder="こちらから検索">
-                <input type="hidden" name="f" value="A">
-                <button class="fa-solid fa-magnifying-glass" style="color: #0e3600;"></button>
-            </form>
-            <div id="keywords">
-                <p id="keywords-title">注目キーワード：</p>
+    <div id="search" style="background-color: rgba(14, 54, 0, 0.2)">
+      <div id="search-wrapper">
+        <form
+          method="get"
+          action="https://esearch.rakuten.co.jp/rms/sd/esearch/vc"
+          accept-charset="EUC-JP"
+        >
+          <input type="hidden" name="sv" value="6" />
+          <input type="hidden" name="sid" value="888888" />
+          <input type="hidden" name="su" value="test" />
+          <input type="text" name="sitem" placeholder="こちらから検索" />
+          <input type="hidden" name="f" value="A" />
+          <button class="fa-solid fa-magnifying-glass" style="color: #0e3600"></button>
+        </form>
+        <div id="keywords">
+          <p id="keywords-title">注目キーワード：</p>
 
-                {{SUGGEST_KEYWORD}}
-                
-            </div>
+          {{SUGGEST_KEYWORD}}
         </div>
+      </div>
     </div>
 
     {{SLIDE}}
 
     <style>
-        .slider .slide-dots li button::before {
-            background-color: #0e3600;
-        }
+      .slider .slide-dots li button::before {
+        background-color: #0e3600;
+      }
     </style>
 
     {{FEATURE}}
-
-</body>
-
+  </body>
 </html>
