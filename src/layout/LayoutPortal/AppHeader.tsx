@@ -2,7 +2,13 @@
 
 import { Button } from '@/component/common/Button';
 import { cn } from '@/lib/utils';
-import { IconBuildingStore, IconLogout, IconUser, IconUsers } from '@tabler/icons-react';
+import {
+  IconBuildingStore,
+  IconLogout,
+  IconServerCog,
+  IconUser,
+  IconUsers,
+} from '@tabler/icons-react';
 import { signOut, useSession } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -35,6 +41,10 @@ const AppHeader = ({ isExpandedSideBar }: AppHeaderProps) => {
     await signOut({ redirect: false });
   };
 
+  const handleOpenaAdminSite = () => {
+    window.open('/admin', '_blank'); // _blank = mở tab mới
+  };
+
   return (
     <>
       <div
@@ -56,7 +66,7 @@ const AppHeader = ({ isExpandedSideBar }: AppHeaderProps) => {
                   <Button prefixIcon={IconBuildingStore}>店舗管理</Button>
                   {session.user.role_name === 'ROLE_ADMIN' ||
                     session.user.role_name === 'ROLE_SUPER_USER'}
-                  <Button onClick={() => router.push('/admin')} prefixIcon={IconBuildingStore}>
+                  <Button onClick={() => handleOpenaAdminSite()} prefixIcon={IconServerCog}>
                     管理画面
                   </Button>
                 </>
