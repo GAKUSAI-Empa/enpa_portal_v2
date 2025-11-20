@@ -11,45 +11,46 @@ import Slide from './components/Slide';
 
 type TableItem = {
   id: number;
-  templateName: string;
-  content1: string;
-  content2: string;
-  discount: number;
-  discountUnit: string;
-  condition: string;
-  startDate: string;
-  endDate: string;
+  template_id: string;
+  message1: string;
+  message2: string;
+  discount_value: number;
+  discount_unit: string;
+  available_condition: string;
+  start_date: string;
+  end_date: string;
 };
 
 const page = () => {
-  const requestUrl = 'http://127.0.0.1:8000/';
+  const requestUrl = 'http://127.0.0.1:8000/coupon/generate';
+  const [loading, setLoading] = useState(false);
 
   const formik = useFormik({
     initialValues: {
       id: 1,
-      templateName: '',
-      content1: '',
-      content2: '',
-      discount: 0,
-      discountUnit: '',
-      condition: '',
-      startDate: '',
-      endDate: '',
+      template_id: '',
+      message1: '',
+      message2: '',
+      discount_value: 0,
+      discount_unit: '',
+      available_condition: '',
+      start_date: '',
+      end_date: '',
     },
     validationSchema: Yup.object({
       couponList: Yup.array()
         .of(
           Yup.object().shape({
-            templateName: Yup.string().trim().required('テンプレート名を入力してください。'),
-            content1: Yup.string().trim().required('文言１を入力してください。'),
-            content2: Yup.string().trim().required('文言１を入力してください。'),
-            discount: Yup.number()
+            template_id: Yup.string().trim().required('テンプレート名を入力してください。'),
+            message1: Yup.string().trim().required('文言１を入力してください。'),
+            message2: Yup.string().trim().required('文言１を入力してください。'),
+            discount_value: Yup.number()
               .typeError('割引は数値で入力してください。')
               .min(0, '割引は0以上である必要があります。')
               .required('割引を入力してください。'),
-            discountUnit: Yup.string().trim().required('割引単位を選択してください。'),
-            startDate: Yup.string().trim().required('開始時間を選択してください。'),
-            endDate: Yup.string().trim().required('終了時間を選択してください。'),
+            discount_unit: Yup.string().trim().required('割引単位を選択してください。'),
+            start_date: Yup.string().trim().required('開始時間を選択してください。'),
+            end_date: Yup.string().trim().required('終了時間を選択してください。'),
           }),
         )
         .min(1, '商品情報を最低１行入力してください。'),
@@ -61,14 +62,14 @@ const page = () => {
   const [TableList, setTableList] = useState<TableItem[]>([
     {
       id: 1,
-      templateName: '',
-      content1: '',
-      content2: '',
-      discount: 0,
-      discountUnit: '',
-      condition: '',
-      startDate: '',
-      endDate: '',
+      template_id: '1',
+      message1: '',
+      message2: '',
+      discount_value: 0,
+      discount_unit: 'persent',
+      available_condition: '',
+      start_date: '',
+      end_date: '',
     },
   ]);
   const addTableRow = (numberRow: number = 1) => {
@@ -77,14 +78,14 @@ const page = () => {
       for (let i = 0; i < numberRow; i++) {
         newRows.push({
           id: prev.length + i + 1,
-          templateName: '',
-          content1: '',
-          content2: '',
-          discount: 0,
-          discountUnit: '',
-          condition: '',
-          startDate: '',
-          endDate: '',
+          template_id: '',
+          message1: '',
+          message2: '',
+          discount_value: 0,
+          discount_unit: '',
+          available_condition: '',
+          start_date: '',
+          end_date: '',
         });
       }
       return [...prev, ...newRows];
@@ -100,20 +101,38 @@ const page = () => {
     });
   };
 
-  const handleSubmit = () => {
-    console.log('data', TableList);
-    fetch(requestUrl, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json, text/plain, */*',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ TableList }),
-    })
-      .then((res) => res.json())
-      .then((res) => {
-        console.log('data >>>>', TableList);
+  const handleSubmit = async () => {
+    const payloadList = TableList.map((item) => ({
+      filename: String(item.id),
+      template_id: item.template_id,
+      message1: item.message1,
+      message2: item.message2,
+      discount_value: item.discount_value,
+      discount_unit: item.discount_unit,
+      available_condition: item.available_condition,
+      start_date: item.start_date,
+      end_date: item.end_date,
+    }));
+    alert('data' + JSON.stringify(payloadList, null, 2));
+
+    try {
+      setLoading(true);
+      const res = await fetch(requestUrl, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json, text/plain, */*',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ payloadList }),
       });
+
+      const data = await res.json();
+      console.log('Server Response:', data);
+    } catch (error) {
+      console.error('Đã xảy ra lỗi khi gửi dữ liệu:', error);
+    } finally {
+      setLoading(false);
+    }
   };
   return (
     <>
@@ -161,11 +180,11 @@ const page = () => {
                   <Table.Row key={`coupon-${index}`}>
                     <Table.Td>{item.id}</Table.Td>
                     {/* <Table.InputCell
-                      value={item.templateName}
+                      value={item.template_id}
                       onChange={(e) => {
                         setTableList((prevRows) =>
                           prevRows.map((r) =>
-                            r.id === item.id ? { ...r, templateName: e.target.value } : r,
+                            r.id === item.id ? { ...r, template_id: e.target.value } : r,
                           ),
                         );
                       }}
@@ -173,12 +192,12 @@ const page = () => {
                     /> */}
 
                     <Table.SelectBox
-                      name="templateName"
-                      value={item.templateName}
+                      name="template_id"
+                      value={item.template_id}
                       onChange={(e) => {
                         setTableList((prevRows) =>
                           prevRows.map((r) =>
-                            r.id === item.id ? { ...r, templateName: e.target.value } : r,
+                            r.id === item.id ? { ...r, template_id: e.target.value } : r,
                           ),
                         );
                       }}
@@ -205,33 +224,33 @@ const page = () => {
                     </Table.SelectBox>
 
                     <Table.InputCell
-                      value={item.content1}
+                      value={item.message1}
                       onChange={(e) => {
                         setTableList((prevRows) =>
                           prevRows.map((r) =>
-                            r.id === item.id ? { ...r, content1: e.target.value } : r,
+                            r.id === item.id ? { ...r, message1: e.target.value } : r,
                           ),
                         );
                       }}
                       placeholder="特別クーポン"
                     />
                     <Table.InputCell
-                      value={item.content2}
+                      value={item.message2}
                       placeholder="今すぐゲット！"
                       onChange={(e) => {
                         setTableList((prevRows) =>
                           prevRows.map((r) =>
-                            r.id === item.id ? { ...r, content2: e.target.value } : r,
+                            r.id === item.id ? { ...r, message2: e.target.value } : r,
                           ),
                         );
                       }}
                     />
                     <Table.InputCell
-                      value={item.discount}
+                      value={item.discount_value}
                       onChange={(e) => {
                         setTableList((prevRows) =>
                           prevRows.map((r) =>
-                            r.id === item.id ? { ...r, discount: Number(e.target.value) } : r,
+                            r.id === item.id ? { ...r, discount_value: Number(e.target.value) } : r,
                           ),
                         );
                       }}
@@ -239,11 +258,11 @@ const page = () => {
 
                     <Table.SelectBox
                       name="couponUnit"
-                      value={item.discountUnit}
+                      value={item.discount_unit}
                       onChange={(e) => {
                         setTableList((prevRows) =>
                           prevRows.map((r) =>
-                            r.id === item.id ? { ...r, discountUnit: e.target.value } : r,
+                            r.id === item.id ? { ...r, discount_unit: e.target.value } : r,
                           ),
                         );
                       }}
@@ -254,44 +273,44 @@ const page = () => {
                     </Table.SelectBox>
 
                     {/* <Table.InputCell
-                      value={item.discountUnit}
+                      value={item.discount_unit}
                       onChange={(e) => {
                         setTableList((prevRows) =>
                           prevRows.map((r) =>
-                            r.id === item.id ? { ...r, discountUnit: e.target.value } : r,
+                            r.id === item.id ? { ...r, discount_unit: e.target.value } : r,
                           ),
                         );
                       }}
                     > */}
                     <Table.InputCell
-                      value={item.condition}
+                      value={item.available_condition}
                       placeholder="3000円以上"
                       onChange={(e) => {
                         setTableList((provRows) =>
                           provRows.map((r) =>
-                            r.id === item.id ? { ...r, condition: e.target.value } : r,
+                            r.id === item.id ? { ...r, available_condition: e.target.value } : r,
                           ),
                         );
                       }}
                     />
                     <Table.InputCell
                       type="datetime-local"
-                      value={item.startDate}
+                      value={item.start_date}
                       onChange={(e) => {
                         setTableList((provRows) =>
                           provRows.map((r) =>
-                            r.id === item.id ? { ...r, startDate: e.target.value } : r,
+                            r.id === item.id ? { ...r, start_date: e.target.value } : r,
                           ),
                         );
                       }}
                     />
                     <Table.InputCell
                       type="datetime-local"
-                      value={item.endDate}
+                      value={item.end_date}
                       onChange={(e) => {
                         setTableList((provRows) =>
                           provRows.map((r) =>
-                            r.id === item.id ? { ...r, endDate: e.target.value } : r,
+                            r.id === item.id ? { ...r, end_date: e.target.value } : r,
                           ),
                         );
                       }}
