@@ -1,10 +1,12 @@
 'use client';
 
 import { Button } from '@/component/common/Button';
+import PageTitle from '@/component/common/PageTitle';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/component/common/Tabs';
 import { FormikProvider, useFormik } from 'formik';
 import { useEffect, useRef, useState } from 'react';
 import * as Yup from 'yup';
+import ReviewModal from './components/ReviewModal';
 import TabItem1 from './components/TabItem1';
 import TabItem2 from './components/TabItem2';
 import TabItem3 from './components/TabItem3';
@@ -79,7 +81,8 @@ const page = () => {
       url: '',
     },
   ]);
-
+  const [reviewHtml, setReviewHtml] = useState('');
+  const [openReviewModal, setOpenReviewModal] = useState(false);
   const [showButtonSetting, setShowButtonSettting] = useState<boolean>(false);
 
   const formik = useFormik({
@@ -113,9 +116,18 @@ const page = () => {
 
       templateHtml = editHtmlContent(templateHtml, values);
 
-      reviewLivePage(templateHtml);
+      handleOpenReviewModal();
+      setReviewHtml(templateHtml);
     },
   });
+
+  const handleOpenReviewModal = () => {
+    setOpenReviewModal(true);
+  };
+
+  const handleCloseReviewModal = () => {
+    setOpenReviewModal(false);
+  };
 
   useEffect(() => {
     const checkTab1Valid = async () => {
@@ -436,6 +448,7 @@ const page = () => {
     <>
       <FormikProvider value={formik}>
         <form onSubmit={formik.handleSubmit}>
+          <PageTitle title="楽天GOLD ヘッダー生成" />
           <Tabs ref={tabsRef} defaultTab={'tab1'}>
             <TabsList>
               <TabsTrigger value="tab1">基本設定</TabsTrigger>
@@ -518,6 +531,9 @@ const page = () => {
           </div>
         </form>
       </FormikProvider>
+      {openReviewModal && (
+        <ReviewModal reviewHtml={reviewHtml} handleCloseReviewModal={handleCloseReviewModal} />
+      )}
     </>
   );
 };

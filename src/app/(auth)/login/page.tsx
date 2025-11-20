@@ -45,9 +45,6 @@ const page = () => {
         toast.error(res.error);
       } else {
         const session = await getSession();
-        console.log(session);
-        toast.success('おはよう' + session?.user.username);
-        console.log(session?.user.accessToken);
         router.replace('/');
       }
 
@@ -82,7 +79,7 @@ const page = () => {
             </div>
 
             {isSessionExpired && (
-              <Alert variant="warning">Session expired. please login again</Alert>
+              <Alert variant="warning">セッションが切れました。再度ログインしてください</Alert>
             )}
 
             <form onSubmit={formik.handleSubmit}>
