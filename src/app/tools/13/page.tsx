@@ -228,7 +228,7 @@ const Page = () => {
                 <div className="flex justify-center">
                   <Button
                     size="lg"
-                    type="button" // 🔹 đổi từ submit sang button để tự xử lý click
+                    type="button"
                     onClick={() => {
                       // Gọi validate form trước
                       thumbnailFormik.validateForm().then((errors) => {

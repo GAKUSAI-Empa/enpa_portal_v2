@@ -8,12 +8,22 @@ import SelectBox from '@/component/common/SelectBox';
 import { Tabs, TabsContent } from '@/component/common/Tabs';
 import { TextBox } from '@/component/common/TextBox';
 import { FormikProvider, useFormik } from 'formik';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import * as Yup from 'yup';
 import SliderImagereview from './components/SliderImage';
-
 const Page = () => {
   const [loading, setLoading] = useState(false);
+  const [token, setToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem('token');
+    if (storedToken) {
+      setToken(storedToken);
+    } else {
+      console.warn('Token not found in localStorage');
+      // Nếu muốn: redirect login
+    }
+  }, []);
 
   // --- Formik Setup ---
   const formik = useFormik({
@@ -45,8 +55,29 @@ const Page = () => {
       pc_position: Yup.array().min(1, '選択してください'),
       sp_position: Yup.array().min(1, '選択してください'),
     }),
+    // onSubmit: async (values) => {
+    //   console.log('SUBMIT STARTED', values);
+    // },
+
     onSubmit: async (values) => {
-      console.log('SUBMIT STARTED', values);
+      const payload = {
+        ...values,
+        min_review_placement: Number(values.min_review_placement),
+        min_review_display: Number(values.min_review_display),
+        pc_width: Number(values.pc_width),
+        sp_width: Number(values.sp_width),
+      };
+      try {
+        const res = await fetch('/api/tools/11', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const result = await res.json();
+        console.log(result);
+      } catch (err) {
+        console.error(err);
+      }
     },
   });
 
