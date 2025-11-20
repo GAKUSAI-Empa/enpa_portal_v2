@@ -5,9 +5,11 @@ import { formatDistanceToNow, parseISO } from 'date-fns';
 import { ja } from 'date-fns/locale';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import useNotificationCountAPI from './api/useNotificationCountAPI';
 import useNotificationListAPI from './api/useNotificationListAPI';
+import useNotificationMainteAPI from './api/useNotificationMainteAPI';
 
 interface NotificationMessage {
   noti_type: string;
@@ -29,6 +31,8 @@ const AppNotification = () => {
     error: errorCount,
   } = useNotificationCountAPI();
   const [liveNoti, setliveNoti] = useState<NotificationMessage[]>([]);
+  const { markAsRead } = useNotificationMainteAPI();
+  const router = useRouter();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -46,21 +50,23 @@ const AppNotification = () => {
     let ws: WebSocket;
 
     const connectWS = () => {
-      ws = new WebSocket(`ws://localhost:8001/notification/ws/${session.user.username}`);
+      ws = new WebSocket(
+        `${process.env.NEXT_PUBLIC_WEBSOCKET_DOMAIN}/notification/ws/${session.user.username}`,
+      );
 
       ws.onopen = () => {
         console.log('WS Connected');
       };
 
       ws.onmessage = (event) => {
-        console.log('WS Raw:', event.data);
-
         try {
           // Parse JSON gửi từ server FastAPI
           const data: NotificationMessage = JSON.parse(event.data);
 
           // Lưu vào danh sách messages
           setliveNoti((prev) => [data, ...prev]);
+          // 🔥 Khi nhận noti mới, revalidate count
+          mutateCount();
         } catch (e) {
           console.error('JSON parse error:', e);
         }
@@ -81,10 +87,17 @@ const AppNotification = () => {
     return () => ws?.close();
   }, [session?.user?.username]);
 
-  // Chuyển ISO string -> time ago dạng Nhật
   const formatTimeAgo = (isoString: string) => {
     const date = parseISO(isoString);
     return formatDistanceToNow(date, { locale: ja, addSuffix: true });
+  };
+
+  const toDetail = async (id: string, is_read: boolean) => {
+    setOpen(false);
+    if (!is_read) {
+      await markAsRead(id);
+    }
+    router.push(`/account/notification/detail/${id}`);
   };
 
   return (
@@ -115,12 +128,22 @@ const AppNotification = () => {
         >
           <div className="px-4 py-3 font-semibold text-gray-700 bg-gray-100 border-b">通知</div>
 
-          <div className="max-h-80 overflow-y-auto">
+          <div className="max-h-80 overflow-y-auto py-2">
+            {liveNoti.length === 0 && notificationHistoryList.length === 0 && (
+              <div className="flex flex-col items-center justify-center w-full">
+                <img
+                  src="\img\notification\noti-empty.jpg"
+                  alt="No notifications"
+                  className="w-32 h-32 object-contain opacity-50"
+                />
+                <p className="mt-4 text-gray-500 text-md">通知はありません</p>
+              </div>
+            )}
             {/* live web socket notification list */}
             {liveNoti?.map((noti: any, index: number) => (
               <div
+                onClick={() => toDetail(noti.id, noti.is_read)}
                 key={noti.id}
-                // onClick={() => handleRead(noti.id)}
                 className={cn(
                   `flex items-start gap-3 px-4 py-3 cursor-pointer`,
                   `${!noti.is_read ? 'bg-blue-50' : 'hover:bg-gray-50'}`,
@@ -149,8 +172,8 @@ const AppNotification = () => {
             {/* history  */}
             {notificationHistoryList?.map((noti: any, index: number) => (
               <div
+                onClick={() => toDetail(noti.id, noti.is_read)}
                 key={noti.id}
-                // onClick={() => handleRead(noti.id)}
                 className={cn(
                   `flex items-start gap-3 px-4 py-3 cursor-pointer`,
                   `${!noti.is_read ? 'bg-blue-50' : 'hover:bg-gray-50'}`,
@@ -179,11 +202,14 @@ const AppNotification = () => {
           </div>
 
           {/* Footer */}
-          <Link href={'/account/notification'}>
-            <div className="px-4 py-2 text-sm text-blue-600 text-center border-t hover:bg-gray-50 cursor-pointer">
-              全て見る
-            </div>
-          </Link>
+          {liveNoti.length !== 0 ||
+            (notificationHistoryList.length !== 0 && (
+              <Link href={'/account/notification'}>
+                <div className="px-4 py-2 text-sm text-blue-600 text-center border-t hover:bg-gray-50 cursor-pointer">
+                  全て見る
+                </div>
+              </Link>
+            ))}
         </div>
       )}
     </div>

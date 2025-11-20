@@ -39,7 +39,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         type={type}
         className={cn(
-
           'flex items-center justify-center rounded-md',
           sizeClass[size],
           colorClass[color],
@@ -47,7 +46,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         )}
         {...props}
       >
-        {PrefixIcon && <PrefixIcon stroke={1.5} />}
+        {PrefixIcon && <PrefixIcon className="mr-1" size={20} stroke={1.5} />}
         {children}
       </button>
     );
