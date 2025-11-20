@@ -1,13 +1,10 @@
 // src/app/layout.tsx
 
 import type { Metadata } from 'next';
-// !!! XÓA import { Noto_Sans_JP } từ google font
 import 'slick-carousel/slick/slick-theme.css';
 import 'slick-carousel/slick/slick.css';
 import './globals.css';
 import Providers from './providers';
-
-// !!! XÓA toàn bộ code liên quan đến Noto_Sans_JP({...})
 
 export const metadata: Metadata = {
   title: 'EmpaPortal V2',
@@ -21,10 +18,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
-      {/* Áp dụng phông chữ mới và xóa các class/biến font cũ */}
       <body
         className={`font-sans bg-background-subtle`}
-        // Thêm style trực tiếp để sử dụng phông chữ bạn vừa định nghĩa
         style={{ fontFamily: 'Noto Sans JP Custom, sans-serif' }}
         suppressHydrationWarning={true}
       >

@@ -10,7 +10,7 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('/static/NotoSansJP-Regular.ttf') format('truetype');
+  src: url('/font/NotoSansJP-Regular.ttf') format('truetype');
 }
 
 /* Trọng lượng 500 (Medium) */
@@ -19,7 +19,7 @@
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url('/static/NotoSansJP-Medium.ttf') format('truetype');
+  src: url('/font/NotoSansJP-Medium.ttf') format('truetype');
 }
 
 /* Trọng lượng 700 (Bold) */
@@ -28,10 +28,8 @@
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url('/static/NotoSansJP-Bold.ttf') format('truetype');
+  src: url('/font/NotoSansJP-Bold.ttf') format('truetype');
 }
-
-/* --- KẾT THÚC THÊM ĐỊNH NGHĨA PHÔNG CHỮ CỤC BỘ --- */
 
 /* disable up down value  */
 /* Chrome, Safari, Edge, Opera */

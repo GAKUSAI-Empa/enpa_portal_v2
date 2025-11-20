@@ -1,6 +1,6 @@
-import React, { Children } from 'react';
-import { cn } from '../../lib/utils';
 import { IconProps } from '@tabler/icons-react';
+import React from 'react';
+import { cn } from '../../lib/utils';
 
 const colorClass: Record<string, string> = {
   primary:
@@ -37,7 +37,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         ref={ref}
-        type="button"
+        type={type}
         className={cn(
           'flex items-center justify-center rounded-md',
           sizeClass[size],
@@ -46,7 +46,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         )}
         {...props}
       >
-        {PrefixIcon && <PrefixIcon stroke={1.5} />}
+        {PrefixIcon && <PrefixIcon className="mr-1" size={20} stroke={1.5} />}
         {children}
       </button>
     );
