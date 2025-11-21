@@ -21,10 +21,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
-      {/* Áp dụng phông chữ mới và xóa các class/biến font cũ */}
       <body
         className={`font-sans bg-background-subtle`}
-        // Thêm style trực tiếp để sử dụng phông chữ bạn vừa định nghĩa
         style={{ fontFamily: 'Noto Sans JP Custom, sans-serif' }}
         suppressHydrationWarning={true}
       >
