@@ -1,4 +1,4 @@
-import { APIUserLogin } from '@/app/login/api/accountAPI';
+import { APIUserLogin } from '@/app/(auth)/login/api/accountAPI';
 import NextAuth, { AuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 export const authOptions: AuthOptions = {

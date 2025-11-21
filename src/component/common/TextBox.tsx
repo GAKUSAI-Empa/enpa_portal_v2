@@ -87,6 +87,7 @@ const TextBox = React.forwardRef<HTMLInputElement, TextBoxProps>(
               )}
             >
               {label}
+
               {isRequired === true ? (
                 <span className="text-red-500 mr-1" aria-hidden="true">
                   *

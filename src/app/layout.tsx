@@ -1,16 +1,10 @@
+// src/app/layout.tsx
+
 import type { Metadata } from 'next';
-import { Noto_Sans_JP } from 'next/font/google';
 import 'slick-carousel/slick/slick-theme.css';
 import 'slick-carousel/slick/slick.css';
 import './globals.css';
 import Providers from './providers';
-
-const notoSansJp = Noto_Sans_JP({
-  subsets: ['latin'],
-  weight: ['400', '500', '700'],
-  display: 'swap',
-  variable: '--font-noto-sans-jp',
-});
 
 export const metadata: Metadata = {
   title: 'EmpaPortal V2',
@@ -25,7 +19,8 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body
-        className={`${notoSansJp.variable} font-sans bg-background-subtle`}
+        className={`font-sans bg-background-subtle`}
+        style={{ fontFamily: 'Noto Sans JP Custom, sans-serif' }}
         suppressHydrationWarning={true}
       >
         <Providers>{children}</Providers>

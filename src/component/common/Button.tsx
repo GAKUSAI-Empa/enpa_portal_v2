@@ -46,7 +46,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         )}
         {...props}
       >
-        {PrefixIcon && <PrefixIcon stroke={1.5} />}
+        {PrefixIcon && <PrefixIcon className="mr-1" size={20} stroke={1.5} />}
         {children}
       </button>
     );

@@ -8,12 +8,9 @@ const useNotificationCountAPI = () => {
 
   const fetcher = async (url: string) => {
     const session = await getSession();
-    if (!session?.user?.accessToken) throw new Error('No access token');
-
     const headers = {
-      Authorization: `${session.user.accessToken}`,
+      Authorization: `${session?.user.accessToken}`,
     };
-
     const response = await axiosClient.get(url, { headers });
     // Backend trả { read_count, unread_count }
     return response.data;
