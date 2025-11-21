@@ -4,7 +4,7 @@
 
 /* --- BẮT ĐẦU THÊM ĐỊNH NGHĨA PHÔNG CHỮ CỤC BỘ --- */
 
-/* Trọng lượng 400 (Regular) */
+/* 400 (Regular) */
 @font-face {
   font-family: 'Noto Sans JP Custom';
   font-style: normal;
@@ -13,7 +13,7 @@
   src: url('/font/NotoSansJP-Regular.ttf') format('truetype');
 }
 
-/* Trọng lượng 500 (Medium) */
+/* 500 (Medium) */
 @font-face {
   font-family: 'Noto Sans JP Custom';
   font-style: normal;
@@ -22,7 +22,7 @@
   src: url('/font/NotoSansJP-Medium.ttf') format('truetype');
 }
 
-/* Trọng lượng 700 (Bold) */
+/* 700 (Bold) */
 @font-face {
   font-family: 'Noto Sans JP Custom';
   font-style: normal;
