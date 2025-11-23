@@ -1,5 +1,5 @@
 'use client';
-import { useFormikContext } from 'formik';
+import { getIn, useFormikContext } from 'formik';
 import React from 'react';
 import { cn } from '../../lib/utils';
 
@@ -38,14 +38,22 @@ const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
     },
     ref,
   ) => {
-    const { values, errors, touched, setFieldValue } = useFormikContext<any>();
+    let formik: any = null;
+    try {
+      formik = useFormikContext();
+    } catch (e) {
+      formik = null;
+    }
 
-    const fieldValue = values?.[name] ?? '';
-    const fieldError = errors?.[name] as string | undefined;
-    const fieldTouched = touched?.[name] as boolean | undefined;
+    const fieldValue = formik ? (getIn(formik.values, name) ?? '') : (props.value ?? '');
+    const fieldError = formik ? (getIn(formik.errors, name) as string | undefined) : undefined;
+    const fieldTouched = formik ? (getIn(formik.touched, name) as boolean | undefined) : false;
 
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setFieldValue(name, e.target.value);
+      if (formik) {
+        formik.setFieldValue(name, e.target.value);
+      }
+      if (props.onChange) props.onChange(e);
     };
 
     return (

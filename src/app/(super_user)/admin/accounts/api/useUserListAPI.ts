@@ -2,7 +2,7 @@ import useAxiosClient from '@/lib/axios/useAxiosClient';
 import { getSession } from 'next-auth/react';
 import useSWR from 'swr';
 
-const useUserListAPI = (page: number = 1, page_size: number = 5) => {
+const useUserListAPI = (page: number = 1, page_size: number = 5, keyword: string = '') => {
   const URL = '/api-be/user/list';
   const axiosClient = useAxiosClient();
 
@@ -11,7 +11,7 @@ const useUserListAPI = (page: number = 1, page_size: number = 5) => {
     const headers = {
       Authorization: `${session?.user.accessToken}`,
     };
-    const params = { page, page_size };
+    const params = { page, page_size, keyword };
     const response = await axiosClient.get(url, { headers, params });
     return response.data;
   };

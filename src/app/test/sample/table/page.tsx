@@ -48,7 +48,7 @@ const page = () => {
             <div className="w-full xl:max-w-[80%]">
               <Card>
                 <CardHeader
-                  title="Form mẫu dùng cho front end"
+                  title="Form mẫu table với Formik"
                   description="Copy paste sử dụng các component dưới đây"
                   buttonGroup={
                     <>
@@ -69,7 +69,7 @@ const page = () => {
                         <Table.Th width="w-24">ImageCell</Table.Th>
                         <Table.Th>InputCell</Table.Th>
                         <Table.Th>SelectBox</Table.Th>
-                        <Table.Th>Button</Table.Th>
+                        <Table.Th width="w-24">Button</Table.Th>
                       </Table.Row>
                     </Table.Head>
                     <Table.Body>
