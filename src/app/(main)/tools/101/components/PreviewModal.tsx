@@ -352,12 +352,11 @@ function PreviewModal({
         {/* Footer */}
         <div className="flex justify-center items-center p-4 border-t space-x-3 bg-gray-50">
           <Button color="grey" onClick={onClose}>
-            修正 (閉じる)
+            戻る
           </Button>
           <Button
             color="secondary"
             onClick={onDownloadZip}
-            // (SỬA LỖI 3) Logic `disabled` này bây giờ sẽ hoạt động
             disabled={!canPerformActions || isAnyFtpUploading}
             className="inline-flex items-center"
           >
@@ -366,7 +365,6 @@ function PreviewModal({
           <Button
             color="primary"
             onClick={() => onUploadFTP('gold')}
-            // (SỬA LỖI 3) Logic `disabled` này bây giờ sẽ hoạt động
             disabled={!canPerformActions || isAnyFtpUploading}
             className="inline-flex items-center"
           >
@@ -380,7 +378,6 @@ function PreviewModal({
           <Button
             color="primary"
             onClick={() => onUploadFTP('rcabinet')}
-            // (SỬA LỖI 3) Logic `disabled` này bây giờ sẽ hoạt động
             disabled={!canPerformActions || isAnyFtpUploading}
             className="inline-flex items-center"
           >

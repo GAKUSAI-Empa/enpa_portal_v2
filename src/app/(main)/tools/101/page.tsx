@@ -1,4 +1,3 @@
-// src/app/tools/03/page.tsx
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -10,32 +9,33 @@ import { IconLoader2, IconRefresh } from '@tabler/icons-react';
 import axios from 'axios';
 import debounce from 'lodash/debounce';
 import { Toaster, toast } from 'sonner';
-// Import Hook thay vì object tĩnh
-import useTool03API from './api/tool03API';
+import useTool101API from './api/useTool101API';
 
 // コンポーネントとロジックの分離
-import EditableProductTable from './components/EditableProductTable';
+import EditableProductTable, {
+  EditableProductTableHandle,
+} from './components/EditableProductTable';
 import PreviewModal from './components/PreviewModal';
 import ResetConfirmPopup from './components/ResetConfirmPopup';
 import RestoreSessionPopup from './components/RestoreSessionPopup';
 import { templates } from './constants';
 import { useJobPolling } from './hooks/useJobPolling';
 import { createNewProductRow } from './lib/utils';
-import { validateRows } from './lib/validation';
 import type { AllErrors, ProductRow } from './types';
 
 type SonnerToastId = string | number;
 
-const LOCAL_STORAGE_KEY = 'tool03_session_data_v2';
+const LOCAL_STORAGE_KEY = 'tool101_session_data_v2';
 
-// --- LAZY LOAD (START) ---
-// 一度に表示する画像数
 const BATCH_SIZE = 10;
-// --- LAZY LOAD (END) ---
 
 export default function TwoPriceImagePage() {
   // Khởi tạo Hook ở ngay đầu Component
-  const tool03API = useTool03API();
+  const tool101API = useTool101API();
+
+  // Ref để gọi validation từ EditableProductTable
+  const tableRef = useRef<EditableProductTableHandle>(null);
+
   // --- State の宣言 ---
   const [isClient, setIsClient] = useState(false);
   const [selectedImages, setSelectedImages] = useState<string[] | null>(null);
@@ -51,7 +51,6 @@ export default function TwoPriceImagePage() {
   // --- LAZY LOAD (START) ---
   // 表示を許可する画像数を追跡する State
   const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
-  // --- LAZY LOAD (END) ---
 
   // セッション復元
   const [showRestorePopup, setShowRestorePopup] = useState(false);
@@ -71,15 +70,15 @@ export default function TwoPriceImagePage() {
       toast.dismiss(toastIdRef.current);
       toastIdRef.current = null;
     }
-    toast.success(message); // メッセージは日本語で渡される想定
+    toast.success(message);
   }, []);
   const handleFtpError = useCallback((target: 'gold' | 'rcabinet', message: string) => {
     const toastIdRef = target === 'gold' ? goldUploadToastIdRef : rcabinetUploadToastIdRef;
     if (toastIdRef.current) {
-      toast.error(message, { id: toastIdRef.current }); // メッセージは日本語で渡される想定
+      toast.error(message, { id: toastIdRef.current });
       toastIdRef.current = null;
     } else {
-      toast.error(message); // メッセージは日本語で渡される想定
+      toast.error(message);
     }
   }, []);
 
@@ -190,8 +189,8 @@ export default function TwoPriceImagePage() {
     setGlobalAlert(null);
     setShowErrors(false);
     setErrors({});
-    clearSavedSession(); // リセット時に古いセッションも削除することを保証
-    initialLoadRef.current = false; // 読み込み完了フラグ
+    clearSavedSession();
+    initialLoadRef.current = false;
   };
   // ----------------------------------------------
 
@@ -205,10 +204,10 @@ export default function TwoPriceImagePage() {
     } else {
       console.log('[LocalStorage] 新しいセッションを開始します。');
       localStorage.removeItem(LOCAL_STORAGE_KEY);
-      initializeEmptyRow('initial-new-session'); // 新しい空行を初期化
+      initializeEmptyRow('initial-new-session');
     }
     setRestoredData(null);
-    initialLoadRef.current = false; // 読み込み完了フラグ
+    initialLoadRef.current = false;
   };
 
   const clearSavedSession = useCallback(() => {
@@ -225,11 +224,9 @@ export default function TwoPriceImagePage() {
         let operation: 'set' | 'append' | 'delete' | 'reset' | 'unknown' = 'unknown';
 
         if (typeof newRowsOrFn !== 'function') {
-          // 1. "Set" の場合 (空のテーブルへのインポート)
           newRows = newRowsOrFn;
           operation = 'set';
         } else {
-          // 2. 関数型更新の場合 (Append, Delete, Reset)
           newRows = newRowsOrFn(prevRows);
           if (newRows.length > prevRows.length) {
             operation = 'append';
@@ -244,12 +241,10 @@ export default function TwoPriceImagePage() {
           }
         }
 
-        // `operation` に基づいて他の State を更新
         const currentIds = new Set(newRows.map((r) => r.id));
         setModifiedRowIds((prevModified) => {
           const nextModified = new Set(prevModified);
 
-          // 存在しなくなった ID を削除
           prevModified.forEach((id) => {
             if (!currentIds.has(id)) {
               nextModified.delete(id);
@@ -257,26 +252,21 @@ export default function TwoPriceImagePage() {
           });
 
           if (operation === 'set') {
-            // "Set" (空のテーブルへのインポート): 全てリセットし、新しい ID をすべて追加
             nextModified.clear();
             newRows.forEach((r) => nextModified.add(r.id));
             setJobId(null);
             setJobStatus(null);
             clearSavedSession();
           } else if (operation === 'append') {
-            // "Append" (CSV追記インポート): 新しい ID を追加、ジョブはリセットしない
             const addedRows = newRows.slice(prevRows.length);
             addedRows.forEach((row) => nextModified.add(row.id));
-            // ここでは jobId やセッションをリセットしない
           } else if (operation === 'reset') {
-            // "Reset" (最後の行の削除): 全てリセット
             nextModified.clear();
             nextModified.add(newRows[0].id);
             setJobId(null);
             setJobStatus(null);
             clearSavedSession();
           }
-          // "delete" または "unknown" は ID の削除のみ (上記で実施済み)
 
           return nextModified;
         });
@@ -284,7 +274,7 @@ export default function TwoPriceImagePage() {
         return newRows;
       });
     },
-    [setJobStatus, clearSavedSession], // 依存関係は不変
+    [setJobStatus, clearSavedSession],
   );
   // -----------------------------------------------------------
 
@@ -292,10 +282,7 @@ export default function TwoPriceImagePage() {
     setIsPreviewModalOpen(false);
     setIsApiLoading(false);
     stopPolling();
-    // --- LAZY LOAD (START) ---
-    // モーダルを閉じる際に表示数をリセット
     setVisibleCount(BATCH_SIZE);
-    // --- LAZY LOAD (END) ---
     if (goldUploadToastIdRef.current) {
       toast.dismiss(goldUploadToastIdRef.current);
       goldUploadToastIdRef.current = null;
@@ -309,9 +296,7 @@ export default function TwoPriceImagePage() {
     }
   }, [stopPolling, jobStatus, clearSavedSession]);
 
-  // --- リセットボタンのロジック ---
   const handleResetClick = () => {
-    // テーブルが既に空の場合はポップアップ不要
     if (
       productRows.length === 1 &&
       !productRows[0].productCode &&
@@ -331,13 +316,18 @@ export default function TwoPriceImagePage() {
       toast.success('テーブルをリセットしました。');
     }
   };
-  // ---------------------------------------
+
   // handlePreviewClick 関数
   const handlePreviewClick = async () => {
     setGlobalAlert(null);
-    const { errors: validationErrors, isValid } = validateRows(productRows);
-    setErrors(validationErrors);
-    setShowErrors(true);
+
+    // Gọi triggerValidation từ Ref
+    let isValid = false;
+    if (tableRef.current) {
+      isValid = await tableRef.current.triggerValidation();
+    }
+
+    // Kiểm tra kết quả trả về từ triggerValidation
     if (!isValid) {
       setGlobalAlert('入力内容にエラーがあります。確認してください。');
       return;
@@ -347,10 +337,7 @@ export default function TwoPriceImagePage() {
     setIsApiLoading(true);
     setIsPreviewModalOpen(true);
     setShowErrors(false);
-    // --- LAZY LOAD (START) ---
-    // モーダルを開く際に表示数をリセット
     setVisibleCount(BATCH_SIZE);
-    // --- LAZY LOAD (END) ---
 
     try {
       let currentJobId = jobId;
@@ -358,14 +345,13 @@ export default function TwoPriceImagePage() {
         // --- POST ロジック (新規ジョブ作成) ---
         console.log('>>> [DEBUG][Page] 新規ジョブを作成中 (POST)');
 
-        // [FIX] Giờ đây tool03API là instance của hook, nên gọi bình thường
-        const data = await tool03API.createJob(productRows);
+        const data = await tool101API.createJob(productRows);
         const newJobId = data.jobId;
 
         setJobId(newJobId);
         setJobStatus({
           jobId: newJobId,
-          status: 'PENDING', // この状態で "待機中..." と表示される
+          status: 'PENDING',
           progress: 0,
           total: data.totalItems,
           results: {},
@@ -389,9 +375,9 @@ export default function TwoPriceImagePage() {
 
         if (rowsToUpdate.length > 0) {
           setJobStatus((prev) => ({
-            jobId: currentJobId!, // currentJobId は確実に存在するので ! を付ける
+            jobId: currentJobId!,
             startTime: prev?.startTime ?? Date.now() / 1000,
-            status: 'Processing', // "Processing" (画像生成中...) に設定
+            status: 'Processing',
             progress: 0,
             total: productRows.length,
             results: prev?.results ?? {},
@@ -403,8 +389,7 @@ export default function TwoPriceImagePage() {
             ftpUploadErrorRcabinet: null,
           }));
 
-          // [FIX] Gọi qua instance hook
-          await tool03API.updateJob(currentJobId, rowsToUpdate);
+          await tool101API.updateJob(currentJobId, rowsToUpdate);
 
           setIsApiLoading(false);
           setModifiedRowIds(new Set());
@@ -418,7 +403,6 @@ export default function TwoPriceImagePage() {
       }
     } catch (error) {
       console.error('ジョブの開始または更新に失敗しました:', error);
-      // エラーメッセージの取得方法を少し改善 (APIのエラーレスポンス構造に合わせて調整が必要かもしれません)
       let errorMessage = '不明なエラー';
       if (axios.isAxiosError(error) && error.response?.data?.detail) {
         errorMessage = error.response.data.detail;
@@ -432,7 +416,6 @@ export default function TwoPriceImagePage() {
     }
   };
 
-  // [SỬA ĐỔI]: Logic download mới (Sử dụng tool03API instance)
   const handleDownloadZip = async () => {
     if (!jobId || jobStatus?.status === 'FAILED') {
       toast.error('ダウンロードするジョブが見つからないか、失敗しました。');
@@ -442,29 +425,21 @@ export default function TwoPriceImagePage() {
     const toastId = toast.loading('ダウンロードを準備中...');
 
     try {
-      // 1. Gọi API tải Blob (đã có Token)
-      // [FIX] Ở đây tool03API là biến instance đã khởi tạo ở đầu hàm, nên không còn lỗi đỏ nữa
-      const blob = await tool03API.downloadZip(jobId);
-
-      // 2. Tạo URL ảo từ Blob
+      const blob = await tool101API.downloadZip(jobId);
       const url = window.URL.createObjectURL(new Blob([blob]));
 
-      // --- [UPDATE]: Tạo tên file theo định dạng ngày tháng (YYYYMMDD_image.zip) ---
       const now = new Date();
       const yyyy = now.getFullYear();
       const mm = String(now.getMonth() + 1).padStart(2, '0');
       const dd = String(now.getDate()).padStart(2, '0');
       const fileName = `${yyyy}${mm}${dd}_image.zip`;
-      // ------------------------------------------------------------------------
 
-      // 3. Tạo thẻ <a> ẩn để kích hoạt download
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', fileName); // Sử dụng tên file mới
+      link.setAttribute('download', fileName);
       document.body.appendChild(link);
       link.click();
 
-      // 4. Dọn dẹp
       link.parentNode?.removeChild(link);
       window.URL.revokeObjectURL(url);
 
@@ -496,35 +471,28 @@ export default function TwoPriceImagePage() {
       return;
     }
 
-    // Cập nhật state local để phản hồi UI ngay lập tức
     setJobStatus((prev) =>
       prev ? { ...prev, [ftpStatusKey]: 'uploading', [ftpErrorKey]: null } : null,
     );
     toastIdRef.current = toast.loading(`${targetName} へのアップロードを開始しています...`);
 
     try {
-      // [FIX] Gọi qua instance hook
-      await tool03API.uploadFTP(jobId, target);
+      await tool101API.uploadFTP(jobId, target);
 
       console.log(
         `>>> [DEBUG][Page] ${targetName} アップロード開始。ポーリングでステータスを追跡します。`,
       );
-      // Không cần làm gì thêm ở đây, polling sẽ tự cập nhật trạng thái tiếp theo.
     } catch (error: any) {
       console.error(`${target} アップロードの開始に失敗:`, error);
 
-      // Xử lý lỗi từ axios hoặc lỗi khác để lấy message chuẩn xác
       let errorMessage = '不明なエラー';
       if (axios.isAxiosError(error)) {
         if (error.response) {
-          // Server trả về response lỗi (vd: 400, 500)
           errorMessage =
             error.response.data?.detail || `HTTPエラー! status: ${error.response.status}`;
         } else if (error.request) {
-          // Request đã gửi nhưng không nhận được response (lỗi mạng)
           errorMessage = 'サーバーからの応答がありません。ネットワーク接続を確認してください。';
         } else {
-          // Lỗi khi thiết lập request
           errorMessage = error.message;
         }
       } else if (error instanceof Error) {
@@ -546,12 +514,8 @@ export default function TwoPriceImagePage() {
 
   const isModalLoading = isApiLoading || isPollingLoading;
 
-  // --- LAZY LOAD (START) ---
-  // ジョブが実行中かどうかを判断 (テーブルを無効化するため)
   const isJobRunning = jobStatus?.status === 'Processing' || jobStatus?.status === 'PENDING';
-  // 全体のローディング状態 (最初の API 呼び出しも含む)
   const isProcessing = isApiLoading || (isPollingLoading && !jobStatus) || isJobRunning;
-  // --- LAZY LOAD (END) ---
 
   // --- JSX Return ---
   return (
@@ -559,7 +523,7 @@ export default function TwoPriceImagePage() {
       <h1 className="text-xl font-bold text-gray-800">二重価格セール画像生成</h1>
       {/* テンプレート選択 */}
       <Card>
-        <CardHeader title="1. テンプレート選択" />
+        <CardHeader title="テンプレート種類" />
         <CardContent>
           <div className="relative">
             <div className="flex items-start gap-4 overflow-x-auto pb-4">
@@ -589,6 +553,7 @@ export default function TwoPriceImagePage() {
       {/* 編集可能テーブル */}
       {isClient && !showRestorePopup && (
         <EditableProductTable
+          ref={tableRef} // Gắn Ref vào đây
           rows={productRows}
           setRows={handleSetProductRows}
           errors={errors}
@@ -596,10 +561,7 @@ export default function TwoPriceImagePage() {
           setModifiedRowIds={setModifiedRowIds}
           jobId={jobId}
           setJobId={setJobId}
-          // --- LAZY LOAD (START) ---
-          // `disabled` プロパティを渡す
           disabled={isProcessing && isPreviewModalOpen}
-          // --- LAZY LOAD (END) ---
         />
       )}
       {isClient && showRestorePopup && (
@@ -615,10 +577,7 @@ export default function TwoPriceImagePage() {
           <Button
             color="secondary"
             onClick={handleResetClick}
-            // --- LAZY LOAD (START) ---
-            // モーダルが開いていて処理中の場合は無効化
             disabled={isProcessing && isPreviewModalOpen}
-            // --- LAZY LOAD (END) ---
             className="inline-flex items-center"
           >
             <IconRefresh size={18} className="mr-1.5" />
@@ -627,15 +586,9 @@ export default function TwoPriceImagePage() {
           <Button
             color="primary"
             onClick={handlePreviewClick}
-            // --- LAZY LOAD (START) ---
-            // モーダルが開いていて処理中の場合は無効化
             disabled={isProcessing && isPreviewModalOpen}
-            // --- LAZY LOAD (END) ---
             className="inline-flex items-center"
           >
-            {/* --- LAZY LOAD (START) ---
-             // モーダルが開いていて処理中の場合のみスピナーを表示
-            // --- LAZY LOAD (END) --- */}
             {isProcessing && isPreviewModalOpen ? (
               <IconLoader2 className="animate-spin mr-2" />
             ) : null}
@@ -677,11 +630,8 @@ export default function TwoPriceImagePage() {
         onUploadFTP={handleUploadFTP}
         isUploadingGold={jobStatus?.ftpUploadStatusGold === 'UPLOADING'}
         isUploadingRcabinet={jobStatus?.ftpUploadStatusRcabinet === 'UPLOADING'}
-        // --- LAZY LOAD (START) ---
-        // State とハンドラ関数を渡す
         visibleCount={visibleCount}
         onLoadMore={() => setVisibleCount((prev) => prev + BATCH_SIZE)}
-        // --- LAZY LOAD (END) ---
       />
 
       {/* セッション復元ポップアップ */}
