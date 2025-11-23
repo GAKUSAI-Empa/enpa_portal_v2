@@ -8,7 +8,7 @@ import { cn } from '../../lib/utils';
 const TableContainer = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ children, className, ...props }, ref) => (
     <div className={cn('w-full overflow-x-hidden bg-white mb-1', className)} {...props} ref={ref}>
-      <table className={cn('w-full min-w-[600px] border-collapse')}>{children}</table>
+      <table className={cn('w-full min-w-[600px] border-collapse table-fixed')}>{children}</table>
     </div>
   ),
 );
