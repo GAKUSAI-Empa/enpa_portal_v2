@@ -2,7 +2,7 @@ import useAxiosClient from '@/lib/axios/useAxiosClient';
 import { getSession } from 'next-auth/react';
 
 const useStaffMainteAPI = () => {
-  const URL_PREFIX = '/staff';
+  const URL_PREFIX = '/api-be/staff';
   const axiosClient = useAxiosClient();
 
   const createStaff = async (

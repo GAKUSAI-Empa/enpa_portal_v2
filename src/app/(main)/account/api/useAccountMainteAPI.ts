@@ -2,7 +2,7 @@ import useAxiosClient from '@/lib/axios/useAxiosClient';
 import { getSession } from 'next-auth/react';
 
 const useAccountMainteAPI = () => {
-  const URL_PREFIX = '/account';
+  const URL_PREFIX = '/api-be/account';
   const axiosClient = useAxiosClient();
 
   const updatePassword = async (current_password: string, new_password: string) => {

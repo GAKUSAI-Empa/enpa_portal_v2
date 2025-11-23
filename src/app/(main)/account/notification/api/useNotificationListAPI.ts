@@ -3,7 +3,7 @@ import { getSession } from 'next-auth/react';
 import useSWR from 'swr';
 
 const useNotificationListAPI = (page: number = 1, page_size: number = 3) => {
-  const URL = '/notification/history';
+  const URL = '/api-be/notification/history';
   const axiosClient = useAxiosClient();
   const fetcher = async (url: string) => {
     try {

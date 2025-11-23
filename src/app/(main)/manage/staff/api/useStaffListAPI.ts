@@ -3,7 +3,7 @@ import { getSession } from 'next-auth/react';
 import useSWR from 'swr';
 
 const useStaffListAPI = (company_id?: string) => {
-  const URL = '/staff/list';
+  const URL = '/api-be/staff/list';
   const axiosClient = useAxiosClient();
   const fetcher = async (url: string) => {
     try {

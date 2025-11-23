@@ -9,7 +9,7 @@ export const APIUserLogin = async (
   username: string = '',
   password: string = '',
 ): Promise<AxiosResponse<any, any>> => {
-  const url = '/auth/login';
+  const url = '/api-be/auth/login';
   const body = {
     username: username,
     password: password,

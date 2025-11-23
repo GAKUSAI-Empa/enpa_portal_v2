@@ -51,7 +51,7 @@ const AppNotification = () => {
 
     const connectWS = () => {
       ws = new WebSocket(
-        `${process.env.NEXT_PUBLIC_WEBSOCKET_DOMAIN}/notification/ws/${session.user.username}`,
+        `${process.env.NEXT_PUBLIC_WEBSOCKET_DOMAIN}/api-be/notification/ws/${session.user.username}`,
       );
 
       ws.onopen = () => {

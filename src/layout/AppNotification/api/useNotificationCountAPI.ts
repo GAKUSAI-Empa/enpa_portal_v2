@@ -3,7 +3,7 @@ import { getSession } from 'next-auth/react';
 import useSWR from 'swr';
 
 const useNotificationCountAPI = () => {
-  const URL = '/notification/count/read-status';
+  const URL = '/api-be/notification/count/read-status';
   const axiosClient = useAxiosClient();
 
   const fetcher = async (url: string) => {
