@@ -1,6 +1,6 @@
-// src/app/tools/03/components/ResetConfirmPopup.tsx
-import React from "react";
-import { Button } from "@/component/common/Button";
+// src/app/tools/101/components/ResetConfirmPopup.tsx
+import React from 'react';
+import { Button } from '@/component/common/Button';
 
 interface ResetConfirmPopupProps {
   onResponse: (confirm: boolean) => void;

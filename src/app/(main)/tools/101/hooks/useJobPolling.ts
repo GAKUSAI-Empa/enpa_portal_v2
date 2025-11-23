@@ -1,7 +1,7 @@
-// src/app/tools/03/hooks/useJobPolling.ts
+// src/app/tools/101/hooks/useJobPolling.ts
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import useTool03API from '../api/tool03API'; // [CHANGE]: Import Hook thay vì static object
+import useTool101API from '../api/useTool101API'; // [CHANGE]: Import Hook thay vì static object
 import type { BackendJobStatus } from '../types';
 
 interface UseJobPollingProps {
@@ -40,7 +40,7 @@ export function useJobPolling({
   onFtpError,
 }: UseJobPollingProps) {
   // Khởi tạo API Hook
-  const api = useTool03API();
+  const api = useTool101API();
 
   const [jobStatus, setJobStatus] = useState<BackendJobStatus | null>(null);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -84,7 +84,7 @@ export function useJobPolling({
     try {
       let newData: BackendJobStatus;
       try {
-        // Sử dụng api instance từ hook thay vì tool03API static
+        // Sử dụng api instance từ hook thay vì tool101API static
         newData = await api.getJobStatus(targetJobId);
       } catch (error: any) {
         if (error.response && error.response.status === 404) {

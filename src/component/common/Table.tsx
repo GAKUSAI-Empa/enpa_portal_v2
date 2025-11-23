@@ -118,10 +118,8 @@ const TableInputCell: React.FC<TableInputCellProps> = ({ className, errorMsg = '
             className="absolute bottom-full left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200
                   max-w-xs w-max bg-red-100 text-red-800 text-xs rounded-md px-2 py-1 shadow-md z-10 break-words"
           >
-            Đây là thông báo lỗi! scsacascascascascascascascas Đây là thông báo lỗi!
-            scsacascascascascascascascas Đây là thông báo lỗi! scsacascascascascascascascas Đây là
-            thông báo lỗi! scsacascascascascascascascas Đây là thông báo lỗi!
-            scsacascascascascascascascas
+            {/* [FIX] Thay thế text cứng bằng biến errorMsg */}
+            {errorMsg}
           </div>
         </div>
       )}

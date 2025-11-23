@@ -3,7 +3,9 @@ import { useSession } from 'next-auth/react';
 import { useMemo } from 'react';
 import type { ProductRow } from '../types';
 
-const useTool03API = () => {
+const BASE_URL = '/api-be/tools/101';
+
+const useTool101API = () => {
   const api = useAxiosClient();
   const { data: session } = useSession();
 
@@ -21,7 +23,7 @@ const useTool03API = () => {
     () => ({
       createJob: async (productRows: ProductRow[]) => {
         const response = await api.post(
-          '/api/tools/03/jobs',
+          `${BASE_URL}/jobs`,
           { productRows },
           { headers: getAuthHeaders() },
         );
@@ -30,7 +32,7 @@ const useTool03API = () => {
 
       updateJob: async (jobId: string, productRows: ProductRow[]) => {
         const response = await api.patch(
-          `/api/tools/03/jobs/${jobId}`,
+          `${BASE_URL}/jobs/${jobId}`,
           { productRows },
           { headers: getAuthHeaders() },
         );
@@ -38,7 +40,7 @@ const useTool03API = () => {
       },
 
       getJobStatus: async (jobId: string) => {
-        const response = await api.get(`/api/tools/03/jobs/${jobId}/status`, {
+        const response = await api.get(`${BASE_URL}/jobs/${jobId}/status`, {
           headers: getAuthHeaders(),
         });
         return response.data;
@@ -46,24 +48,23 @@ const useTool03API = () => {
 
       uploadFTP: async (jobId: string, target: 'gold' | 'rcabinet') => {
         const response = await api.post(
-          `/api/tools/03/jobs/${jobId}/upload`,
+          `${BASE_URL}/jobs/${jobId}/upload`,
           { target },
           { headers: getAuthHeaders() },
         );
         return response.data;
       },
 
-      // Thay vì getDownloadUrl trả string, tạo hàm downloadZip
       downloadZip: async (jobId: string) => {
-        const response = await api.get(`/api/tools/03/jobs/${jobId}/download`, {
+        const response = await api.get(`${BASE_URL}/jobs/${jobId}/download`, {
           headers: getAuthHeaders(),
-          responseType: 'blob', // Báo cho axios biết đây là file nhị phân
+          responseType: 'blob',
         });
-        return response.data; // Trả về Blob
+        return response.data;
       },
 
       fetchImagePresignedUrl: async (jobId: string, filename: string) => {
-        const endpoint = `/api/tools/03/jobs/${jobId}/image/${encodeURIComponent(filename)}`;
+        const endpoint = `${BASE_URL}/jobs/${jobId}/image/${encodeURIComponent(filename)}`;
         const response = await api.get(endpoint, { headers: getAuthHeaders() });
         return response.data?.url;
       },
@@ -74,4 +75,4 @@ const useTool03API = () => {
   return service;
 };
 
-export default useTool03API;
+export default useTool101API;
