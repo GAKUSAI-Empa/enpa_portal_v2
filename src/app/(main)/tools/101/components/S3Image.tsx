@@ -1,4 +1,4 @@
-// src/app/tools/03/components/S3Image.tsx
+// src/app/tools/101/components/S3Image.tsx
 'use client';
 
 import useTool101API from '@/app/(main)/tools/101/api/useTool101API';

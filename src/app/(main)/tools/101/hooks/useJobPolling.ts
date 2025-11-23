@@ -1,4 +1,4 @@
-// src/app/tools/03/hooks/useJobPolling.ts
+// src/app/tools/101/hooks/useJobPolling.ts
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import useTool101API from '../api/useTool101API'; // [CHANGE]: Import Hook thay vì static object
