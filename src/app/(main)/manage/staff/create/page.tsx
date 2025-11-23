@@ -60,7 +60,6 @@ const page = () => {
         toast.success(resData.detail);
         router.push('/manage/staff');
       } catch (e: any) {
-        console.log(e);
         const backendMessage =
           e?.response?.data?.detail || 'エラーが発生しました。もう一度お試しください。';
         toast.error(backendMessage);

@@ -52,7 +52,6 @@ const page = () => {
     }),
     onSubmit: async (values) => {
       try {
-        console.log(values);
         setIsLoading(true);
         const dataRes = await definitiveRegistration(
           provis_regis_id,
@@ -66,7 +65,6 @@ const page = () => {
         toast.success(dataRes.detail);
         router.push('/login');
       } catch (e: any) {
-        console.log(e);
         const backendMessage =
           e?.response?.data?.detail || 'エラーが発生しました。もう一度お試しください。';
         toast.error(backendMessage);

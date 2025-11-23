@@ -42,7 +42,6 @@ const page = () => {
         redirect: false,
       });
       if (res && res.error) {
-        console.log(res);
         toast.error(res.error);
       } else {
         const session = await getSession();

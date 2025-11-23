@@ -2,9 +2,11 @@
 import { Button } from '@/component/common/Button';
 import { Card, CardContent, CardHeader } from '@/component/common/Card';
 import { Table } from '@/component/common/Table';
-import { IconPlus } from '@tabler/icons-react';
+import { IconPlus, IconTrash } from '@tabler/icons-react';
+import useUserListAPI from './api/useUserListAPI';
 
 const AccountManagePage = () => {
+  const { data: list, error, isLoading, mutate } = useUserListAPI(1, 99);
   return (
     <>
       <Card>
@@ -31,33 +33,18 @@ const AccountManagePage = () => {
               </Table.Row>
             </Table.Head>
             <Table.Body>
-              {/* {slideList?.map((item, index) => (
-                <Table.Row key={`slide-${index}`}>
-                  <Table.Td>{item.id}</Table.Td>
-                  <Table.ImageCell src={item.slideImg} alt="slide" />
-                  <Table.InputCell
-                    value={item.slideImg}
-                    onChange={(e) => {
-                      setSlideList((prevRows) =>
-                        prevRows.map((r) =>
-                          r.id === item.id ? { ...r, slideImg: e.target.value } : r,
-                        ),
-                      );
-                    }}
-                  />
-                  <Table.InputCell
-                    value={item.url}
-                    onChange={(e) => {
-                      setSlideList((prevRows) =>
-                        prevRows.map((r) => (r.id === item.id ? { ...r, url: e.target.value } : r)),
-                      );
-                    }}
-                  />
-                  <Table.Button onClick={() => deleteSlideRow(item.id)}>
+              {list?.map((item: any, index: number) => (
+                <Table.Row key={item.id}>
+                  <Table.Td>{item.username}</Table.Td>
+                  <Table.Td>{item.email}</Table.Td>
+                  <Table.Td>{item.company_name}</Table.Td>
+                  <Table.Td>{item.role_name}</Table.Td>
+                  <Table.Td>{item.create_datetime}</Table.Td>
+                  <Table.Button>
                     <IconTrash size={20} />
                   </Table.Button>
                 </Table.Row>
-              ))} */}
+              ))}
             </Table.Body>
           </Table.Container>
         </CardContent>

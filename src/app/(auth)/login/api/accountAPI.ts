@@ -23,7 +23,6 @@ export const APIUserLogin = async (
       },
     });
     const response = await defaultAxios.post(url, body);
-    console.log(response);
     return response;
   } catch (error) {
     throw error;
