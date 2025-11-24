@@ -23,7 +23,7 @@ const toolsNavItemList = [
     label: 'デザイン・ページ制作',
     icon: IconBrush,
     children: [
-      { label: '楽天GOLDヘッダー生成', href: '/tools/04' },
+      { label: '楽天GOLDヘッダー生成', href: '/tools/103' },
       { label: '商品紹介パーツ生成', href: '/7' },
       { label: 'コンテンツページ自動生成', href: '/8' },
       { label: 'クーポンバナー生成', href: '/9' },

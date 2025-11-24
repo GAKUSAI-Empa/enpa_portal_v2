@@ -21,25 +21,25 @@ export async function POST(req: Request) {
     });
 
     // 1️⃣ Upload HTML từ Next.js
-    await client.ensureDir('/public_html/tools/4');
+    await client.ensureDir('/public_html/tools/103');
     const buffer = Buffer.from(content, 'utf-8');
     const stream = Readable.from(buffer);
     await client.uploadFrom(stream, fileName);
     console.log('aa');
-    // 2️⃣ Upload folder CSS/JS/IMG từ public/template_html/tools/4
-    const publicFolder = path.join(process.cwd(), 'public', 'template_html', 'tools', '4');
+    // 2️⃣ Upload folder CSS/JS/IMG từ public/template_html/tools/103
+    const publicFolder = path.join(process.cwd(), 'public', 'template_html', 'tools', '103');
     const foldersToUpload = ['header_css', 'header_js', 'img']; // chỉ upload các folder này
 
     for (const folderName of foldersToUpload) {
       const localFolderPath = path.join(publicFolder, folderName);
-      const remoteFolderPath = `/public_html/tools/4/${folderName}`;
+      const remoteFolderPath = `/public_html/tools/103/${folderName}`;
 
       if (fs.existsSync(localFolderPath)) {
         await uploadFolderRecursive(client, localFolderPath, remoteFolderPath);
       }
     }
 
-    const list = await client.list('/public_html/tools/4');
+    const list = await client.list('/public_html/tools/103');
     const uploadedFile = list.find((f) => f.name === fileName);
     client.close();
 

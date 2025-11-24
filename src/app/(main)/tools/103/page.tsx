@@ -111,7 +111,7 @@ const page = () => {
     }),
     onSubmit: async (values) => {
       // Lấy template HTML
-      const responseHtml = await fetch('/template_html/tools/4/header.html');
+      const responseHtml = await fetch('/template_html/tools/103/header.html');
       let templateHtml = await responseHtml.text();
 
       templateHtml = editHtmlContent(templateHtml, values);
@@ -277,7 +277,7 @@ const page = () => {
     // Thêm <base href> để trình duyệt hiểu đường dẫn tương đối
     templateHtml = templateHtml.replace(
       /<head[^>]*>/i,
-      `<head><base href="${window.location.origin}/template_html/tools/4/">`,
+      `<head><base href="${window.location.origin}/template_html/tools/103/">`,
     );
     // Gán các giá trị vào template
     templateHtml = templateHtml.replace('{{PAGE_TITLE}}', 'PC用ヘッダー作成');
@@ -304,20 +304,6 @@ const page = () => {
     }
 
     return templateHtml;
-  };
-
-  const reviewLivePage = (templateHtml: string) => {
-    // 4️⃣ Tạo Blob để mở trong tab mới
-    // const blob = new Blob([templateHtml], { type: "text/html" });
-    // const url = URL.createObjectURL(blob);
-
-    // 5️⃣ Mở tab preview
-    // window.open(url, "_blank");
-
-    // Lưu template tạm thời
-    sessionStorage.setItem('reviewHtml', templateHtml);
-    // Mở tab mới cùng origin
-    window.open('/tools/04/review', '_blank');
   };
 
   // Table input
