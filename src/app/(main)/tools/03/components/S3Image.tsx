@@ -1,13 +1,12 @@
 // src/app/tools/03/components/S3Image.tsx
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 // (Import thêm IconAlertCircle để báo lỗi)
-import { IconLoader2, IconAlertCircle } from '@tabler/icons-react';
+import { IconAlertCircle, IconLoader2 } from '@tabler/icons-react';
 // === SỬA LỖI IMPORT ===
-// Đổi từ đường dẫn tương đối ('../api/tool03API')
-// sang đường dẫn tuyệt đối (alias '@') dựa trên cấu trúc dự án
-import { tool03API } from '@/app/tools/03/api/tool03API'; // Import API
+// [CHANGE]: Import Hook thay vì static object
+import useTool03API from '@/app/(main)/tools/03/api/tool03API';
 // === KẾT THÚC SỬA LỖI ===
 
 interface S3ImageProps {
@@ -25,6 +24,9 @@ interface S3ImageProps {
  * 4. Hiển thị icon lỗi nếu không lấy được URL.
  */
 export function S3Image({ jobId, filename, className, alt }: S3ImageProps) {
+  // [CHANGE]: Khởi tạo API Hook ở đây
+  const api = useTool03API();
+
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false); // (Thêm state báo lỗi)
@@ -36,9 +38,10 @@ export function S3Image({ jobId, filename, className, alt }: S3ImageProps) {
       setIsLoading(true);
       setIsError(false); // (Reset lỗi)
       try {
-        // *** (SỬA ĐỔI QUAN TRỌNG: Gọi hàm API mới) ***
-        // Gọi hàm API mới (fetchImagePresignedUrl) để lấy S3 URL
-        const s3Url = await tool03API.fetchImagePresignedUrl(jobId, filename);
+        // *** (SỬA ĐỔI QUAN TRỌNG: Gọi hàm từ API Hook instance) ***
+        // [CHANGE]: Dùng api.fetchImagePresignedUrl thay vì tool03API.fetchImagePresignedUrl
+        const s3Url = await api.fetchImagePresignedUrl(jobId, filename);
+
         if (isMounted) {
           // Gắn thêm tham số timestamp để tránh lỗi cache nếu có
           setImageUrl(s3Url + `&t=${Date.now()}`);
@@ -60,7 +63,7 @@ export function S3Image({ jobId, filename, className, alt }: S3ImageProps) {
     return () => {
       isMounted = false;
     };
-  }, [jobId, filename]); // (Chạy lại khi jobId hoặc filename thay đổi)
+  }, [jobId, filename, api]); // [CHANGE]: Thêm api vào dependency array
 
   // (Lấy class CSS từ PreviewModal để đồng bộ kích thước)
   const containerClasses = `flex items-center justify-center bg-gray-100 rounded ${className || 'w-40 h-40'}`;

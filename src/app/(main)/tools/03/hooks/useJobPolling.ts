@@ -1,8 +1,7 @@
 // src/app/tools/03/hooks/useJobPolling.ts
-
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { tool03API } from '../api/tool03API';
+import useTool03API from '../api/tool03API'; // [CHANGE]: Import Hook thay vì static object
 import type { BackendJobStatus } from '../types';
 
 interface UseJobPollingProps {
@@ -16,20 +15,19 @@ interface UseJobPollingProps {
 }
 
 function isFtpFinalState(status?: string | null): boolean {
-  // === (SỬA LỖI 2) Kiểm tra cả chữ hoa và chữ thường cho an toàn ===
   const upperStatus = status?.toUpperCase();
   return upperStatus === 'SUCCESS' || upperStatus === 'FAILED';
 }
 
 function isFtpUploading(status?: string | null): boolean {
-  // === (SỬA LỖI 2) Thêm 'PENDING' vào trạng thái đang chờ ===
+  // === Thêm 'PENDING' vào trạng thái đang chờ ===
   // Giúp polling tiếp tục chạy nếu CSDL trả về 'PENDING'
   const upperStatus = status?.toUpperCase();
   return upperStatus === 'UPLOADING' || upperStatus === 'PENDING';
 }
 
 function isJobProcessingFinished(status?: string | null): boolean {
-  // === (SỬA LỖI) Đảm bảo kiểm tra đúng các trạng thái "chưa hoàn thành" ===
+  // === ( Đảm bảo kiểm tra đúng các trạng thái "chưa hoàn thành" ===
   return !['PENDING', 'Processing', 'RUNNING'].includes(status || '');
 }
 
@@ -41,6 +39,9 @@ export function useJobPolling({
   onFtpSuccess,
   onFtpError,
 }: UseJobPollingProps) {
+  // Khởi tạo API Hook
+  const api = useTool03API();
+
   const [jobStatus, setJobStatus] = useState<BackendJobStatus | null>(null);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const previousJobStatusRef = useRef<BackendJobStatus | null>(null);
@@ -83,7 +84,8 @@ export function useJobPolling({
     try {
       let newData: BackendJobStatus;
       try {
-        newData = await tool03API.getJobStatus(targetJobId);
+        // Sử dụng api instance từ hook thay vì tool03API static
+        newData = await api.getJobStatus(targetJobId);
       } catch (error: any) {
         if (error.response && error.response.status === 404) {
           toast.error('ジョブが見つかりません。');
@@ -108,7 +110,7 @@ export function useJobPolling({
       const prevData = previousJobStatusRef.current;
       setJobStatus(newData);
 
-      // --- (SỬA LỖI) Kiểm tra trạng thái chữ IN HOA ---
+      // --- Kiểm tra trạng thái chữ IN HOA ---
       if (
         prevData?.status &&
         !isJobProcessingFinished(prevData.status) &&
@@ -120,9 +122,8 @@ export function useJobPolling({
         else if (newData.status === 'FAILED')
           toast.error(`画像の生成に失敗しました: ${newData.message || '不明なエラー'}`);
       }
-      // --- (KẾT THÚC SỬA LỖI) ---
 
-      // --- (SỬA LỖI) Chuyển đổi trạng thái FTP (dùng isFtpUploading/isFtpFinalState) ---
+      // --- Chuyển đổi trạng thái FTP (dùng isFtpUploading/isFtpFinalState) ---
       if (
         isFtpUploading(prevData?.ftpUploadStatusGold) &&
         isFtpFinalState(newData.ftpUploadStatusGold)
@@ -167,7 +168,7 @@ export function useJobPolling({
       console.error('[Hook] polling error:', error);
       onPollingErrorRef.current?.(error as Error);
     }
-  }, [stopPolling]);
+  }, [stopPolling, api]); // Thêm 'api' vào dependency array
 
   useEffect(() => {
     const shouldPoll =

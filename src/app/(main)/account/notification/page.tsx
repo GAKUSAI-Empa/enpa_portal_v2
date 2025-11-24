@@ -1,6 +1,7 @@
 'use client';
 import { Button } from '@/component/common/Button';
 import { Card, CardContent, CardHeader } from '@/component/common/Card';
+import LoadingData from '@/component/common/LoadingData';
 import { cn } from '@/lib/utils';
 import {
   IconAlertTriangle,
@@ -57,6 +58,10 @@ export default function NotificationsPage() {
       toast.error(backendMessage);
     }
   };
+
+  if (isLoading) {
+    return <LoadingData />;
+  }
 
   return (
     <Card>

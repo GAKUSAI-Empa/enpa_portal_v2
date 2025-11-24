@@ -1,68 +1,77 @@
-import axios from 'axios';
+import useAxiosClient from '@/lib/axios/useAxiosClient';
+import { useSession } from 'next-auth/react';
+import { useMemo } from 'react';
 import type { ProductRow } from '../types';
 
-// Lấy URL Backend từ biến môi trường (giống đồng nghiệp của bạn)
-export const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_DOMAIN || 'http://localhost:8000';
+const useTool03API = () => {
+  const api = useAxiosClient();
+  const { data: session } = useSession();
 
-// Tạo instance axios với cấu hình mặc định
-const api = axios.create({
-  baseURL: BACKEND_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-export const tool03API = {
-  // Tạo job mới (POST)
-  createJob: async (productRows: ProductRow[]) => {
-    const response = await api.post('/api/tools/03/jobs', { productRows });
-    return response.data;
-  },
-
-  // Cập nhật job (PATCH)
-  updateJob: async (jobId: string, productRows: ProductRow[]) => {
-    const response = await api.patch(`/api/tools/03/jobs/${jobId}`, { productRows });
-    return response.data;
-  },
-
-  // Lấy trạng thái job (GET)
-  getJobStatus: async (jobId: string) => {
-    const response = await api.get(`/api/tools/03/jobs/${jobId}/status`);
-    return response.data;
-  },
-
-  // Upload FTP (POST)
-  uploadFTP: async (jobId: string, target: 'gold' | 'rcabinet') => {
-    const response = await api.post(`/api/tools/03/jobs/${jobId}/upload`, { target });
-    return response.data;
-  },
-
-  // Helper để lấy URL download (dùng cho window.open)
-  getDownloadUrl: (jobId: string) => {
-    return `${BACKEND_BASE_URL}/api/tools/03/jobs/${jobId}/download`;
-  },
-
-  // === (THÊM HÀM MỚI) ===
-  /**
-   * Gọi API backend để lấy S3 Presigned URL cho một file ảnh.
-   * Backend trả về: { "url": "https://s3-presigned-url..." }
-   * Hàm này trích xuất và trả về string URL.
-   */
-  fetchImagePresignedUrl: async (jobId: string, filename: string) => {
-    const endpoint = `/api/tools/03/jobs/${jobId}/image/${encodeURIComponent(filename)}`;
-    try {
-      const response = await api.get(endpoint);
-      // response.data là { url: "..." }
-      if (response.data && response.data.url) {
-        return response.data.url as string;
-      }
-      throw new Error('Định dạng Presigned URL không hợp lệ từ API');
-    } catch (error) {
-      console.error(`Lỗi khi fetch Presigned URL cho ${filename}:`, error);
-      throw error;
+  const getAuthHeaders = () => {
+    if (session?.user?.accessToken) {
+      const token = session.user.accessToken;
+      return {
+        Authorization: token.startsWith('Bearer ') ? token : `Bearer ${token}`,
+      };
     }
-  },
+    return {};
+  };
 
-  // === (XÓA HÀM CŨ GÂY LỖI) ===
-  // getImageUrl: (jobId: string, filename: string) => { ... }
+  const service = useMemo(
+    () => ({
+      createJob: async (productRows: ProductRow[]) => {
+        const response = await api.post(
+          '/api/tools/03/jobs',
+          { productRows },
+          { headers: getAuthHeaders() },
+        );
+        return response.data;
+      },
+
+      updateJob: async (jobId: string, productRows: ProductRow[]) => {
+        const response = await api.patch(
+          `/api/tools/03/jobs/${jobId}`,
+          { productRows },
+          { headers: getAuthHeaders() },
+        );
+        return response.data;
+      },
+
+      getJobStatus: async (jobId: string) => {
+        const response = await api.get(`/api/tools/03/jobs/${jobId}/status`, {
+          headers: getAuthHeaders(),
+        });
+        return response.data;
+      },
+
+      uploadFTP: async (jobId: string, target: 'gold' | 'rcabinet') => {
+        const response = await api.post(
+          `/api/tools/03/jobs/${jobId}/upload`,
+          { target },
+          { headers: getAuthHeaders() },
+        );
+        return response.data;
+      },
+
+      // Thay vì getDownloadUrl trả string, tạo hàm downloadZip
+      downloadZip: async (jobId: string) => {
+        const response = await api.get(`/api/tools/03/jobs/${jobId}/download`, {
+          headers: getAuthHeaders(),
+          responseType: 'blob', // Báo cho axios biết đây là file nhị phân
+        });
+        return response.data; // Trả về Blob
+      },
+
+      fetchImagePresignedUrl: async (jobId: string, filename: string) => {
+        const endpoint = `/api/tools/03/jobs/${jobId}/image/${encodeURIComponent(filename)}`;
+        const response = await api.get(endpoint, { headers: getAuthHeaders() });
+        return response.data?.url;
+      },
+    }),
+    [api, session],
+  );
+
+  return service;
 };
+
+export default useTool03API;
