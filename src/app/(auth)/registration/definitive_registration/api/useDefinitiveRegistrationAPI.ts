@@ -1,7 +1,7 @@
 import useAxiosClient from '@/lib/axios/useAxiosClient';
 
 const useDefinitiveRegistrationAPI = () => {
-  const URL_PREFIX = '/registration';
+  const URL_PREFIX = '/api-be/registration';
   const axiosClient = useAxiosClient();
 
   const provisionalRegistrationCheck = async (provis_regis_id: string) => {

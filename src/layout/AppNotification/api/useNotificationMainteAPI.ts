@@ -2,7 +2,7 @@ import useAxiosClient from '@/lib/axios/useAxiosClient';
 import { getSession } from 'next-auth/react';
 
 const useNotificationMainteAPI = () => {
-  const URL_PREFIX = '/notification';
+  const URL_PREFIX = '/api-be/notification';
   const axiosClient = useAxiosClient();
 
   const markAsRead = async (notification_id: string) => {

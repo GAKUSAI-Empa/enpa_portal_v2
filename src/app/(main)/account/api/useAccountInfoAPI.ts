@@ -3,7 +3,7 @@ import { getSession } from 'next-auth/react';
 import useSWR from 'swr';
 
 const useAccountInfoAPI = () => {
-  const URL = '/account/detail';
+  const URL = '/api-be/account/detail';
   const axiosClient = useAxiosClient();
 
   const fetcher = async (url: string) => {

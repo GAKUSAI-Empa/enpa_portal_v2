@@ -23,7 +23,7 @@ const toolsNavItemList = [
     label: 'デザイン・ページ制作',
     icon: IconBrush,
     children: [
-      { label: '楽天GOLDヘッダー生成', href: '/tools/04' },
+      { label: '楽天GOLDヘッダー生成', href: '/tools/103' },
       { label: '商品紹介パーツ生成', href: '/7' },
       { label: 'コンテンツページ自動生成', href: '/8' },
       { label: 'クーポンバナー生成', href: '/9' },
@@ -35,7 +35,7 @@ const toolsNavItemList = [
     children: [
       { label: 'サムネコロ一括生成・反映予約', href: '/10' },
       { label: '楽天GOLDセール会場生成', href: '/11' },
-      { label: '二重価格セール画像生成', href: '/tools/03' },
+      { label: '二重価格セール画像生成', href: '/tools/101' },
       { label: 'セール更新エクセル予約', href: '/13' },
       { label: 'CSVアップロード予約', href: '/14' },
       { label: 'カテゴリ別商品順位最適化', href: '/15' },

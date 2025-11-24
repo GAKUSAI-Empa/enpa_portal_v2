@@ -4,7 +4,6 @@ import { Alert } from '@/component/common/Alert';
 import { Badge } from '@/component/common/Badge';
 import { Button } from '@/component/common/Button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/component/common/Card';
-import { Grid, GridCol, GridRow } from '@/component/common/Grid';
 import RadioBox from '@/component/common/RadioBox';
 import SelectBox from '@/component/common/SelectBox';
 import { Table } from '@/component/common/Table';
@@ -284,53 +283,7 @@ export default function Home() {
             </Form>
           </FormikProvider>
         </TabsContent>
-        <TabsContent value="tab2">
-          <Grid>
-            <GridRow cols={12} gap="gap-2">
-              <GridCol md={2} lg={2}>
-                <Card>
-                  <CardHeader title="Component Button" />
-                  <CardContent>
-                    <Button style={{ background: 'darkblue' }} color="primary">
-                      primary
-                    </Button>
-                    <Button color="secondary">secondary</Button>
-                    <Button color="primary">primary</Button>
-                    <Button>sssss</Button>
-                  </CardContent>
-                </Card>
-              </GridCol>
-
-              <GridCol md={6} lg={4}>
-                <Card>
-                  <CardHeader title="Component Button" />
-                  <CardContent>
-                    <Button style={{ background: 'darkblue' }} color="primary">
-                      primary
-                    </Button>
-                    <Button color="secondary">secondary</Button>
-                    <Button color="primary">primary</Button>
-                    <Button>sssss</Button>
-                  </CardContent>
-                </Card>
-              </GridCol>
-
-              <GridCol md={12} lg={4}>
-                <Card>
-                  <CardHeader title="Component Button" />
-                  <CardContent>
-                    <Button style={{ background: 'darkblue' }} color="primary">
-                      primary
-                    </Button>
-                    <Button color="secondary">secondary</Button>
-                    <Button color="primary">primary</Button>
-                    <Button>sssss</Button>
-                  </CardContent>
-                </Card>
-              </GridCol>
-            </GridRow>
-          </Grid>
-        </TabsContent>
+        <TabsContent value="tab2"></TabsContent>
         <TabsContent value="tab3">
           <Table.Container>
             <Table.Head>

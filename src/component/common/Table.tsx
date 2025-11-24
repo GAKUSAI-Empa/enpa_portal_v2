@@ -1,6 +1,6 @@
 'use client';
 import { IconAlertCircle } from '@tabler/icons-react';
-import { useField } from 'formik';
+import { useField, useFormikContext } from 'formik';
 import React from 'react';
 import { cn } from '../../lib/utils';
 
@@ -8,7 +8,7 @@ import { cn } from '../../lib/utils';
 const TableContainer = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ children, className, ...props }, ref) => (
     <div className={cn('w-full overflow-x-hidden bg-white mb-1', className)} {...props} ref={ref}>
-      <table className={cn('w-full min-w-[600px] border-collapse')}>{children}</table>
+      <table className={cn('w-full min-w-[600px] border-collapse table-fixed')}>{children}</table>
     </div>
   ),
 );
@@ -118,10 +118,8 @@ const TableInputCell: React.FC<TableInputCellProps> = ({ className, errorMsg = '
             className="absolute bottom-full left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200
                   max-w-xs w-max bg-red-100 text-red-800 text-xs rounded-md px-2 py-1 shadow-md z-10 break-words"
           >
-            Đây là thông báo lỗi! scsacascascascascascascascas Đây là thông báo lỗi!
-            scsacascascascascascascascas Đây là thông báo lỗi! scsacascascascascascascascas Đây là
-            thông báo lỗi! scsacascascascascascascascas Đây là thông báo lỗi!
-            scsacascascascascascascascas
+            {/* [FIX] Thay thế text cứng bằng biến errorMsg */}
+            {errorMsg}
           </div>
         </div>
       )}
@@ -165,7 +163,7 @@ interface TableImageCellProps extends React.ImgHTMLAttributes<HTMLImageElement> 
   src: string;
 }
 const TableImageCell: React.FC<TableImageCellProps> = ({ className, children, src, ...props }) => (
-  <td className="border h-[40px]">
+  <td className="border h-[40px] cursor-not-allowed">
     {src && <img {...props} src={src} className={cn('h-full w-full', className)} />}
   </td>
 );
@@ -194,24 +192,49 @@ const TableActionButtonCell: React.FC<TableActionButtonCellProps> = ({
   </td>
 );
 
-// ==================== InputCellTest ====================
-interface TableInputCellTestProps extends React.InputHTMLAttributes<HTMLInputElement> {
+// ==================== TableInputCellFormik ====================
+interface TableInputCellFormikProps extends React.InputHTMLAttributes<HTMLInputElement> {
   name: string;
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
-export const TableInputCellTest: React.FC<TableInputCellTestProps> = ({
+
+export const TableInputCellFormik: React.FC<TableInputCellFormikProps> = ({
   name,
   className,
+  value: propValue,
+  onChange: propOnChange,
   ...props
 }) => {
-  const [field, meta] = useField(name);
+  let field: any = { value: '', onChange: () => {} };
+  let meta: any = { error: '', touched: false };
+
+  // Kiểm tra có FormikContext hay không
+  let hasFormik = false;
+  try {
+    useFormikContext();
+    hasFormik = true;
+  } catch (e) {
+    hasFormik = false;
+  }
+
+  if (hasFormik) {
+    [field, meta] = useField(name);
+  }
+
   const errorMsg = meta.touched && meta.error ? meta.error : '';
+
+  const inputValue = hasFormik ? field.value : (propValue ?? '');
+  const handleChange = hasFormik ? field.onChange : (propOnChange ?? (() => {}));
 
   return (
     <td className="border h-[40px]">
       <div className="flex items-center">
         <input
-          {...field}
           {...props}
+          name={name}
+          value={inputValue}
+          onChange={handleChange}
           className={cn(
             'w-full h-10 bg-transparent px-2 py-2 text-sm text-black placeholder-gray-400',
             'focus:outline focus:outline-2 focus:outline-[#e6372e]',
@@ -234,28 +257,52 @@ export const TableInputCellTest: React.FC<TableInputCellTestProps> = ({
   );
 };
 
-// ==================== TableSelectTest ====================
-interface TableSelectTestProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
+// ==================== TableSelectFormik ====================
+interface TableSelectFormikProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   name: string;
   children:
-    | React.ReactElement<typeof TableSelectTestOption>
-    | React.ReactElement<typeof TableSelectTestOption>[];
+    | React.ReactElement<typeof TableSelectFormikOption>
+    | React.ReactElement<typeof TableSelectFormikOption>[];
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 }
-const TableSelectTest: React.FC<TableSelectTestProps> = ({
+export const TableSelectFormik: React.FC<TableSelectFormikProps> = ({
   className,
   name,
   children,
+  value: propValue,
+  onChange: propOnChange,
   ...props
 }) => {
-  const [field, meta] = useField(name);
+  let field: any = { value: '', onChange: () => {} };
+  let meta: any = { error: '', touched: false };
+
+  // Kiểm tra có FormikContext hay không
+  let hasFormik = false;
+  try {
+    useFormikContext();
+    hasFormik = true;
+  } catch (e) {
+    hasFormik = false;
+  }
+
+  if (hasFormik) {
+    [field, meta] = useField(name);
+  }
+
   const errorMsg = meta.touched && meta.error ? meta.error : '';
+
+  const selectValue = hasFormik ? field.value : (propValue ?? '');
+  const handleChange = hasFormik ? field.onChange : (propOnChange ?? (() => {}));
 
   return (
     <td className="border h-[40px]">
       <div className="flex items-center">
         <select
-          {...field}
           {...props}
+          name={name}
+          value={selectValue}
+          onChange={handleChange}
           className={cn(
             'w-full h-10 bg-transparent px-2 py-2 text-sm text-black placeholder-gray-400',
             'focus:outline focus:outline-2 focus:outline-[#e6372e]',
@@ -281,10 +328,10 @@ const TableSelectTest: React.FC<TableSelectTestProps> = ({
 };
 
 // ==================== TableSelectTestOption ====================
-interface TableSelectTestOptionProps extends React.OptionHTMLAttributes<HTMLOptionElement> {
+interface TableSelectFormikOptionProps extends React.OptionHTMLAttributes<HTMLOptionElement> {
   children: React.ReactNode;
 }
-const TableSelectTestOption: React.FC<TableSelectTestOptionProps> = ({
+const TableSelectFormikOption: React.FC<TableSelectFormikOptionProps> = ({
   className,
   children,
   ...props
@@ -309,7 +356,7 @@ export const Table = {
   ImageCell: TableImageCell,
   Button: TableActionButtonCell,
   // Test
-  InputCellTest: TableInputCellTest,
-  SelectTest: TableSelectTest,
-  SelectTestOption: TableSelectTestOption,
+  InputCellFormik: TableInputCellFormik,
+  SelectFormik: TableSelectFormik,
+  SelectFormikOption: TableSelectFormikOption,
 };

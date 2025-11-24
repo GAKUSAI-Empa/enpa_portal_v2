@@ -12,7 +12,6 @@ export default withAuth(
       return NextResponse.rewrite(
         new URL('/404', req.url), //Not admin, superuser redirect to 404
       );
-    console.log('user role ' + (req.nextauth.token as any)?.role_name);
     if (
       req.nextUrl.pathname.startsWith('/manage') &&
       (req.nextauth.token as any)?.role_name !== 'ROLE_ADMIN' &&
