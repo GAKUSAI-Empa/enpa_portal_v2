@@ -22,6 +22,7 @@ const TabItem5 = ({ slideList, setSlideList, addSlideRow, deleteSlideRow }: TabI
       <Card>
         <CardHeader
           title="5. スライドバナー設定"
+          isSticky={true}
           buttonGroup={
             <>
               <Button color="secondary" size="sm" onClick={() => addSlideRow(1)}>
@@ -41,7 +42,7 @@ const TabItem5 = ({ slideList, setSlideList, addSlideRow, deleteSlideRow }: TabI
                 <Table.Th width="w-24">画像</Table.Th>
                 <Table.Th>画像URL</Table.Th>
                 <Table.Th>リンク先URL</Table.Th>
-                <Table.Th>削除</Table.Th>
+                <Table.Th width="w-24">削除</Table.Th>
               </Table.Row>
             </Table.Head>
             <Table.Body>

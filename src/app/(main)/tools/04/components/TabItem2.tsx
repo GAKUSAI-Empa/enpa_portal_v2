@@ -28,6 +28,7 @@ const TabItem2 = ({
       <Card>
         <CardHeader
           title="2. ナビゲーションメニュー設定"
+          isSticky={true}
           buttonGroup={
             <>
               <Button color="secondary" size="sm" onClick={() => addNavigationRow(1)}>
@@ -46,7 +47,7 @@ const TabItem2 = ({
                 <Table.Th width="w-24">ID</Table.Th>
                 <Table.Th>項目名</Table.Th>
                 <Table.Th>リンク先URL</Table.Th>
-                <Table.Th>削除</Table.Th>
+                <Table.Th width="w-24">削除</Table.Th>
               </Table.Row>
             </Table.Head>
 

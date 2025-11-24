@@ -27,6 +27,7 @@ const TabItem4 = ({
       <Card>
         <CardHeader
           title="4. 注目キーワード設定"
+          isSticky={true}
           buttonGroup={
             <>
               <Button color="secondary" size="sm" onClick={() => addSuggestKeywordRow(1)}>
@@ -45,7 +46,7 @@ const TabItem4 = ({
                 <Table.Th width="w-24">ID</Table.Th>
                 <Table.Th>キーワード</Table.Th>
                 <Table.Th>検索URL</Table.Th>
-                <Table.Th>削除</Table.Th>
+                <Table.Th width="w-24">削除</Table.Th>
               </Table.Row>
             </Table.Head>
             <Table.Body>

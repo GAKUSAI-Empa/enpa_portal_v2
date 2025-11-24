@@ -163,7 +163,7 @@ interface TableImageCellProps extends React.ImgHTMLAttributes<HTMLImageElement> 
   src: string;
 }
 const TableImageCell: React.FC<TableImageCellProps> = ({ className, children, src, ...props }) => (
-  <td className="border h-[40px]">
+  <td className="border h-[40px] cursor-not-allowed">
     {src && <img {...props} src={src} className={cn('h-full w-full', className)} />}
   </td>
 );

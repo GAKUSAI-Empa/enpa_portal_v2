@@ -47,8 +47,8 @@ const TabItem6 = ({
               direction="vertical"
             />
             <SelectBox
-              id=""
-              name=""
+              id="hideShowButton"
+              name="hideShowButton"
               label="ボタン有無"
               width="full"
               direction="vertical"
@@ -63,30 +63,26 @@ const TabItem6 = ({
             />
             {showButtonSetting && (
               <React.Fragment>
-                <div>
-                  <TextBox
-                    id="buttonText"
-                    name="buttonText"
-                    type="text"
-                    width="full"
-                    isRequired={true}
-                    label={'ボタン文言'}
-                    placeholder="例：楽天に遷移する"
-                    direction="vertical"
-                  />
-                </div>
-                <div>
-                  <TextBox
-                    id="buttonLink"
-                    name="buttonLink"
-                    type="text"
-                    width="full"
-                    isRequired={true}
-                    label={'ボタンリンク先'}
-                    placeholder="例：https://www.rakuten.co.jp/"
-                    direction="vertical"
-                  />
-                </div>
+                <TextBox
+                  id="buttonText"
+                  name="buttonText"
+                  type="text"
+                  width="full"
+                  isRequired={true}
+                  label={'ボタン文言'}
+                  placeholder="例：楽天に遷移する"
+                  direction="vertical"
+                />
+                <TextBox
+                  id="buttonLink"
+                  name="buttonLink"
+                  type="text"
+                  width="full"
+                  isRequired={true}
+                  label={'ボタンリンク先'}
+                  placeholder="例：https://www.rakuten.co.jp/"
+                  direction="vertical"
+                />
               </React.Fragment>
             )}
           </div>
@@ -107,7 +103,7 @@ const TabItem6 = ({
               onChange={formik.handleChange}
             />
           </div>
-          <div className="flex justify-end gap-2 mb-2">
+          <div className="flex justify-end gap-2 mb-2 sticky top-20 z-40 bg-white">
             <Button color="secondary" size="sm" onClick={() => addFeatureRow(1)}>
               行を追加
             </Button>
@@ -122,7 +118,7 @@ const TabItem6 = ({
                 <Table.Th width="w-24">画像</Table.Th>
                 <Table.Th>画像URL</Table.Th>
                 <Table.Th>リンク先URL</Table.Th>
-                <Table.Th>削除</Table.Th>
+                <Table.Th width="w-24">削除</Table.Th>
               </Table.Row>
             </Table.Head>
             <Table.Body>

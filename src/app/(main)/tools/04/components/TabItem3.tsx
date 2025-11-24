@@ -27,6 +27,7 @@ const TabItem3 = ({
       <Card>
         <CardHeader
           title="3.アイコン付きメニュー設定"
+          isSticky={true}
           buttonGroup={
             <>
               <Button color="secondary" size="sm" onClick={() => addIconMenuRow(1)}>
@@ -47,7 +48,7 @@ const TabItem3 = ({
                 <Table.Th>画像URL</Table.Th>
                 <Table.Th>リンク先URL</Table.Th>
                 <Table.Th>テキスト</Table.Th>
-                <Table.Th>削除</Table.Th>
+                <Table.Th width="w-24">削除</Table.Th>
               </Table.Row>
             </Table.Head>
             <Table.Body>
