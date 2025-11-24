@@ -192,14 +192,14 @@ const TableActionButtonCell: React.FC<TableActionButtonCellProps> = ({
   </td>
 );
 
-// ==================== InputCellTest ====================
-interface TableInputCellTestProps extends React.InputHTMLAttributes<HTMLInputElement> {
+// ==================== TableInputCellFormik ====================
+interface TableInputCellFormikProps extends React.InputHTMLAttributes<HTMLInputElement> {
   name: string;
   value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export const TableInputCellTest: React.FC<TableInputCellTestProps> = ({
+export const TableInputCellFormik: React.FC<TableInputCellFormikProps> = ({
   name,
   className,
   value: propValue,
@@ -257,16 +257,16 @@ export const TableInputCellTest: React.FC<TableInputCellTestProps> = ({
   );
 };
 
-// ==================== TableSelectTest ====================
-interface TableSelectTestProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
+// ==================== TableSelectFormik ====================
+interface TableSelectFormikProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   name: string;
   children:
-    | React.ReactElement<typeof TableSelectTestOption>
-    | React.ReactElement<typeof TableSelectTestOption>[];
+    | React.ReactElement<typeof TableSelectFormikOption>
+    | React.ReactElement<typeof TableSelectFormikOption>[];
   value?: string;
   onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 }
-export const TableSelectTest: React.FC<TableSelectTestProps> = ({
+export const TableSelectFormik: React.FC<TableSelectFormikProps> = ({
   className,
   name,
   children,
@@ -328,10 +328,10 @@ export const TableSelectTest: React.FC<TableSelectTestProps> = ({
 };
 
 // ==================== TableSelectTestOption ====================
-interface TableSelectTestOptionProps extends React.OptionHTMLAttributes<HTMLOptionElement> {
+interface TableSelectFormikOptionProps extends React.OptionHTMLAttributes<HTMLOptionElement> {
   children: React.ReactNode;
 }
-const TableSelectTestOption: React.FC<TableSelectTestOptionProps> = ({
+const TableSelectFormikOption: React.FC<TableSelectFormikOptionProps> = ({
   className,
   children,
   ...props
@@ -356,7 +356,7 @@ export const Table = {
   ImageCell: TableImageCell,
   Button: TableActionButtonCell,
   // Test
-  InputCellTest: TableInputCellTest,
-  SelectTest: TableSelectTest,
-  SelectTestOption: TableSelectTestOption,
+  InputCellFormik: TableInputCellFormik,
+  SelectFormik: TableSelectFormik,
+  SelectFormikOption: TableSelectFormikOption,
 };

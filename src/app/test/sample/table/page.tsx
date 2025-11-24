@@ -82,17 +82,17 @@ const page = () => {
                             }
                             alt="slide"
                           />
-                          <Table.InputCellTest
+                          <Table.InputCellFormik
                             name={`rows[${index}].input`}
                             placeholder="Nhập giá trị"
                           />
-                          <Table.SelectTest name={`rows[${index}].select`}>
-                            <Table.SelectTestOption value={''}>
+                          <Table.SelectFormik name={`rows[${index}].select`}>
+                            <Table.SelectFormikOption value={''}>
                               選んでください
-                            </Table.SelectTestOption>
-                            <Table.SelectTestOption value={'a'}>aaa</Table.SelectTestOption>
-                            <Table.SelectTestOption value={'b'}>bbb</Table.SelectTestOption>
-                          </Table.SelectTest>
+                            </Table.SelectFormikOption>
+                            <Table.SelectFormikOption value={'a'}>aaa</Table.SelectFormikOption>
+                            <Table.SelectFormikOption value={'b'}>bbb</Table.SelectFormikOption>
+                          </Table.SelectFormik>
                           <Table.Button onClick={() => {}}>
                             <IconTrash size={20} />
                           </Table.Button>
