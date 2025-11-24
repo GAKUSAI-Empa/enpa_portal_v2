@@ -60,7 +60,6 @@ const page = () => {
         toast.success(resData.detail);
       } catch (e: any) {
         setRegistSuccess(false);
-        console.log(e);
         const backendMessage =
           e?.response?.data?.detail || 'エラーが発生しました。もう一度お試しください。';
         toast.error(backendMessage);

@@ -1,6 +1,7 @@
 'use client';
 import { Button } from '@/component/common/Button';
 import { Card, CardContent, CardHeader } from '@/component/common/Card';
+import LoadingData from '@/component/common/LoadingData';
 import { Table } from '@/component/common/Table';
 import { IconPlus, IconTrash } from '@tabler/icons-react';
 import { confirm } from 'material-ui-confirm';
@@ -25,10 +26,12 @@ const page = () => {
       const resData = await deleteStaff(username);
       mutate();
       toast.success(resData.detail);
-    } catch (e) {
-      toast.error('エラーが発生しました。もう一度お試しください。');
-    }
+    } catch (e) {}
   };
+
+  if (isLoading) {
+    return <LoadingData />;
+  }
 
   return (
     <>

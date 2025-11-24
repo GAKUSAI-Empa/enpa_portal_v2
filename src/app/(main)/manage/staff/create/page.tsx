@@ -37,16 +37,16 @@ const page = () => {
       isManager: Yup.string().trim().required('権限を選択してください。'),
       password: Yup.string()
         .trim()
-        // .matches(
-        //   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/,
-        //   'パスワードは英大文字・英小文字・数字を含めてください。',
-        // )
-        // .min(8, 'パスワードは8文字以上で入力してください。')
+        .matches(
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/,
+          'パスワードは英大文字・英小文字・数字を含めてください。',
+        )
+        .min(8, 'パスワードは8文字以上で入力してください。')
         .required('パスワードを入力してください。'),
       retypePassword: Yup.string()
         .trim()
         .oneOf([Yup.ref('password')], 'パスワードが一致しません。')
-        .required('パスワードを確認してください。'),
+        .required('パスワード(確認用)を入力してください。'),
     }),
     onSubmit: async (values) => {
       try {
@@ -60,7 +60,6 @@ const page = () => {
         toast.success(resData.detail);
         router.push('/manage/staff');
       } catch (e: any) {
-        console.log(e);
         const backendMessage =
           e?.response?.data?.detail || 'エラーが発生しました。もう一度お試しください。';
         toast.error(backendMessage);

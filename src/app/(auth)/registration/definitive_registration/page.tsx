@@ -2,6 +2,7 @@
 
 import { Button } from '@/component/common/Button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/component/common/Card';
+import LoadingData from '@/component/common/LoadingData';
 import SelectBox from '@/component/common/SelectBox';
 import { TextBox } from '@/component/common/TextBox';
 import { IconLoader2 } from '@tabler/icons-react';
@@ -13,7 +14,7 @@ import * as Yup from 'yup';
 import useDefinitiveRegistrationAPI from './api/useDefinitiveRegistrationAPI';
 
 const page = () => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isProvisRegisIdValid, setIsProvisRegisIdValid] = useState<boolean>();
   const { provisionalRegistrationCheck, definitiveRegistration } = useDefinitiveRegistrationAPI();
   const router = useRouter();
@@ -51,7 +52,6 @@ const page = () => {
     }),
     onSubmit: async (values) => {
       try {
-        console.log(values);
         setIsLoading(true);
         const dataRes = await definitiveRegistration(
           provis_regis_id,
@@ -65,7 +65,6 @@ const page = () => {
         toast.success(dataRes.detail);
         router.push('/login');
       } catch (e: any) {
-        console.log(e);
         const backendMessage =
           e?.response?.data?.detail || 'エラーが発生しました。もう一度お試しください。';
         toast.error(backendMessage);
@@ -82,16 +81,41 @@ const page = () => {
       try {
         const resData = await provisionalRegistrationCheck(provis_regis_id);
         setIsProvisRegisIdValid(false);
+        setIsLoading(true);
         if (resData?.valid) {
           setIsProvisRegisIdValid(true);
+          setIsLoading(false);
         }
       } catch (error) {
         setIsProvisRegisIdValid(false);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     provisRegisIdCheck();
   }, [provis_regis_id]);
+
+  if (!isProvisRegisIdValid) {
+    if (isLoading) {
+      return <LoadingData />;
+    }
+
+    return (
+      <div className="flex flex-col justify-center w-full mt-2">
+        <div className="flex flex-col items-center justify-center h-full flex-1">
+          <div className="w-full xl:max-w-[50%]">
+            <Card>
+              <CardHeader title="店舗・ユーザー情報登録フォーム" />
+              <CardContent>
+                <p>無効なURLです。</p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -180,7 +204,9 @@ const page = () => {
           </form>
         </FormikProvider>
       )}
-      {!isProvisRegisIdValid && (
+      {/* {!isProvisRegisIdValid && isLoading ? (
+        <LoadingData />
+      ) : (
         <div className="flex flex-col justify-center w-full mt-2">
           <div className="flex flex-col items-center justify-center h-full flex-1">
             <div className="w-full xl:max-w-[50%]">
@@ -193,7 +219,7 @@ const page = () => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
     </>
   );
 };

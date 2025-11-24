@@ -4,14 +4,14 @@ import { Alert } from '@/component/common/Alert';
 import { Badge } from '@/component/common/Badge';
 import { Button } from '@/component/common/Button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/component/common/Card';
-import { Grid, GridCol, GridRow } from '@/component/common/Grid';
 import RadioBox from '@/component/common/RadioBox';
 import SelectBox from '@/component/common/SelectBox';
 import { Table } from '@/component/common/Table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/component/common/Tabs';
 import { TextBox } from '@/component/common/TextBox';
 import { IconAdjustments, IconAdOff } from '@tabler/icons-react';
-import { FormikProvider, useFormik } from 'formik';
+// Sửa đổi: Import FormikProvider và useFormik (và Form)
+import { Form, FormikProvider, useFormik } from 'formik';
 import Link from 'next/link';
 import * as Yup from 'yup';
 // import { ErrorMessage, Field, Form, Formik } from 'formik';
@@ -23,6 +23,7 @@ export default function Home() {
       age: '10',
       price: '12.50',
       selectBoxValue: '',
+      radioBoxValue: '1', // Thêm giá trị ban đầu cho RadioBox
     },
     validationSchema: Yup.object({
       title: Yup.string().required('Title must not be empty'),
@@ -35,8 +36,7 @@ export default function Home() {
         .min(0, `Min value is 0`)
         .max(9999.99, `Max value is 9999.99`),
       selectBoxValue: Yup.string().required('Chọn selectBoxValue'),
-      // .min(0.0, "Price must be >= 0")
-      // .max(99999.9, "Price must be <= 10000"),
+      radioBoxValue: Yup.string().required('Chọn RadioBox'), // Thêm validation
     }),
     onSubmit: async (values) => {
       console.log('Form submitted:', values);
@@ -53,44 +53,53 @@ export default function Home() {
         </TabsList>
 
         <TabsContent value="tab1">
-          <RadioBox.Group name="">
-            <RadioBox.Option value="1">Option 1</RadioBox.Option>
-            <RadioBox.Option value="2">Option 2</RadioBox.Option>
-            <RadioBox.Option value="3" disabled={true}>
-              Option 3 (Disabled)
-            </RadioBox.Option>
-          </RadioBox.Group>
-          <div className="">
-            <h1 className="text-2xl font-bold text-gray-800 mb-2">Form test</h1>
-            <Card>
-              <CardHeader
-                title="formik"
-                description="formik test with yup validation"
-                buttonGroup={
-                  <>
-                    <Button size="sm" color="primary">
-                      行を追加
-                    </Button>
-                    <Button size="sm" color="secondary">
-                      5行追加
-                    </Button>
-                    <Button size="sm" color="grey">
-                      CSVで一括取り込む
-                    </Button>
-                  </>
-                }
-              />
-              <CardContent>
-                <IconAdjustments size={48} strokeWidth={2} color={'black'} />;
-                <FormikProvider value={formik}>
-                  <form onSubmit={formik.handleSubmit}>
+          {/* SỬA ĐỔI: Bọc toàn bộ nội dung tab1 bằng FormikProvider và Form */}
+          <FormikProvider value={formik}>
+            <Form onSubmit={formik.handleSubmit}>
+              <RadioBox.Group name="radioBoxValue">
+                {' '}
+                {/* Sửa: Thêm name */}
+                <RadioBox.Option value="1">Option 1</RadioBox.Option>
+                <RadioBox.Option value="2">Option 2</RadioBox.Option>
+                <RadioBox.Option value="3" disabled={true}>
+                  Option 3 (Disabled)
+                </RadioBox.Option>
+              </RadioBox.Group>
+              {formik.touched.radioBoxValue && formik.errors.radioBoxValue && (
+                <div className="text-red-500 text-sm mt-1">{formik.errors.radioBoxValue}</div>
+              )}
+
+              <div className="">
+                <h1 className="text-2xl font-bold text-gray-800 mb-2">Form test</h1>
+                <Card>
+                  <CardHeader
+                    title="formik"
+                    description="formik test with yup validation"
+                    buttonGroup={
+                      <>
+                        <Button size="sm" color="primary">
+                          行を追加
+                        </Button>
+                        <Button size="sm" color="secondary">
+                          5行追加
+                        </Button>
+                        <Button size="sm" color="grey">
+                          CSVで一括取り込む
+                        </Button>
+                      </>
+                    }
+                  />
+                  <CardContent>
+                    <IconAdjustments size={48} strokeWidth={2} color={'black'} />;
+                    {/* Provider đã được dời lên trên */}
+                    {/* <form onSubmit={formik.handleSubmit}> */}
                     <TextBox
                       id="title"
                       name="title"
                       type="text"
                       isRequired={true}
                       label={'イベント名を入力'}
-                      value={formik.values.title}
+                      value={formik.values.title} // Giữ lại value, onChange vì đang dùng useFormik
                       width="lg"
                       placeholder="カスタムイベント名"
                       onChange={formik.handleChange}
@@ -131,7 +140,7 @@ export default function Home() {
                     )}
                     <TextBox
                       id=""
-                      name=""
+                      name="" // Component này không có 'name' nên sẽ không được Formik quản lý
                       type="number"
                       isRequired={true}
                       label={'イベントsacsac'}
@@ -161,164 +170,120 @@ export default function Home() {
                         {formik.errors.selectBoxValue}
                       </div>
                     )}
-                  </form>
-                </FormikProvider>
-              </CardContent>
-              <CardFooter>
-                <Button type="submit" onClick={formik.submitForm}>
-                  excecute
-                </Button>
-              </CardFooter>
-            </Card>
+                    {/* </form> */}
+                  </CardContent>
+                  <CardFooter>
+                    <Button type="submit" onClick={formik.submitForm}>
+                      excecute
+                    </Button>
+                  </CardFooter>
+                </Card>
 
-            <h1 className="text-2xl font-bold text-gray-800 mb-2">セールページ作成</h1>
-            <Card>
-              <CardHeader
-                title="カードタイトル"
-                description="カードdes"
-                buttonGroup={
-                  <>
-                    <Button>aaa</Button>
-                    <Button>aaa</Button>
-                    <Button>aaa</Button>
-                  </>
-                }
-              />
-              <CardContent>
-                <TextBox
-                  id="custom-event-name"
-                  name="custom-event-name"
-                  isRequired={true}
-                  label={'イベント名を入力'}
-                  value={'aaaa'}
-                  direction="horizontal"
-                  placeholder="カスタムイベント名"
-                  onChange={() => {}}
-                />
-                <div className="flex flex-row">
-                  <TextBox
-                    id="custom-event-name"
-                    name="custom-event-name"
-                    isRequired={false}
-                    label={'イベント名を入力'}
-                    value={'aaaa'}
-                    placeholder="カスタムイベント名"
-                    onChange={() => {}}
+                <h1 className="text-2xl font-bold text-gray-800 mb-2">セールページ作成</h1>
+                <Card>
+                  <CardHeader
+                    title="カードタイトル"
+                    description="カードdes"
+                    buttonGroup={
+                      <>
+                        <Button>aaa</Button>
+                        <Button>aaa</Button>
+                        <Button>aaa</Button>
+                      </>
+                    }
                   />
-                  <TextBox
-                    id="custom-event-name"
-                    name="custom-event-name"
-                    form="formName"
-                    isRequired={false}
-                    className="ml-1"
-                    label={'イベント名を入力'}
-                    value={'aaaa'}
-                    placeholder="カスタムイベント名"
-                    onChange={() => {}}
-                  />
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button color="primary">Button footer</Button>
-              </CardFooter>
-            </Card>
+                  <CardContent>
+                    {/* Các component này không dùng Formik nên có thể nằm ngoài */}
+                    <TextBox
+                      id="custom-event-name"
+                      name="custom-event-name"
+                      isRequired={true}
+                      label={'イベント名を入力'}
+                      value={'aaaa'}
+                      direction="horizontal"
+                      placeholder="カスタムイベント名"
+                      onChange={() => {}}
+                    />
+                    <div className="flex flex-row">
+                      <TextBox
+                        id="custom-event-name"
+                        name="custom-event-name"
+                        isRequired={false}
+                        label={'イベント名を入力'}
+                        value={'aaaa'}
+                        placeholder="カスタムイベント名"
+                        onChange={() => {}}
+                      />
+                      <TextBox
+                        id="custom-event-name"
+                        name="custom-event-name"
+                        form="formName"
+                        isRequired={false}
+                        className="ml-1"
+                        label={'イベント名を入力'}
+                        value={'aaaa'}
+                        placeholder="カスタムイベント名"
+                        onChange={() => {}}
+                      />
+                    </div>
+                  </CardContent>
+                  <CardFooter>
+                    <Button color="primary">Button footer</Button>
+                  </CardFooter>
+                </Card>
 
-            <Card>
-              <CardHeader title="Component alert" />
-              <CardContent>
-                <Alert variant="info">thong bao info</Alert>
-                <Alert variant="success">thong bao success</Alert>
-                <Alert variant="error">thong bao error</Alert>
-                <Alert variant="warning">thong bao warning</Alert>
-              </CardContent>
-            </Card>
+                <Card>
+                  <CardHeader title="Component alert" />
+                  <CardContent>
+                    <Alert variant="info">thong bao info</Alert>
+                    <Alert variant="success">thong bao success</Alert>
+                    <Alert variant="error">thong bao error</Alert>
+                    <Alert variant="warning">thong bao warning</Alert>
+                  </CardContent>
+                </Card>
 
-            <Card>
-              <CardHeader title="Component Button" />
-              <CardContent>
-                <Button style={{ background: 'darkblue' }} color="primary">
-                  primary
-                </Button>
-                <Button color="secondary">secondary</Button>
-                <Button color="primary">primary</Button>
-                <Button>sssss</Button>
-                <div className="">
-                  <Button size="sm">Size</Button>
-                  <Button size="md">Size</Button>
-                  <Button size="lg">Size</Button>
-                </div>
-              </CardContent>
-            </Card>
+                <Card>
+                  <CardHeader title="Component Button" />
+                  <CardContent>
+                    <Button style={{ background: 'darkblue' }} color="primary">
+                      primary
+                    </Button>
+                    <Button color="secondary">secondary</Button>
+                    <Button color="primary">primary</Button>
+                    <Button>sssss</Button>
+                    <div className="">
+                      <Button size="sm">Size</Button>
+                      <Button size="md">Size</Button>
+                      <Button size="lg">Size</Button>
+                    </div>
+                  </CardContent>
+                </Card>
 
-            <Card>
-              <CardHeader title="Component Icon" />
-              <CardContent>
-                <IconAdOff size={48} strokeWidth={2} color={'#000000'} />
-                <p>Xem icon sử dụng tại: </p>
-                <Link href="https://tabler-icons-react.vercel.app/">
-                  https://tabler-icons-react.vercel.app/
-                </Link>
-              </CardContent>
-            </Card>
+                <Card>
+                  <CardHeader title="Component Icon" />
+                  <CardContent>
+                    <IconAdOff size={48} strokeWidth={2} color={'#000000'} />
+                    <p>Xem icon sử dụng tại: </p>
+                    <Link href="https://tabler-icons-react.vercel.app/">
+                      https://tabler-icons-react.vercel.app/
+                    </Link>
+                  </CardContent>
+                </Card>
 
-            <Card>
-              <CardHeader title="Component Badge" />
-              <CardContent>
-                <Badge color="primary">primary</Badge>
-                <Badge color="secondary">secondary</Badge>
-                <Badge color="success">success</Badge>
-                <Badge color="warning">warning</Badge>
-              </CardContent>
-            </Card>
-          </div>
+                <Card>
+                  <CardHeader title="Component Badge" />
+                  <CardContent>
+                    <Badge color="primary">primary</Badge>
+                    <Badge color="secondary">secondary</Badge>
+                    <Badge color="success">success</Badge>
+                    <Badge color="warning">warning</Badge>
+                  </CardContent>
+                </Card>
+              </div>
+            </Form>
+          </FormikProvider>
         </TabsContent>
-        <TabsContent value="tab2">
-          <Grid>
-            <GridRow cols={12} gap="gap-2">
-              <GridCol md={2} lg={2}>
-                <Card>
-                  <CardHeader title="Component Button" />
-                  <CardContent>
-                    <Button style={{ background: 'darkblue' }} color="primary">
-                      primary
-                    </Button>
-                    <Button color="secondary">secondary</Button>
-                    <Button color="primary">primary</Button>
-                    <Button>sssss</Button>
-                  </CardContent>
-                </Card>
-              </GridCol>
-
-              <GridCol md={6} lg={4}>
-                <Card>
-                  <CardHeader title="Component Button" />
-                  <CardContent>
-                    <Button style={{ background: 'darkblue' }} color="primary">
-                      primary
-                    </Button>
-                    <Button color="secondary">secondary</Button>
-                    <Button color="primary">primary</Button>
-                    <Button>sssss</Button>
-                  </CardContent>
-                </Card>
-              </GridCol>
-
-              <GridCol md={12} lg={4}>
-                <Card>
-                  <CardHeader title="Component Button" />
-                  <CardContent>
-                    <Button style={{ background: 'darkblue' }} color="primary">
-                      primary
-                    </Button>
-                    <Button color="secondary">secondary</Button>
-                    <Button color="primary">primary</Button>
-                    <Button>sssss</Button>
-                  </CardContent>
-                </Card>
-              </GridCol>
-            </GridRow>
-          </Grid>
-        </TabsContent>
+        <TabsContent value="tab2"></TabsContent>
         <TabsContent value="tab3">
           <Table.Container>
             <Table.Head>

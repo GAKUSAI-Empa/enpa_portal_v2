@@ -1,6 +1,8 @@
 'use client';
 import { Button } from '@/component/common/Button';
 import { Card, CardContent, CardHeader } from '@/component/common/Card';
+import LoadingData from '@/component/common/LoadingData';
+import Pagination from '@/component/common/Pagination';
 import { cn } from '@/lib/utils';
 import {
   IconAlertTriangle,
@@ -12,14 +14,32 @@ import {
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { ja } from 'date-fns/locale';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import useNotificationListAPI from './api/useNotificationListAPI';
 import useNotificationMainteAPI from './api/useNotificationMainteAPI';
 
 export default function NotificationsPage() {
   const router = useRouter();
-  const { data: notificationHistoryList, error, isLoading, mutate } = useNotificationListAPI(1, 99);
+  const [filters, setFilters] = useState({
+    page: 1,
+    page_size: 10,
+  });
+  const {
+    data: notificationHistoryList,
+    total,
+    error,
+    isLoading,
+    mutate,
+  } = useNotificationListAPI(filters.page, filters.page_size);
   const { markAsRead, markAllAsRead } = useNotificationMainteAPI();
+
+  const totalPages = Math.ceil(total / filters.page_size);
+
+  const nextPage = () =>
+    setFilters((prev) => ({ ...prev, page: Math.min(prev.page + 1, totalPages) }));
+
+  const prevPage = () => setFilters((prev) => ({ ...prev, page: Math.max(prev.page - 1, 1) }));
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -58,6 +78,10 @@ export default function NotificationsPage() {
     }
   };
 
+  if (isLoading) {
+    return <LoadingData />;
+  }
+
   return (
     <Card>
       <CardHeader
@@ -69,7 +93,7 @@ export default function NotificationsPage() {
         }
       />
       <CardContent>
-        <div className="flex min-h-screen p-6">
+        <div className="flex p-6">
           {/* Main content */}
           <main className="flex-1 ml-8">
             {/* Notifications list */}
@@ -114,6 +138,12 @@ export default function NotificationsPage() {
             </div>
           </main>
         </div>
+        <Pagination
+          page={filters.page}
+          totalPages={totalPages}
+          handleClickPrevPage={prevPage}
+          handleClickNextPage={nextPage}
+        />
       </CardContent>
     </Card>
   );

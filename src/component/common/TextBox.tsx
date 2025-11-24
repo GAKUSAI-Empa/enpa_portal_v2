@@ -24,7 +24,7 @@ interface TextBoxProps extends React.InputHTMLAttributes<HTMLInputElement> {
 const TextBox = React.forwardRef<HTMLInputElement, TextBoxProps>(
   (
     {
-      label = 'No label',
+      label = 'ラベル無し',
       showLabel = true,
       isRequired = false,
       id,
@@ -46,14 +46,22 @@ const TextBox = React.forwardRef<HTMLInputElement, TextBoxProps>(
 
     const inputType = type === 'password' ? (showPassword ? 'text' : 'password') : type;
 
-    const { values, errors, touched, setFieldValue, isSubmitting } = useFormikContext<any>();
+    let formik: any = null;
+    try {
+      formik = useFormikContext();
+    } catch (e) {
+      formik = null;
+    }
 
-    const fieldValue = getIn(values, name) ?? '';
-    const fieldError = getIn(errors, name) as string | undefined;
-    const fieldTouched = getIn(touched, name) as boolean | undefined;
+    const fieldValue = formik ? (getIn(formik.values, name) ?? '') : (props.value ?? '');
+    const fieldError = formik ? (getIn(formik.errors, name) as string | undefined) : undefined;
+    const fieldTouched = formik ? (getIn(formik.touched, name) as boolean | undefined) : false;
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFieldValue(name, e.target.value);
+      if (formik) {
+        formik.setFieldValue(name, e.target.value);
+      }
+      if (props.onChange) props.onChange(e);
     };
 
     const renderFieldError = (error: any) => {
@@ -98,7 +106,7 @@ const TextBox = React.forwardRef<HTMLInputElement, TextBoxProps>(
             </label>
           )}
           <div className="flex items-center">
-            <div className="relative w-full">
+            <div className={cn('relative ', widthClass[width])}>
               <input
                 id={id}
                 name={name}

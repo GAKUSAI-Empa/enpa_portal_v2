@@ -14,11 +14,13 @@ const RadioContext = createContext<RadioContextType | null>(null);
 
 interface RadioGroupProps {
   label?: string;
-  isRequired?: Boolean;
+  isRequired?: boolean;
   name: string;
   direction?: 'vertical' | 'horizontal';
   children: React.ReactNode;
   className?: string;
+  value?: string; // external control (non-Formik)
+  onChange?: (value: string) => void;
 }
 
 const Group: React.FC<RadioGroupProps> = ({
@@ -28,29 +30,38 @@ const Group: React.FC<RadioGroupProps> = ({
   direction = 'vertical',
   children,
   className = '',
+  value,
+  onChange,
 }) => {
-  const { values, errors, touched, setFieldValue } = useFormikContext<any>();
-  const fieldValue = values?.[name] ?? '';
-  const fieldError = errors?.[name] as string | undefined;
-  const fieldTouched = touched?.[name] as boolean | undefined;
+  let formik: any = null;
 
-  const [selectedValue, setSelectedValue] = useState(fieldValue || '');
+  try {
+    formik = useFormikContext();
+  } catch (e) {
+    formik = null;
+  }
 
-  // const handleChange = (value: string) => {
-  //   setSelectedValue(value);
-  //   onChange && onChange(value);
-  // };
+  const formikValue = formik ? formik.values?.[name] : undefined;
+  const formikError = formik ? formik.errors?.[name] : undefined;
+  const formikTouched = formik ? formik.touched?.[name] : undefined;
 
-  const handleChange = (value: string) => {
-    setSelectedValue(value);
-    setFieldValue(name, value);
+  const [selectedValue, setSelectedValue] = useState(formikValue ?? value ?? '');
+
+  const handleChange = (v: string) => {
+    setSelectedValue(v);
+
+    if (formik) {
+      formik.setFieldValue(name, v);
+    } else if (onChange) {
+      onChange(v);
+    }
   };
 
   useEffect(() => {
-    if (fieldValue !== selectedValue) {
-      setSelectedValue(fieldValue);
+    if (formik && formikValue !== selectedValue) {
+      setSelectedValue(formikValue);
     }
-  }, [fieldValue]);
+  }, [formikValue]);
 
   return (
     <RadioContext.Provider value={{ selectedValue, onChange: handleChange, name }}>
@@ -65,15 +76,20 @@ const Group: React.FC<RadioGroupProps> = ({
           {isRequired && <span className="text-red-500 ml-1">*</span>}
         </label>
       )}
+
       <div
         className={cn(
-          `flex ${direction === 'horizontal' ? 'flex-row space-x-4' : 'flex-col space-y-2'}`,
+          direction === 'horizontal' ? 'flex flex-row space-x-4' : 'flex flex-col space-y-2',
           className,
         )}
       >
         {children}
       </div>
-      {fieldTouched && fieldError && <p className="text-red-500 text-sm">{fieldError}</p>}
+
+      {/* Error chỉ hiển thị nếu có Formik */}
+      {formik && formikTouched && formikError && (
+        <p className="text-red-500 text-sm">{formikError}</p>
+      )}
     </RadioContext.Provider>
   );
 };
@@ -85,9 +101,9 @@ interface OptionProps {
   className?: string;
 }
 
-const Option: React.FC<OptionProps> = ({ value, disabled = false, children, className = '' }) => {
+const Option: React.FC<OptionProps> = ({ value, disabled = false, children, className }) => {
   const context = useContext(RadioContext);
-  if (!context) throw new Error('Radio.Option must be used inside Radio.Group');
+  if (!context) throw new Error('Radio.Option must be inside Radio.Group');
 
   const checked = context.selectedValue === value;
 
@@ -95,7 +111,7 @@ const Option: React.FC<OptionProps> = ({ value, disabled = false, children, clas
     <label
       className={cn(
         'flex items-center cursor-pointer',
-        disabled ? 'opacity-50 cursor-not-allowed' : '',
+        disabled && 'opacity-50 cursor-not-allowed',
         className,
       )}
     >
@@ -108,20 +124,22 @@ const Option: React.FC<OptionProps> = ({ value, disabled = false, children, clas
         onChange={() => context.onChange(value)}
         className="hidden"
       />
+
       <span
         className={`w-5 h-5 flex items-center justify-center border-2 rounded-full mr-2
           ${checked ? 'border-primary bg-primary' : 'border-gray-400'}`}
       >
         {checked && <span className="w-2.5 h-2.5 bg-white rounded-full" />}
       </span>
+
       <span>{children}</span>
     </label>
   );
 };
 
 const RadioBox = {
-  Group: Group,
-  Option: Option,
+  Group,
+  Option,
 };
 
 export default RadioBox;
