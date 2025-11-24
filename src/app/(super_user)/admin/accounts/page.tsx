@@ -6,8 +6,9 @@ import LoadingData from '@/component/common/LoadingData';
 import Pagination from '@/component/common/Pagination';
 import { Table } from '@/component/common/Table';
 import { TextBox } from '@/component/common/TextBox';
-import { IconPlus, IconTrash } from '@tabler/icons-react';
+import { IconEdit, IconPlus, IconTrash } from '@tabler/icons-react';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import useUserListAPI from './api/useUserListAPI';
 
@@ -18,13 +19,14 @@ const AccountManagePage = () => {
     page_size: 10,
     keyword: '',
   });
+  const router = useRouter();
 
   const {
     data: list,
     total,
     isLoading,
     mutate,
-  } = useUserListAPI(filters.page, filters.page_size, filters.keyword);
+  } = useUserListAPI(filters.page, filters.page_size, filters.keyword.trim());
 
   const totalPages = Math.ceil(total / filters.page_size);
 
@@ -55,7 +57,12 @@ const AccountManagePage = () => {
       <CardHeader
         title="ユーザー管理"
         buttonGroup={
-          <Button prefixIcon={IconPlus} color="primary" size="md">
+          <Button
+            prefixIcon={IconPlus}
+            color="primary"
+            size="md"
+            onClick={() => router.push('/admin/accounts/create')}
+          >
             作成
           </Button>
         }
@@ -87,6 +94,7 @@ const AccountManagePage = () => {
                   <Table.Th>企業名</Table.Th>
                   <Table.Th>権限</Table.Th>
                   <Table.Th>登録日</Table.Th>
+                  <Table.Th width="w-24">変更</Table.Th>
                   <Table.Th width="w-24">削除</Table.Th>
                 </Table.Row>
               </Table.Head>
@@ -98,6 +106,11 @@ const AccountManagePage = () => {
                     <Table.Td>{item.company_name}</Table.Td>
                     <Table.Td>{item.role_name}</Table.Td>
                     <Table.Td>{item.create_datetime}</Table.Td>
+                    <Table.Button
+                      onClick={() => router.push(`/admin/accounts/edit/${item.username}`)}
+                    >
+                      <IconEdit size={20} />
+                    </Table.Button>
                     {item.username !== session?.user.username ? (
                       <Table.Button>
                         <IconTrash size={20} />

@@ -2,44 +2,32 @@
 
 import { Button } from '@/component/common/Button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/component/common/Card';
+import Label from '@/component/common/Label';
 import SelectBox from '@/component/common/SelectBox';
 import { TextBox } from '@/component/common/TextBox';
 import { IconLoader2 } from '@tabler/icons-react';
 import { FormikProvider, useFormik } from 'formik';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import * as Yup from 'yup';
 
-const page = () => {
+interface UserPageProps {
+  params: {
+    username: string;
+  };
+}
+const page = ({ params }: UserPageProps) => {
+  const { username } = params;
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const formik = useFormik({
     initialValues: {
-      username: '',
-      password: '',
-      retypePassword: '',
+      username: username,
     },
-    validationSchema: Yup.object({
-      username: Yup.string()
-        .trim()
-        .required('ユーザー名を入力してください。')
-        .matches(/^[a-zA-Z0-9_]+$/, 'ユーザー名には英数字とアンダースコア（_）のみ使用できます。')
-        .max(20, 'ユーザー名は20文字以内で入力してください。'),
-      password: Yup.string()
-        .trim()
-        .matches(
-          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/,
-          'パスワードは英大文字・英小文字・数字を含めてください。',
-        )
-        .min(8, 'パスワードは8文字以上で入力してください。')
-        .required('パスワードを入力してください。'),
-      retypePassword: Yup.string()
-        .trim()
-        .oneOf([Yup.ref('password')], 'パスワードが一致しません。')
-        .required('パスワード(確認用)を入力してください。'),
-    }),
+    validationSchema: Yup.object({}),
     onSubmit: async (values) => {
       try {
         setIsLoading(true);
@@ -66,7 +54,7 @@ const page = () => {
       <FormikProvider value={formik}>
         <form onSubmit={formik.handleSubmit}>
           <Card>
-            <CardHeader title="ユーザー追加" />
+            <CardHeader title="ユーザー変更" />
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6">
                 <div>
@@ -75,24 +63,9 @@ const page = () => {
                     name="username"
                     type="text"
                     isRequired={true}
+                    disabled={true}
                     label={'ユーザー名'}
                     placeholder="enpaportal"
-                    direction="vertical"
-                  />
-                  <TextBox
-                    id="password"
-                    name="password"
-                    type="text"
-                    isRequired={true}
-                    label={'パスワード'}
-                    direction="vertical"
-                  />
-                  <TextBox
-                    id="retypePassword"
-                    name="retypePassword"
-                    type="text"
-                    isRequired={true}
-                    label={'パスワード(確認用)'}
                     direction="vertical"
                   />
                   <TextBox
@@ -130,6 +103,19 @@ const page = () => {
                     ]}
                     isRequired={true}
                   />
+                </div>
+                <div>
+                  <Label>Password</Label>
+                  <p>
+                    生のパスワードは格納されていないため、このユーザのパスワードを確認する方法はありません。しかし
+                    <Link
+                      className="text-blue-600"
+                      href={`/admin/accounts/change-password/${formik.values.username}`}
+                    >
+                      このフォーム
+                    </Link>
+                    を使用してパスワードを変更できます。
+                  </p>
                 </div>
               </div>
             </CardContent>

@@ -2,7 +2,6 @@
 
 import { Button } from '@/component/common/Button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/component/common/Card';
-import SelectBox from '@/component/common/SelectBox';
 import { TextBox } from '@/component/common/TextBox';
 import { IconLoader2 } from '@tabler/icons-react';
 import { FormikProvider, useFormik } from 'formik';
@@ -10,23 +9,26 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import * as Yup from 'yup';
+import useUserMainteAPI from '../../api/useUserMainteAPI';
 
-const page = () => {
+interface UserPageProps {
+  params: {
+    username: string;
+  };
+}
+const UserPage = ({ params }: UserPageProps) => {
+  const { username } = params;
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { updatePassword } = useUserMainteAPI();
 
   const formik = useFormik({
     initialValues: {
-      username: '',
+      username: username,
       password: '',
       retypePassword: '',
     },
     validationSchema: Yup.object({
-      username: Yup.string()
-        .trim()
-        .required('ユーザー名を入力してください。')
-        .matches(/^[a-zA-Z0-9_]+$/, 'ユーザー名には英数字とアンダースコア（_）のみ使用できます。')
-        .max(20, 'ユーザー名は20文字以内で入力してください。'),
       password: Yup.string()
         .trim()
         .matches(
@@ -43,13 +45,8 @@ const page = () => {
     onSubmit: async (values) => {
       try {
         setIsLoading(true);
-        // const resData = await createStaff(
-        //   values.username,
-        //   values.email,
-        //   values.isManager,
-        //   values.password,
-        // );
-        // toast.success(resData.detail);
+        const resData = await updatePassword(username, values.password);
+        toast.success(resData.detail);
         router.push('/admin/accounts');
       } catch (e: any) {
         const backendMessage =
@@ -66,7 +63,7 @@ const page = () => {
       <FormikProvider value={formik}>
         <form onSubmit={formik.handleSubmit}>
           <Card>
-            <CardHeader title="ユーザー追加" />
+            <CardHeader title={`パスワードの変更：${formik.values.username}`} />
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6">
                 <div>
@@ -75,6 +72,7 @@ const page = () => {
                     name="username"
                     type="text"
                     isRequired={true}
+                    disabled={true}
                     label={'ユーザー名'}
                     placeholder="enpaportal"
                     direction="vertical"
@@ -82,7 +80,7 @@ const page = () => {
                   <TextBox
                     id="password"
                     name="password"
-                    type="text"
+                    type="password"
                     isRequired={true}
                     label={'パスワード'}
                     direction="vertical"
@@ -90,45 +88,10 @@ const page = () => {
                   <TextBox
                     id="retypePassword"
                     name="retypePassword"
-                    type="text"
+                    type="password"
                     isRequired={true}
                     label={'パスワード(確認用)'}
                     direction="vertical"
-                  />
-                  <TextBox
-                    id="email"
-                    name="email"
-                    type="text"
-                    isRequired={true}
-                    label={'メールアドレス'}
-                    placeholder="enpaportal@gmail.com"
-                    direction="vertical"
-                  />
-                  <SelectBox
-                    id="company_id"
-                    label="企業名"
-                    name="company_id"
-                    width="full"
-                    options={[
-                      { value: '', label: '選んでください' },
-                      { value: 'Option 1', label: '1' },
-                      { value: 'Option 2', label: '2' },
-                      { value: 'Option 3', label: '3' },
-                    ]}
-                    isRequired={true}
-                  />
-                  <SelectBox
-                    id="role_id"
-                    label="パーミッション"
-                    name="role_id"
-                    width="full"
-                    options={[
-                      { value: '', label: '選んでください' },
-                      { value: 'Option 1', label: '1' },
-                      { value: 'Option 2', label: '2' },
-                      { value: 'Option 3', label: '3' },
-                    ]}
-                    isRequired={true}
                   />
                 </div>
               </div>
@@ -148,4 +111,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default UserPage;

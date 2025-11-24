@@ -3,7 +3,7 @@ import { getSession } from 'next-auth/react';
 import useSWR from 'swr';
 
 const useUserListAPI = (page: number = 1, page_size: number = 5, keyword: string = '') => {
-  const URL = '/api-be/user/list';
+  const URL = '/api-be/manage/user/list';
   const axiosClient = useAxiosClient();
 
   const fetcher = async ([url, page, page_size]: [string, number, number]) => {

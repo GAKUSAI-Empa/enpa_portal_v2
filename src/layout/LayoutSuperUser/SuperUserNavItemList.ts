@@ -2,7 +2,7 @@ import { IconDatabase } from '@tabler/icons-react';
 
 const superUserNavItemList = [
   {
-    label: 'データ設定',
+    label: '管理',
     icon: IconDatabase,
     children: [
       { label: 'ユーザー', href: '/admin/accounts' },
