@@ -5,15 +5,16 @@ import { Card, CardContent, CardHeader } from '@/component/common/Card';
 import { Table } from '@/component/common/Table';
 import { IconTrash } from '@tabler/icons-react';
 import { useFormik } from 'formik';
+import { useSession } from 'next-auth/react';
 import { useState } from 'react';
 import * as Yup from 'yup';
 import Slide from './components/Slide';
 
 type TableItem = {
   id: number;
-  template_id: string;
-  message1: string;
-  message2: string;
+  template: string;
+  coupon_message1: string;
+  coupon_message2: string;
   discount_value: number;
   discount_unit: string;
   available_condition: string;
@@ -21,16 +22,23 @@ type TableItem = {
   end_date: string;
 };
 
+type ImageItem = {
+  file_name: string;
+  image_base64: string;
+};
+
 const page = () => {
-  const requestUrl = 'http://127.0.0.1:8000/coupon/generate';
+  const requestUrl = 'http://127.0.0.1:8000/coupon/generate-preview';
   const [loading, setLoading] = useState(false);
+  const { data: session } = useSession();
+  const [images, setImages] = useState<ImageItem[]>([]);
 
   const formik = useFormik({
     initialValues: {
       id: 1,
-      template_id: '',
-      message1: '',
-      message2: '',
+      template: '',
+      coupon_message1: '',
+      coupon_message2: '',
       discount_value: 0,
       discount_unit: '',
       available_condition: '',
@@ -41,9 +49,9 @@ const page = () => {
       couponList: Yup.array()
         .of(
           Yup.object().shape({
-            template_id: Yup.string().trim().required('テンプレート名を入力してください。'),
-            message1: Yup.string().trim().required('文言１を入力してください。'),
-            message2: Yup.string().trim().required('文言１を入力してください。'),
+            template: Yup.string().trim().required('テンプレート名を入力してください。'),
+            coupon_message1: Yup.string().trim().required('文言１を入力してください。'),
+            coupon_message2: Yup.string().trim().required('文言１を入力してください。'),
             discount_value: Yup.number()
               .typeError('割引は数値で入力してください。')
               .min(0, '割引は0以上である必要があります。')
@@ -62,11 +70,11 @@ const page = () => {
   const [TableList, setTableList] = useState<TableItem[]>([
     {
       id: 1,
-      template_id: '1',
-      message1: '',
-      message2: '',
+      template: '1',
+      coupon_message1: '',
+      coupon_message2: '',
       discount_value: 0,
-      discount_unit: 'persent',
+      discount_unit: '円',
       available_condition: '',
       start_date: '',
       end_date: '',
@@ -78,9 +86,9 @@ const page = () => {
       for (let i = 0; i < numberRow; i++) {
         newRows.push({
           id: prev.length + i + 1,
-          template_id: '',
-          message1: '',
-          message2: '',
+          template: '',
+          coupon_message1: '',
+          coupon_message2: '',
           discount_value: 0,
           discount_unit: '',
           available_condition: '',
@@ -103,17 +111,31 @@ const page = () => {
 
   const handleSubmit = async () => {
     const payloadList = TableList.map((item) => ({
-      filename: String(item.id),
-      template_id: item.template_id,
-      message1: item.message1,
-      message2: item.message2,
+      file_name: String(item.id),
+      template: item.template,
+      coupon_message1: item.coupon_message1,
+      coupon_message2: item.coupon_message2,
       discount_value: item.discount_value,
       discount_unit: item.discount_unit,
       available_condition: item.available_condition,
       start_date: item.start_date,
       end_date: item.end_date,
     }));
-    alert('data' + JSON.stringify(payloadList, null, 2));
+
+    const requestBody = {
+      items: payloadList,
+    };
+
+    // const token = session?.user?.accessToken;
+
+    const token =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjYmJmNDkzYy1mZjc5LTQ4YjgtODQ4MC1lOWJhNjcwNWY4ZjkiLCJleHAiOjE3NjM5NjcwMjQsInVzZXJfbmFtZSI6ImFkbWluIiwicm9sZV9uYW1lIjoiUk9MRV9BRE1JTiJ9.jX4NE5rhN6hMDE4YCVweqXRkBFepr-yrA-EHXiLq65I';
+
+    if (!token) {
+      alert('token có vấn đề!');
+
+      return;
+    }
 
     try {
       setLoading(true);
@@ -122,12 +144,16 @@ const page = () => {
         headers: {
           Accept: 'application/json, text/plain, */*',
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ payloadList }),
+
+        body: JSON.stringify(requestBody),
       });
+      console.log('data', JSON.stringify(requestBody, null, 2));
 
       const data = await res.json();
       console.log('Server Response:', data);
+      setImages(data.images);
     } catch (error) {
       console.error('Đã xảy ra lỗi khi gửi dữ liệu:', error);
     } finally {
@@ -157,7 +183,6 @@ const page = () => {
               </>
             }
           />
-
           <CardContent>
             <Table.Container>
               <Table.Head>
@@ -179,25 +204,13 @@ const page = () => {
                 {TableList?.map((item, index) => (
                   <Table.Row key={`coupon-${index}`}>
                     <Table.Td>{item.id}</Table.Td>
-                    {/* <Table.InputCell
-                      value={item.template_id}
-                      onChange={(e) => {
-                        setTableList((prevRows) =>
-                          prevRows.map((r) =>
-                            r.id === item.id ? { ...r, template_id: e.target.value } : r,
-                          ),
-                        );
-                      }}
-                      placeholder="テンプレート1"
-                    /> */}
-
                     <Table.SelectBox
-                      name="template_id"
-                      value={item.template_id}
+                      name="template"
+                      value={item.template}
                       onChange={(e) => {
                         setTableList((prevRows) =>
                           prevRows.map((r) =>
-                            r.id === item.id ? { ...r, template_id: e.target.value } : r,
+                            r.id === item.id ? { ...r, template: e.target.value } : r,
                           ),
                         );
                       }}
@@ -224,27 +237,29 @@ const page = () => {
                     </Table.SelectBox>
 
                     <Table.InputCell
-                      value={item.message1}
+                      value={item.coupon_message1}
                       onChange={(e) => {
                         setTableList((prevRows) =>
                           prevRows.map((r) =>
-                            r.id === item.id ? { ...r, message1: e.target.value } : r,
+                            r.id === item.id ? { ...r, coupon_message1: e.target.value } : r,
                           ),
                         );
                       }}
                       placeholder="特別クーポン"
                     />
+
                     <Table.InputCell
-                      value={item.message2}
+                      value={item.coupon_message2}
                       placeholder="今すぐゲット！"
                       onChange={(e) => {
                         setTableList((prevRows) =>
                           prevRows.map((r) =>
-                            r.id === item.id ? { ...r, message2: e.target.value } : r,
+                            r.id === item.id ? { ...r, coupon_message2: e.target.value } : r,
                           ),
                         );
                       }}
                     />
+
                     <Table.InputCell
                       value={item.discount_value}
                       onChange={(e) => {
@@ -268,20 +283,10 @@ const page = () => {
                       }}
                       className="w-[60px] text-center"
                     >
-                      <Table.Option value="option1">%</Table.Option>
-                      <Table.Option value="option2">円</Table.Option>
-                    </Table.SelectBox>
+                      <Table.Option value="option1">円</Table.Option>
 
-                    {/* <Table.InputCell
-                      value={item.discount_unit}
-                      onChange={(e) => {
-                        setTableList((prevRows) =>
-                          prevRows.map((r) =>
-                            r.id === item.id ? { ...r, discount_unit: e.target.value } : r,
-                          ),
-                        );
-                      }}
-                    > */}
+                      <Table.Option value="option2">%</Table.Option>
+                    </Table.SelectBox>
                     <Table.InputCell
                       value={item.available_condition}
                       placeholder="3000円以上"
@@ -293,6 +298,7 @@ const page = () => {
                         );
                       }}
                     />
+
                     <Table.InputCell
                       type="datetime-local"
                       value={item.start_date}
@@ -304,6 +310,7 @@ const page = () => {
                         );
                       }}
                     />
+
                     <Table.InputCell
                       type="datetime-local"
                       value={item.end_date}
@@ -315,6 +322,7 @@ const page = () => {
                         );
                       }}
                     />
+
                     <Table.Button onClick={() => deleteTableRow(item.id)}>
                       <IconTrash />
                     </Table.Button>
@@ -324,12 +332,31 @@ const page = () => {
             </Table.Container>
           </CardContent>
         </Card>
+
         <div className="flex items-center justify-center">
-          <Button className={'flex flexEnd'} size="lg" type="submit" onClick={() => handleSubmit()}>
+          <Button className={'flex flexEnd'} size="lg" onClick={() => handleSubmit()}>
             プレビュー
           </Button>
         </div>
       </form>
+
+      <div className="flex flex-wrap gap-4 mt-5">
+        {images?.length > 0 ? (
+          images.map((imgItem, index) => (
+            <div key={index} className="flex flex-col items-center">
+              <img
+                src={`data:image/png;base64,${imgItem.image_base64}`}
+                alt={`Image ${imgItem.file_name}`}
+                className="max-w-[200px] h-auto border"
+              />
+
+              <span className="mt-1 text-sm">{imgItem.file_name}</span>
+            </div>
+          ))
+        ) : (
+          <p>プレビュー画像はここに表示されます</p>
+        )}
+      </div>
     </>
   );
 };

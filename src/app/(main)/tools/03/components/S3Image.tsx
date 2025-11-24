@@ -1,9 +1,9 @@
 // src/app/tools/03/components/S3Image.tsx
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 // (Import thêm IconAlertCircle để báo lỗi)
-import { IconLoader2, IconAlertCircle } from '@tabler/icons-react';
+import { IconAlertCircle, IconLoader2 } from '@tabler/icons-react';
 // === SỬA LỖI IMPORT ===
 // Đổi từ đường dẫn tương đối ('../api/tool03API')
 // sang đường dẫn tuyệt đối (alias '@') dựa trên cấu trúc dự án
