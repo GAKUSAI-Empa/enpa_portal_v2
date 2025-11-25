@@ -2,6 +2,7 @@
 
 import { Button } from '@/component/common/Button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/component/common/Card';
+import LoadingData from '@/component/common/LoadingData';
 import SelectBox from '@/component/common/SelectBox';
 import { TextBox } from '@/component/common/TextBox';
 import { IconLoader2 } from '@tabler/icons-react';
@@ -10,16 +11,25 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import * as Yup from 'yup';
+import useCompanyListAPI from '../api/useCompanyListAPI';
+import useRoleListAPI from '../api/useRoleListAPI';
+import useUserMainteAPI from '../api/useUserMainteAPI';
 
 const page = () => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { createUser } = useUserMainteAPI();
+  const { data: companyList, isLoading: isLoadingCompanyList } = useCompanyListAPI(1, 99);
+  const { data: roleList, isLoading: isLoadingRoleList } = useRoleListAPI(1, 99);
 
   const formik = useFormik({
     initialValues: {
       username: '',
       password: '',
       retypePassword: '',
+      email: '',
+      company_id: '',
+      role_id: '',
     },
     validationSchema: Yup.object({
       username: Yup.string()
@@ -39,17 +49,23 @@ const page = () => {
         .trim()
         .oneOf([Yup.ref('password')], 'パスワードが一致しません。')
         .required('パスワード(確認用)を入力してください。'),
+      email: Yup.string()
+        .email('メールアドレスの形式が正しくありません。')
+        .required('メールアドレスを入力してください。'),
+      company_id: Yup.string().trim().required('企業を選択してください。'),
+      role_id: Yup.string().trim().required('パーミッションを選択してください。'),
     }),
     onSubmit: async (values) => {
       try {
         setIsLoading(true);
-        // const resData = await createStaff(
-        //   values.username,
-        //   values.email,
-        //   values.isManager,
-        //   values.password,
-        // );
-        // toast.success(resData.detail);
+        const resData = await createUser(
+          values.username,
+          values.password,
+          values.email,
+          values.company_id,
+          values.role_id,
+        );
+        toast.success(resData.detail);
         router.push('/admin/accounts');
       } catch (e: any) {
         const backendMessage =
@@ -68,70 +84,78 @@ const page = () => {
           <Card>
             <CardHeader title="ユーザー追加" />
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6">
-                <div>
-                  <TextBox
-                    id="username"
-                    name="username"
-                    type="text"
-                    isRequired={true}
-                    label={'ユーザー名'}
-                    placeholder="enpaportal"
-                    direction="vertical"
-                  />
-                  <TextBox
-                    id="password"
-                    name="password"
-                    type="text"
-                    isRequired={true}
-                    label={'パスワード'}
-                    direction="vertical"
-                  />
-                  <TextBox
-                    id="retypePassword"
-                    name="retypePassword"
-                    type="text"
-                    isRequired={true}
-                    label={'パスワード(確認用)'}
-                    direction="vertical"
-                  />
-                  <TextBox
-                    id="email"
-                    name="email"
-                    type="text"
-                    isRequired={true}
-                    label={'メールアドレス'}
-                    placeholder="enpaportal@gmail.com"
-                    direction="vertical"
-                  />
-                  <SelectBox
-                    id="company_id"
-                    label="企業名"
-                    name="company_id"
-                    width="full"
-                    options={[
-                      { value: '', label: '選んでください' },
-                      { value: 'Option 1', label: '1' },
-                      { value: 'Option 2', label: '2' },
-                      { value: 'Option 3', label: '3' },
-                    ]}
-                    isRequired={true}
-                  />
-                  <SelectBox
-                    id="role_id"
-                    label="パーミッション"
-                    name="role_id"
-                    width="full"
-                    options={[
-                      { value: '', label: '選んでください' },
-                      { value: 'Option 1', label: '1' },
-                      { value: 'Option 2', label: '2' },
-                      { value: 'Option 3', label: '3' },
-                    ]}
-                    isRequired={true}
-                  />
+              {isLoadingCompanyList && isLoadingRoleList ? (
+                <LoadingData />
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6">
+                  <div>
+                    <TextBox
+                      id="username"
+                      name="username"
+                      type="text"
+                      isRequired={true}
+                      label={'ユーザー名'}
+                      placeholder="enpaportal"
+                      direction="vertical"
+                    />
+                    <SelectBox
+                      id="company_id"
+                      label="企業名"
+                      name="company_id"
+                      width="full"
+                      options={[
+                        { value: '', label: '選んでください' },
+                        ...(companyList || [])?.map((c: any) => ({
+                          value: c.id,
+                          label: c.company_name,
+                        })),
+                      ]}
+                      isRequired={true}
+                    />
+                    <SelectBox
+                      id="role_id"
+                      label="パーミッション"
+                      name="role_id"
+                      width="full"
+                      options={[
+                        { value: '', label: '選んでください' },
+                        ...(roleList || [])?.map((c: any) => ({
+                          value: c.id,
+                          label: c.role_name,
+                        })),
+                      ]}
+                      isRequired={true}
+                    />
+                  </div>
+                  <div>
+                    <TextBox
+                      id="email"
+                      name="email"
+                      type="text"
+                      isRequired={true}
+                      label={'メールアドレス'}
+                      placeholder="enpaportal@gmail.com"
+                      direction="vertical"
+                    />
+                    <TextBox
+                      id="password"
+                      name="password"
+                      type="password"
+                      isRequired={true}
+                      label={'パスワード'}
+                      direction="vertical"
+                    />
+                    <TextBox
+                      id="retypePassword"
+                      name="retypePassword"
+                      type="password"
+                      isRequired={true}
+                      label={'パスワード(確認用)'}
+                      direction="vertical"
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
             </CardContent>
             <CardFooter className="flex gap-2">
               <Button type="submit" disabled={isLoading} onClick={formik.submitForm}>
