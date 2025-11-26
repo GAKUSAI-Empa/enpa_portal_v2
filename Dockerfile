@@ -18,6 +18,11 @@ RUN npm ci --ignore-scripts
 # Copy toàn bộ mã nguồn
 COPY . .
 
+RUN rm -f .env.local
+
+# Copy file production env trước khi build
+COPY .env.production .env
+
 # Build dự án Next.js
 RUN npm run build
 
