@@ -9,7 +9,7 @@ import { IconLoader2, IconRefresh } from '@tabler/icons-react';
 import axios from 'axios';
 import debounce from 'lodash/debounce';
 import { Toaster, toast } from 'sonner';
-import useTool101API from './api/useTool101API';
+import useTool102API from './api/useTool102API';
 
 // コンポーネントとロジックの分離
 import EditableProductTable, {
@@ -25,13 +25,13 @@ import type { AllErrors, ProductRow } from './types';
 
 type SonnerToastId = string | number;
 
-const LOCAL_STORAGE_KEY = 'tool101_session_data_v2';
+const LOCAL_STORAGE_KEY = 'tool102_session_data_v2';
 
 const BATCH_SIZE = 10;
 
 export default function TwoPriceImagePage() {
   // Khởi tạo Hook ở ngay đầu Component
-  const tool101API = useTool101API();
+  const tool102API = useTool102API();
 
   // Ref để gọi validation từ EditableProductTable
   const tableRef = useRef<EditableProductTableHandle>(null);
@@ -345,7 +345,7 @@ export default function TwoPriceImagePage() {
         // --- POST ロジック (新規ジョブ作成) ---
         console.log('>>> [DEBUG][Page] 新規ジョブを作成中 (POST)');
 
-        const data = await tool101API.createJob(productRows);
+        const data = await tool102API.createJob(productRows);
         const newJobId = data.jobId;
 
         setJobId(newJobId);
@@ -389,7 +389,7 @@ export default function TwoPriceImagePage() {
             ftpUploadErrorRcabinet: null,
           }));
 
-          await tool101API.updateJob(currentJobId, rowsToUpdate);
+          await tool102API.updateJob(currentJobId, rowsToUpdate);
 
           setIsApiLoading(false);
           setModifiedRowIds(new Set());
@@ -425,7 +425,7 @@ export default function TwoPriceImagePage() {
     const toastId = toast.loading('ダウンロードを準備中...');
 
     try {
-      const blob = await tool101API.downloadZip(jobId);
+      const blob = await tool102API.downloadZip(jobId);
       const url = window.URL.createObjectURL(new Blob([blob]));
 
       const now = new Date();
@@ -477,7 +477,7 @@ export default function TwoPriceImagePage() {
     toastIdRef.current = toast.loading(`${targetName} へのアップロードを開始しています...`);
 
     try {
-      await tool101API.uploadFTP(jobId, target);
+      await tool102API.uploadFTP(jobId, target);
 
       console.log(
         `>>> [DEBUG][Page] ${targetName} アップロード開始。ポーリングでステータスを追跡します。`,

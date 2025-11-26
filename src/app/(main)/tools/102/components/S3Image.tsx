@@ -1,7 +1,7 @@
-// src/app/tools/101/components/S3Image.tsx
+// src/app/tools/102/components/S3Image.tsx
 'use client';
 
-import useTool101API from '@/app/(main)/tools/101/api/useTool101API';
+import useTool102API from '@/app/(main)/tools/102/api/useTool102API';
 import { IconAlertCircle, IconLoader2 } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 
@@ -20,7 +20,7 @@ interface S3ImageProps {
  * 4. Hiển thị icon lỗi nếu không lấy được URL.
  */
 export function S3Image({ jobId, filename, className, alt }: S3ImageProps) {
-  const api = useTool101API();
+  const api = useTool102API();
 
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
