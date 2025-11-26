@@ -9,7 +9,7 @@ interface PageTitleProps {
 const PageTitle = ({ className = '', title }: PageTitleProps) => {
   return (
     <>
-      <h1 className={cn('text-xl font-bold text-gray-800', className)}>{title}</h1>
+      <h1 className={cn('text-xl font-bold text-gray-800 mb-2', className)}>{title}</h1>
     </>
   );
 };

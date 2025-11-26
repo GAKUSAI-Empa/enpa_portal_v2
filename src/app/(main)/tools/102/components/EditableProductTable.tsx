@@ -246,6 +246,7 @@ const EditableProductTable = forwardRef<EditableProductTableHandle, EditableProd
                 <CardHeader
                   title="1. 商品情報入力"
                   description="は必須項目です。"
+                  isSticky={true}
                   showDescAsterisk
                   buttonGroup={
                     <FieldArray name="rows">
