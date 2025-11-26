@@ -1,4 +1,4 @@
-// src/app/tools/101/components/ResetConfirmPopup.tsx
+// src/app/tools/102/components/ResetConfirmPopup.tsx
 import React from 'react';
 import { Button } from '@/component/common/Button';
 

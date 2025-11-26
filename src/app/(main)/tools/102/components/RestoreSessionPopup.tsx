@@ -1,5 +1,4 @@
-// src/app/tools/101/components/RestoreSessionPopup.tsx
-import React from 'react';
+// src/app/tools/102/components/RestoreSessionPopup.tsx
 import { Button } from '@/component/common/Button';
 
 interface RestoreSessionPopupProps {

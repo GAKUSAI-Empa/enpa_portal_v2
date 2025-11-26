@@ -85,7 +85,7 @@ const TableCell: React.FC<TableCellProps> = ({
 }) => (
   <td
     className={cn(
-      'border px-2 py-2 h-[40px]',
+      'border px-2 py-2 h-[40px] overflow-hidden',
       tdPositionClass[position],
       center && 'text-center',
       className,

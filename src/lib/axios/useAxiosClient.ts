@@ -1,32 +1,29 @@
 'use client';
 import axios, { AxiosError } from 'axios';
-import { signOut } from 'next-auth/react';
-import { useEffect, useMemo } from 'react';
+import { signOut, useSession } from 'next-auth/react';
+import { useEffect } from 'react';
 
+const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_DOMAIN;
+const axiosAuth = axios.create({
+  //axios instance create
+  //Stater config for axios calling
+  baseURL: BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 const useAxiosClient = () => {
-  // Base URL thông minh
-  // Production: Dùng relative path '/api-be'
-  // Dev: Dùng localhost hoặc biến môi trường
-  const baseURL = useMemo(() => {
-    if (process.env.NODE_ENV === 'production') {
-      return '/api-be';
-    }
-    return process.env.NEXT_PUBLIC_BACKEND_DOMAIN || 'http://localhost:8000';
-  }, []);
+  //================================
+  //    INTERCEPTOR: BEFORE SENDING REQUEST & AFTER SENDING REQUEST
+  //================================
+  const { data: session, update } = useSession();
 
-  const axiosAuth = useMemo(() => {
-    return axios.create({
-      baseURL: baseURL,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-  }, [baseURL]);
-
+  //========================================
+  //With 401 status error from apis
+  //========================================
   const handle401Error = async (error: AxiosError) => {
     await signOut({ callbackUrl: '/login?isSessionExpired=true' }); // clear session
   };
-
   useEffect(() => {
     //Response interceptor & handle error occur
     const responseIntercept = axiosAuth.interceptors.response.use(
@@ -42,11 +39,9 @@ const useAxiosClient = () => {
 
     return () => {
       //clean up hook
-      // axiosAuth.interceptors.request.eject(requestIntercept);
-
       axiosAuth.interceptors.response.eject(responseIntercept);
     };
-  }, [axiosAuth]);
+  }, [session]);
 
   return axiosAuth;
 };

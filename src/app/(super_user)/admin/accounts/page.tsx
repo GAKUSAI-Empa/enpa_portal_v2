@@ -7,10 +7,13 @@ import Pagination from '@/component/common/Pagination';
 import { Table } from '@/component/common/Table';
 import { TextBox } from '@/component/common/TextBox';
 import { IconEdit, IconPlus, IconTrash } from '@tabler/icons-react';
+import { confirm } from 'material-ui-confirm';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { toast } from 'sonner';
 import useUserListAPI from './api/useUserListAPI';
+import useUserMainteAPI from './api/useUserMainteAPI';
 
 const AccountManagePage = () => {
   const { data: session } = useSession();
@@ -27,6 +30,8 @@ const AccountManagePage = () => {
     isLoading,
     mutate,
   } = useUserListAPI(filters.page, filters.page_size, filters.keyword.trim());
+
+  const { deleteUser } = useUserMainteAPI();
 
   const totalPages = Math.ceil(total / filters.page_size);
 
@@ -50,6 +55,19 @@ const AccountManagePage = () => {
       ...prev,
       keyword: e.target.value,
     }));
+  };
+
+  const handleDelete = async (username: string) => {
+    try {
+      await confirm({
+        title: `削除`,
+        description: '削除します。よろしいでしょうか?',
+      });
+
+      const resData = await deleteUser(username);
+      mutate();
+      toast.success(resData.detail);
+    } catch (e) {}
   };
 
   return (
@@ -90,7 +108,7 @@ const AccountManagePage = () => {
               <Table.Head>
                 <Table.Row>
                   <Table.Th>ユーザー名</Table.Th>
-                  <Table.Th>メールアドレス</Table.Th>
+                  <Table.Th width="w-80">メールアドレス</Table.Th>
                   <Table.Th>企業名</Table.Th>
                   <Table.Th>権限</Table.Th>
                   <Table.Th>登録日</Table.Th>
@@ -112,7 +130,7 @@ const AccountManagePage = () => {
                       <IconEdit size={20} />
                     </Table.Button>
                     {item.username !== session?.user.username ? (
-                      <Table.Button>
+                      <Table.Button onClick={() => handleDelete(item.username)}>
                         <IconTrash size={20} />
                       </Table.Button>
                     ) : (

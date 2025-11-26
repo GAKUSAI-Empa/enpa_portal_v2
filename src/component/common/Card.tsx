@@ -1,3 +1,4 @@
+import { IconProps } from '@tabler/icons-react';
 import * as React from 'react';
 import { cn } from '../../lib/utils';
 import { Button } from './Button';
@@ -35,6 +36,8 @@ interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
     | (React.ReactElement<typeof Button> | React.ReactElement<'button'>)[]; // cho phép mảng
   showDescAsterisk?: boolean;
   isSticky?: boolean;
+  prefixIcon?: React.ComponentType<IconProps>;
+  prefixIconHexColor?: string;
 }
 const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
   (
@@ -47,6 +50,8 @@ const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
       buttonGroup = <></>,
       showDescAsterisk = false,
       isSticky = false,
+      prefixIcon: PrefixIcon,
+      prefixIconHexColor = '#000000',
       ...props
     },
     ref,
@@ -62,9 +67,14 @@ const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
         {...props}
       >
         <div>
-          <h3 className={cn('text-lg font-bold leading-none tracking-tight', classNameTitle)}>
-            {title}
-          </h3>
+          <div className={cn('flex items-center gap-2')}>
+            {PrefixIcon && (
+              <PrefixIcon className="mr-1" color={prefixIconHexColor} size={20} stroke={2} />
+            )}
+            <h3 className={cn('text-lg font-bold leading-none tracking-tight', classNameTitle)}>
+              {title}
+            </h3>
+          </div>
           {description && (
             <p className={cn('text-sm text-gray-500 mt-2', classNameDescription)}>
               {showDescAsterisk && (
