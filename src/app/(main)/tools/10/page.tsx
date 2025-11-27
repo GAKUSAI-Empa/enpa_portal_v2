@@ -4,12 +4,12 @@ import { Button } from '@/component/common/Button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/component/common/Card';
 import { Table } from '@/component/common/Table';
 import { IconTrash } from '@tabler/icons-react';
-import { formatISO } from 'date-fns';
 import { FormikProvider, useFormik } from 'formik';
 import { useSession } from 'next-auth/react';
 import { useRef, useState } from 'react';
 import * as Yup from 'yup';
-import Slide from './components/Slide';
+import tool10MainteAPI from './tool10_api/tool10_MainteAPI';
+import Slide from './tool10_components/Slide';
 
 type TableItem = {
   id: number;
@@ -29,7 +29,7 @@ type ImageItem = {
 };
 
 const page = () => {
-  const requestUrl = 'http://127.0.0.1:8000/api-be/coupon/generate-preview';
+  const { generatePreviews } = tool10MainteAPI();
   const [loading, setLoading] = useState(false);
   const { data: session } = useSession();
   const [images, setImages] = useState<ImageItem[]>([]);
@@ -85,51 +85,24 @@ const page = () => {
         .min(1, '商品情報を最低１行入力してください。'),
     }),
     onSubmit: async (values) => {
-      const payloadList = values.couponList.map((item) => ({
-        file_name: String(item.id),
-        template: item.template,
-        coupon_message1: item.coupon_message1,
-        coupon_message2: item.coupon_message2,
-        discount_value: item.discount_value,
-        discount_unit: item.discount_unit,
-        available_condition: item.available_condition,
-        start_date: formatISO(new Date(item.start_date)),
-        end_date: formatISO(new Date(item.end_date)),
-      }));
+      setLoading(true);
 
-      const requestBody = {
-        items: payloadList,
-      }; // const token = session?.user?.accessToken;
+      const imageResult: ImageItem[] = [];
 
-      const token =
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0NWU0NDI0Mi0xOGJjLTQ0YTQtODRjZS05NDQ2NWNmNjNkMTEiLCJleHAiOjE3NjQxNDA4MzUsInVzZXJfbmFtZSI6ImFkbWluIiwicm9sZV9uYW1lIjoiUk9MRV9BRE1JTiJ9.a6zuaXWLYFrzZ4scT3RG1YkwGF6tod_ODtpq_GOzO8o';
+      for (const item of values.couponList) {
+        try {
+          const result = await generatePreviews(values.couponList);
 
-      if (!token) {
-        alert('token có vấn đề!');
+          if (result && result.images) {
+            imageResult.push(...result.images);
+          } else if (result && result.file_name && result.image_base64) {
+            imageResult.push(result as ImageItem);
+          }
+        } catch (error) {
+          console.error('Error generating preview for item ID:', item.id, error);
+        }
 
-        return;
-      }
-
-      try {
-        setLoading(true);
-        const res = await fetch(requestUrl, {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json, text/plain, */*',
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-
-          body: JSON.stringify(requestBody),
-        });
-        console.log('data', JSON.stringify(requestBody, null, 2));
-
-        const data = await res.json();
-        console.log('Server Response:', data);
-        setImages(data.images);
-      } catch (error) {
-        console.error('Đã xảy ra lỗi khi gửi dữ liệu:', error);
-      } finally {
+        setImages(imageResult);
         setLoading(false);
       }
     },
@@ -163,22 +136,12 @@ const page = () => {
       id: index + 1,
     }));
     formik.setFieldValue('couponList', reindexedList);
-  }; // Import CSV function start
-
-  const parseJapaneseDate = (dateString: string): string => {
-    if (!dateString) return '';
-    const parts = dateString.split(/[\/\s:]/);
-    if (parts.length >= 5) {
-      const [year, month, day, hour, minute] = parts;
-      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${hour.padStart(2, '0')}:${minute.padStart(2, '0')}`;
-    }
-    return dateString.replace(/\//g, '-').replace(' ', 'T');
   };
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileButtonClick = () => {
-    fileInputRef.current?.click(); // Mở dialog chọn file
+    fileInputRef.current?.click();
   };
 
   const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -224,9 +187,6 @@ const page = () => {
         ? formik.values.couponList[formik.values.couponList.length - 1].id
         : 0;
 
-    // ========================
-    // XLSX FILE PROCESS
-    // ========================
     if (isExcel) {
       const XLSX = await import('xlsx');
       const buffer = await file.arrayBuffer();
@@ -241,7 +201,7 @@ const page = () => {
         return;
       }
 
-      const headers = rows[0].slice(1); // bỏ cột A
+      const headers = rows[0].slice(1);
 
       rows.slice(1).forEach((row, idx) => {
         const cols = row.slice(1);
@@ -268,7 +228,6 @@ const page = () => {
 
           if (key === 'start_date' || key === 'end_date') {
             if (typeof value === 'number') {
-              //  Excel date → JS date
               const date = XLSX.SSF.parse_date_code(value);
               if (date) {
                 const yyyy = date.y;
@@ -279,7 +238,6 @@ const page = () => {
                 item[key] = `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
               }
             } else {
-              //  CSV hoặc Excel dạng chuỗi
               item[key] = parseJapaneseDate(String(value));
             }
           } else if (key === 'discount_value') {
@@ -293,9 +251,6 @@ const page = () => {
       });
     }
 
-    // ========================
-    // CSV FILE PROCESS
-    // ========================
     if (isCSV) {
       const text = await file.text();
       const lines = text.split(/\r?\n/).filter((l) => l.trim() !== '');
