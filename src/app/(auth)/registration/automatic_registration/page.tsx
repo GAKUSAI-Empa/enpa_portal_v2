@@ -93,6 +93,7 @@ const page = () => {
                         placeholder="〇〇株式会社"
                         direction="vertical"
                         disabled={formik.isSubmitting}
+                        maxLength={50}
                       />
                       <TextBox
                         id="personName"
@@ -102,6 +103,7 @@ const page = () => {
                         placeholder="山田 太郎"
                         direction="vertical"
                         disabled={formik.isSubmitting}
+                        maxLength={50}
                       />
                       <TextBox
                         id="email"
@@ -121,6 +123,7 @@ const page = () => {
                         placeholder="0123456789"
                         direction="vertical"
                         disabled={formik.isSubmitting}
+                        maxLength={11}
                       />
                       <TextArea
                         id="note"
@@ -130,6 +133,7 @@ const page = () => {
                         placeholder="備考"
                         direction="vertical"
                         disabled={formik.isSubmitting}
+                        maxLength={100}
                       />
                       <CheckboxGroup
                         id="terms_of_use_check"
@@ -138,6 +142,7 @@ const page = () => {
                         options={[{ label: '同意する', value: 'true' }]}
                         direction="horizontal"
                         disabled={formik.isSubmitting}
+                        isRequired={true}
                       />
                       <CheckboxGroup
                         id="privacy_policy_check"
@@ -146,6 +151,7 @@ const page = () => {
                         options={[{ label: '同意する', value: 'true' }]}
                         direction="horizontal"
                         disabled={formik.isSubmitting}
+                        isRequired={true}
                       />
                     </CardContent>
                     <CardFooter className="flex gap-2">

@@ -137,6 +137,7 @@ const page = () => {
                         placeholder="123456"
                         direction="vertical"
                         disabled={formik.isSubmitting}
+                        maxLength={6}
                       />
                       <TextBox
                         id="store_url"
@@ -146,6 +147,7 @@ const page = () => {
                         placeholder="http://empotown.jp"
                         direction="vertical"
                         disabled={formik.isSubmitting}
+                        maxLength={100}
                       />
                       <TextBox
                         id="store_name"
@@ -155,6 +157,7 @@ const page = () => {
                         placeholder="エンパタウン"
                         direction="vertical"
                         disabled={formik.isSubmitting}
+                        maxLength={20}
                       />
                       <SelectBox
                         id="default_tax_rate"
@@ -191,6 +194,7 @@ const page = () => {
                         placeholder="empo-user01"
                         direction="vertical"
                         disabled={formik.isSubmitting}
+                        maxLength={20}
                       />
                     </CardContent>
                     <CardFooter className="flex gap-2">
