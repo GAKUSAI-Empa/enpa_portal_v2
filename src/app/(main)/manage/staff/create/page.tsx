@@ -89,6 +89,7 @@ const page = () => {
                     label={'ユーザー名'}
                     placeholder="enpaportal"
                     direction="vertical"
+                    maxLength={20}
                   />
                   <TextBox
                     id="email"

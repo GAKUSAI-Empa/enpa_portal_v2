@@ -143,7 +143,7 @@ const page = () => {
                         name="store_url"
                         isRequired={true}
                         label={'店舗URL'}
-                        placeholder="empotown"
+                        placeholder="http://empotown.jp"
                         direction="vertical"
                         disabled={formik.isSubmitting}
                       />

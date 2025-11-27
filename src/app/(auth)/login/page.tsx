@@ -4,26 +4,19 @@ import { Button } from '@/component/common/Button';
 import { TextBox } from '@/component/common/TextBox';
 import { IconLoader2 } from '@tabler/icons-react';
 import { FormikProvider, useFormik } from 'formik';
-import { getSession, signIn, useSession } from 'next-auth/react';
+import { signIn } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import * as Yup from 'yup';
 
 const page = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const { data: session } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
   const isSessionExpired = searchParams ? searchParams.get('isSessionExpired') === 'true' : false;
-
-  useEffect(() => {
-    if (session) {
-      router.push('/account');
-    }
-  }, [session]);
 
   const formik = useFormik({
     initialValues: {
@@ -44,8 +37,7 @@ const page = () => {
       if (res && res.error) {
         toast.error(res.error);
       } else {
-        const session = await getSession();
-        router.replace('/');
+        router.replace('/tools/dashboard');
       }
 
       setIsLoading(false);

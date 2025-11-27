@@ -21,6 +21,8 @@ const page = () => {
       await confirm({
         title: `削除`,
         description: '削除します。よろしいでしょうか?',
+        confirmationText: 'はい',
+        cancellationText: 'キャンセル',
       });
 
       const resData = await deleteStaff(username);
