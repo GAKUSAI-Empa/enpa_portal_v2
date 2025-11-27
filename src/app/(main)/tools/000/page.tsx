@@ -227,6 +227,48 @@ const Page = () => {
     }
   };
 
+  const handleImportProductCSV = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      const text = evt.target?.result;
+      if (!text || typeof text !== 'string') return;
+
+      const lines = text
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean);
+
+      // Lấy header → tên các cột
+      const headers = lines[0].split(',');
+
+      // Convert thành mảng product
+      const rows = lines.slice(1).map((line, index) => {
+        const cols = line.split(',');
+
+        return {
+          id: index + 1,
+          section: cols[headers.indexOf('section')] || '',
+          imageSize: cols[headers.indexOf('imageSize')] || 'large',
+          productNameDisplay: cols[headers.indexOf('productNameDisplay')] || '',
+          productNameSEO: cols[headers.indexOf('productNameSEO')] || '',
+          description: cols[headers.indexOf('description')] || '',
+          normalPrice: cols[headers.indexOf('normalPrice')] || '',
+          salePrice: cols[headers.indexOf('salePrice')] || '',
+          productURL: cols[headers.indexOf('productURL')] || '',
+          imageURL: cols[headers.indexOf('imageURL')] || '',
+        } as ProductRow;
+      });
+
+      setProductList(rows);
+      alert('商品リストをCSVから読み込みました！');
+    };
+
+    reader.readAsText(file, 'UTF-8');
+  };
+
   return (
     <Tabs defaultTab="tab1">
       <TabsContent value="tab1">
@@ -292,7 +334,19 @@ const Page = () => {
             </Card>
 
             <Card>
-              <CardHeader title="3.クーポン設定" />
+              <CardHeader
+                title="3.クーポン設定"
+                buttonGroup={
+                  <>
+                    <Button color="secondary" size="sm" onClick={() => addTableRow(1)}>
+                      行を追加
+                    </Button>
+                    <Button color="secondary" size="sm" onClick={() => addTableRow(5)}>
+                      5行追加
+                    </Button>
+                  </>
+                }
+              />
               <CardContent>
                 <div className="flex flex-col">
                   <label className="text-sm font-medium text-gray-700 mb-1">
@@ -319,15 +373,7 @@ const Page = () => {
                   </label>
                 </div>
 
-                <div className="flex gap-3 mt-3 mb-3">
-                  <Button color="secondary" size="sm" onClick={() => addTableRow(1)}>
-                    行を追加
-                  </Button>
-                  <Button color="secondary" size="sm" onClick={() => addTableRow(5)}>
-                    5行追加
-                  </Button>
-                  <Button color="grey">CSVで一括取込</Button>
-                </div>
+                <div className="flex gap-3 mt-3 mb-3 justify-end"></div>
 
                 <div className="m-4">
                   <Table.Container>
@@ -408,22 +454,26 @@ const Page = () => {
 
             <Card>
               <CardContent>
-                <CardHeader title="4.セクション設定" />
+                <CardHeader
+                  title="4.セクション設定"
+                  buttonGroup={
+                    <>
+                      <Button color="secondary" size="sm" onClick={() => addSectionRow(1)}>
+                        行を追加
+                      </Button>
+                      <Button color="secondary" size="sm" onClick={() => addSectionRow(5)}>
+                        5行追加
+                      </Button>
+                    </>
+                  }
+                />
                 <div className="mb-3">
                   <label className="text-sm font-medium text-gray-700">
                     セクション（ナビテキスト／セクション見出し／URL）
                   </label>
                 </div>
 
-                <div className="flex gap-3 mb-3">
-                  <Button color="secondary" size="sm" onClick={() => addSectionRow(1)}>
-                    行を追加
-                  </Button>
-                  <Button color="secondary" size="sm" onClick={() => addSectionRow(5)}>
-                    5行追加
-                  </Button>
-                  <Button color="grey">CSVで一括取込</Button>
-                </div>
+                <div className="flex gap-3 mb-3 justify-end"></div>
 
                 <div className="m-4">
                   <Table.Container>
@@ -479,20 +529,37 @@ const Page = () => {
 
             <Card>
               <CardContent>
-                <CardHeader title="5.商品リスト設定" />
+                <CardHeader
+                  title="5.商品リスト設定"
+                  buttonGroup={
+                    <>
+                      <Button color="secondary" size="sm" onClick={() => addProductRow(1)}>
+                        行を追加
+                      </Button>
+                      <Button color="secondary" size="sm" onClick={() => addProductRow(5)}>
+                        5行追加
+                      </Button>
+                      <Button
+                        color="grey"
+                        onClick={() => document.getElementById('productCsvInput')?.click()}
+                      >
+                        CSVで一括取込
+                      </Button>
+                    </>
+                  }
+                />
+                <div className="flex gap-3 mb-3 mt-2 justify-end">
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    各セクションに表示する商品を登録・編集します。「セクション」は、上記で設定した「テキスト（ナビ）」と連動します。
+                  </label>
 
-                <label className="text-sm font-medium text-gray-700 mb-1 block">
-                  各セクションに表示する商品を登録・編集します。「セクション」は、上記で設定した「テキスト（ナビ）」と連動します。
-                </label>
-
-                <div className="flex gap-3 mb-3 mt-2">
-                  <Button color="secondary" size="sm" onClick={() => addProductRow(1)}>
-                    行を追加
-                  </Button>
-                  <Button color="secondary" size="sm" onClick={() => addProductRow(5)}>
-                    5行追加
-                  </Button>
-                  <Button color="grey">CSVで一括取込</Button>
+                  <input
+                    id="productCsvInput"
+                    type="file"
+                    accept=".csv"
+                    className="hidden"
+                    onChange={handleImportProductCSV}
+                  />
                 </div>
 
                 <div className="m-4 overflow-auto">
@@ -520,7 +587,7 @@ const Page = () => {
 
                           <Table.InputCell
                             value={item.section}
-                            placeholder="例：おすすめ"
+                            placeholder=""
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                               updateProductCell(item.id, 'section', e.target.value)
                             }
@@ -539,7 +606,7 @@ const Page = () => {
 
                           <Table.InputCell
                             value={item.productNameDisplay}
-                            placeholder="例：ギフトセット"
+                            placeholder=""
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                               updateProductCell(item.id, 'productNameDisplay', e.target.value)
                             }
@@ -547,7 +614,7 @@ const Page = () => {
 
                           <Table.InputCell
                             value={item.productNameSEO}
-                            placeholder="例：SEOキーワードを含む商品名"
+                            placeholder=""
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                               updateProductCell(item.id, 'productNameSEO', e.target.value)
                             }
@@ -555,7 +622,7 @@ const Page = () => {
 
                           <Table.InputCell
                             value={item.description}
-                            placeholder="商品の説明文"
+                            placeholder=""
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                               updateProductCell(item.id, 'description', e.target.value)
                             }
@@ -563,7 +630,7 @@ const Page = () => {
 
                           <Table.InputCell
                             value={item.normalPrice}
-                            placeholder="例：2000"
+                            placeholder=""
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                               updateProductCell(item.id, 'normalPrice', e.target.value)
                             }
@@ -571,7 +638,7 @@ const Page = () => {
 
                           <Table.InputCell
                             value={item.salePrice}
-                            placeholder="例：1500"
+                            placeholder=""
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                               updateProductCell(item.id, 'salePrice', e.target.value)
                             }
@@ -579,7 +646,7 @@ const Page = () => {
 
                           <Table.InputCell
                             value={item.productURL}
-                            placeholder="https://example.com/product"
+                            placeholder=""
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                               updateProductCell(item.id, 'productURL', e.target.value)
                             }
@@ -587,7 +654,7 @@ const Page = () => {
 
                           <Table.InputCell
                             value={item.imageURL}
-                            placeholder="https://image/...jpg"
+                            placeholder=""
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                               updateProductCell(item.id, 'imageURL', e.target.value)
                             }

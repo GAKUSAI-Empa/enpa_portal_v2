@@ -1,0 +1,350 @@
+'use client';
+
+import { Button } from '@/component/common/Button';
+import { Card, CardContent, CardHeader } from '@/component/common/Card';
+import { Table } from '@/component/common/Table';
+import { IconTrash } from '@tabler/icons-react';
+import { useFormik } from 'formik';
+import { useState } from 'react';
+import * as Yup from 'yup';
+import Slide from './components/Slide';
+
+type TableItem = {
+  id: number;
+  template_id: string;
+  message1: string;
+  message2: string;
+  discount_value: number;
+  discount_unit: string;
+  available_condition: string;
+  start_date: string;
+  end_date: string;
+};
+
+const page = () => {
+  const requestUrl = 'http://127.0.0.1:8000/coupon/generate';
+  const [loading, setLoading] = useState(false);
+
+  const formik = useFormik({
+    initialValues: {
+      id: 1,
+      template_id: '',
+      message1: '',
+      message2: '',
+      discount_value: 0,
+      discount_unit: '',
+      available_condition: '',
+      start_date: '',
+      end_date: '',
+    },
+    validationSchema: Yup.object({
+      couponList: Yup.array()
+        .of(
+          Yup.object().shape({
+            template_id: Yup.string().trim().required('テンプレート名を入力してください。'),
+            message1: Yup.string().trim().required('文言１を入力してください。'),
+            message2: Yup.string().trim().required('文言１を入力してください。'),
+            discount_value: Yup.number()
+              .typeError('割引は数値で入力してください。')
+              .min(0, '割引は0以上である必要があります。')
+              .required('割引を入力してください。'),
+            discount_unit: Yup.string().trim().required('割引単位を選択してください。'),
+            start_date: Yup.string().trim().required('開始時間を選択してください。'),
+            end_date: Yup.string().trim().required('終了時間を選択してください。'),
+          }),
+        )
+        .min(1, '商品情報を最低１行入力してください。'),
+    }),
+    onSubmit: (values) => {
+      console.log('Form submitted with values:', values);
+    },
+  });
+  const [TableList, setTableList] = useState<TableItem[]>([
+    {
+      id: 1,
+      template_id: '1',
+      message1: '',
+      message2: '',
+      discount_value: 0,
+      discount_unit: 'persent',
+      available_condition: '',
+      start_date: '',
+      end_date: '',
+    },
+  ]);
+  const addTableRow = (numberRow: number = 1) => {
+    setTableList((prev) => {
+      const newRows: TableItem[] = [];
+      for (let i = 0; i < numberRow; i++) {
+        newRows.push({
+          id: prev.length + i + 1,
+          template_id: '',
+          message1: '',
+          message2: '',
+          discount_value: 0,
+          discount_unit: '',
+          available_condition: '',
+          start_date: '',
+          end_date: '',
+        });
+      }
+      return [...prev, ...newRows];
+    });
+
+    console.log(numberRow);
+  };
+
+  const deleteTableRow = (id: number) => {
+    setTableList((prev) => {
+      const filtered = prev.filter((r) => r.id !== id);
+      return filtered.map((r, index) => ({ ...r, id: index + 1 }));
+    });
+  };
+
+  const handleSubmit = async () => {
+    const payloadList = TableList.map((item) => ({
+      filename: String(item.id),
+      template_id: item.template_id,
+      message1: item.message1,
+      message2: item.message2,
+      discount_value: item.discount_value,
+      discount_unit: item.discount_unit,
+      available_condition: item.available_condition,
+      start_date: item.start_date,
+      end_date: item.end_date,
+    }));
+    alert('data' + JSON.stringify(payloadList, null, 2));
+
+    try {
+      setLoading(true);
+      const res = await fetch(requestUrl, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json, text/plain, */*',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ payloadList }),
+      });
+
+      const data = await res.json();
+      console.log('Server Response:', data);
+    } catch (error) {
+      console.error('Đã xảy ra lỗi khi gửi dữ liệu:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  return (
+    <>
+      <Card className="truncate pb-5">
+        <CardHeader title="1.テンプレート" />
+        <Slide />
+      </Card>
+
+      <form method="POST" action={'#'}>
+        <Card>
+          <CardHeader
+            title="2. 商品情報入力"
+            buttonGroup={
+              <>
+                <Button color="secondary" size="sm" onClick={() => addTableRow(1)}>
+                  行を追加
+                </Button>
+                <Button color="secondary" size="sm" onClick={() => addTableRow(5)}>
+                  5行追加
+                </Button>
+                <Button color="grey">CSVで一括取り込む</Button>
+              </>
+            }
+          />
+
+          <CardContent>
+            <Table.Container>
+              <Table.Head>
+                <Table.Row>
+                  <Table.Th width="w-24">ID</Table.Th>
+                  <Table.Th width="w-40">テンプレート</Table.Th>
+                  <Table.Th>商品管理番号</Table.Th>
+                  <Table.Th>テーマカラー </Table.Th>
+                  <Table.Th>背景カラー</Table.Th>
+                  <Table.Th>キャッチコピー</Table.Th>
+                  <Table.Th>価格</Table.Th>
+                  <Table.Th> 商品名</Table.Th>
+                  <Table.Th>説明文</Table.Th>
+                  <Table.Th>ボタン文言</Table.Th>
+                  <Table.Th> 画像URL</Table.Th>
+                  <Table.Th width="w-24">削除</Table.Th>
+                </Table.Row>
+              </Table.Head>
+
+              <Table.Body>
+                {TableList?.map((item, index) => (
+                  <Table.Row key={`coupon-${index}`}>
+                    <Table.Td>{item.id}</Table.Td>
+                    {/* <Table.InputCell
+                      value={item.template_id}
+                      onChange={(e) => {
+                        setTableList((prevRows) =>
+                          prevRows.map((r) =>
+                            r.id === item.id ? { ...r, template_id: e.target.value } : r,
+                          ),
+                        );
+                      }}
+                      placeholder="テンプレート1"
+                    /> */}
+
+                    <Table.SelectBox
+                      name="template_id"
+                      value={item.template_id}
+                      onChange={(e) => {
+                        setTableList((prevRows) =>
+                          prevRows.map((r) =>
+                            r.id === item.id ? { ...r, template_id: e.target.value } : r,
+                          ),
+                        );
+                      }}
+                      className="w-[140px]"
+                    >
+                      <Table.Option value="1">テンプレート1</Table.Option>
+                      <Table.Option value="2">テンプレート2</Table.Option>
+                      <Table.Option value="3">テンプレート3</Table.Option>
+                      <Table.Option value="4">テンプレート4</Table.Option>
+                    </Table.SelectBox>
+
+                    <Table.InputCell
+                      value={item.message1}
+                      onChange={(e) => {
+                        setTableList((prevRows) =>
+                          prevRows.map((r) =>
+                            r.id === item.id ? { ...r, message1: e.target.value } : r,
+                          ),
+                        );
+                      }}
+                      placeholder="番号を入力"
+                    />
+                    <Table.InputCell
+                      value={item.message2}
+                      placeholder="#FFFFF"
+                      onChange={(e) => {
+                        setTableList((prevRows) =>
+                          prevRows.map((r) =>
+                            r.id === item.id ? { ...r, message2: e.target.value } : r,
+                          ),
+                        );
+                      }}
+                    />
+                    <Table.InputCell
+                      value={item.discount_value}
+                      onChange={(e) => {
+                        setTableList((prevRows) =>
+                          prevRows.map((r) =>
+                            r.id === item.id ? { ...r, discount_value: Number(e.target.value) } : r,
+                          ),
+                        );
+                      }}
+                    />
+
+                    <Table.SelectBox
+                      name="couponUnit"
+                      value={item.discount_unit}
+                      onChange={(e) => {
+                        setTableList((prevRows) =>
+                          prevRows.map((r) =>
+                            r.id === item.id ? { ...r, discount_unit: e.target.value } : r,
+                          ),
+                        );
+                      }}
+                      className="w-[60px] text-center"
+                    >
+                      <Table.Option value="option1">%</Table.Option>
+                      <Table.Option value="option2">円</Table.Option>
+                    </Table.SelectBox>
+
+                    {/* <Table.InputCell
+                      value={item.discount_unit}
+                      onChange={(e) => {
+                        setTableList((prevRows) =>
+                          prevRows.map((r) =>
+                            r.id === item.id ? { ...r, discount_unit: e.target.value } : r,
+                          ),
+                        );
+                      }}
+                    > */}
+                    <Table.InputCell
+                      value={item.available_condition}
+                      placeholder="3000円以上"
+                      onChange={(e) => {
+                        setTableList((provRows) =>
+                          provRows.map((r) =>
+                            r.id === item.id ? { ...r, available_condition: e.target.value } : r,
+                          ),
+                        );
+                      }}
+                    />
+
+                    <Table.InputCell
+                      value={item.available_condition}
+                      placeholder="3000円以上"
+                      onChange={(e) => {
+                        setTableList((provRows) =>
+                          provRows.map((r) =>
+                            r.id === item.id ? { ...r, available_condition: e.target.value } : r,
+                          ),
+                        );
+                      }}
+                    />
+
+                    <Table.InputCell
+                      value={item.available_condition}
+                      placeholder="3000円以上"
+                      onChange={(e) => {
+                        setTableList((provRows) =>
+                          provRows.map((r) =>
+                            r.id === item.id ? { ...r, available_condition: e.target.value } : r,
+                          ),
+                        );
+                      }}
+                    />
+                    <Table.InputCell
+                      value={item.available_condition}
+                      placeholder="3000円以上"
+                      onChange={(e) => {
+                        setTableList((provRows) =>
+                          provRows.map((r) =>
+                            r.id === item.id ? { ...r, available_condition: e.target.value } : r,
+                          ),
+                        );
+                      }}
+                    />
+                    <Table.InputCell
+                      value={item.available_condition}
+                      placeholder="3000円以上"
+                      onChange={(e) => {
+                        setTableList((provRows) =>
+                          provRows.map((r) =>
+                            r.id === item.id ? { ...r, available_condition: e.target.value } : r,
+                          ),
+                        );
+                      }}
+                    />
+
+                    <Table.Button onClick={() => deleteTableRow(item.id)}>
+                      <IconTrash />
+                    </Table.Button>
+                  </Table.Row>
+                ))}
+              </Table.Body>
+            </Table.Container>
+          </CardContent>
+        </Card>
+        <div className="flex items-center justify-center">
+          <Button className={'flex flexEnd'} size="lg" type="submit" onClick={() => handleSubmit()}>
+            プレビュー
+          </Button>
+        </div>
+      </form>
+    </>
+  );
+};
+
+export default page;
