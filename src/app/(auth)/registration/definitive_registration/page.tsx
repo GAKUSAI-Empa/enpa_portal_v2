@@ -47,8 +47,9 @@ const page = () => {
       tax_rounding: Yup.string().trim().required('消費税1円未満端数を入力してください。'),
       username: Yup.string()
         .trim()
-        .max(20, 'ユーザー名は20文字以内で入力してください。')
-        .required('ユーザー名を入力してください。'),
+        .required('ユーザー名を入力してください。')
+        .matches(/^[a-zA-Z0-9_]+$/, 'ユーザー名には英数字とアンダースコア（_）のみ使用できます。')
+        .max(20, 'ユーザー名は20文字以内で入力してください。'),
     }),
     onSubmit: async (values) => {
       try {

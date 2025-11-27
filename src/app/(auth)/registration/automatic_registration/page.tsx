@@ -36,7 +36,12 @@ const page = () => {
         .trim()
         .required('メールアドレスを入力してください。')
         .email('有効なメールアドレスを入力してください。'),
-      telephoneNumber: Yup.string().trim().required('電話番号を入力してください。'),
+      telephoneNumber: Yup.string()
+        .trim()
+        .matches(/^[0-9]+$/, '電話番号は数字のみで入力してください。')
+        .min(10, '電話番号は10桁以上で入力してください。')
+        .max(11, '電話番号は11桁以内で入力してください。')
+        .required('電話番号を入力してください。'),
       terms_of_use_check: Yup.array()
         .min(1, '利用規約に同意してください')
         .required('利用規約に同意してください'),
@@ -73,7 +78,7 @@ const page = () => {
     <>
       {!registSuccess && (
         <FormikProvider value={formik}>
-          <form onSubmit={formik.handleSubmit}>
+          <form autoComplete="off" onSubmit={formik.handleSubmit}>
             <div className="flex flex-col justify-center w-full mt-2">
               <div className="flex flex-col items-center justify-center h-full flex-1">
                 <div className="w-full xl:max-w-[50%]">
@@ -113,7 +118,7 @@ const page = () => {
                         name="telephoneNumber"
                         isRequired={true}
                         label={'電話番号'}
-                        placeholder="01-2345-6789"
+                        placeholder="0123456789"
                         direction="vertical"
                         disabled={formik.isSubmitting}
                       />
@@ -147,7 +152,11 @@ const page = () => {
                       <Button type="submit" disabled={isLoading} onClick={formik.submitForm}>
                         {isLoading ? <IconLoader2 className="animate-spin" /> : <>確認</>}
                       </Button>
-                      <Button color="grey" disabled={formik.isSubmitting}>
+                      <Button
+                        color="grey"
+                        disabled={formik.isSubmitting}
+                        onClick={() => router.push('/login')}
+                      >
                         戻る
                       </Button>
                     </CardFooter>
