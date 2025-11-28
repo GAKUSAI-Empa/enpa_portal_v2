@@ -35,7 +35,7 @@ const page = () => {
       email: Yup.string()
         .trim()
         .required('メールアドレスを入力してください。')
-        .email('有効なメールアドレスを入力してください。'),
+        .matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, '有効なメールアドレスを入力してください。'),
       telephoneNumber: Yup.string()
         .trim()
         .matches(/^[0-9]+$/, '電話番号は数字のみで入力してください。')

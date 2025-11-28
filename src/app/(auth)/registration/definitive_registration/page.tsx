@@ -43,8 +43,8 @@ const page = () => {
         .trim()
         .max(20, '店舗名は20文字以内で入力してください。')
         .required('店舗名を入力してください。'),
-      default_tax_rate: Yup.string().trim().required('通常の税率を入力してください。'),
-      tax_rounding: Yup.string().trim().required('消費税1円未満端数を入力してください。'),
+      default_tax_rate: Yup.string().trim().required('通常の税率を選択してください。'),
+      tax_rounding: Yup.string().trim().required('消費税1円未満端数を選択してください。'),
       username: Yup.string()
         .trim()
         .required('ユーザー名を入力してください。')

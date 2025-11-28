@@ -3,6 +3,8 @@ import fs from 'fs';
 import { NextResponse } from 'next/server';
 import path from 'path';
 import { Readable } from 'stream';
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
   try {
@@ -25,7 +27,6 @@ export async function POST(req: Request) {
     const buffer = Buffer.from(content, 'utf-8');
     const stream = Readable.from(buffer);
     await client.uploadFrom(stream, fileName);
-    console.log('aa');
     // 2️⃣ Upload folder CSS/JS/IMG từ public/template_html/tools/103
     const publicFolder = path.join(process.cwd(), 'public', 'template_html', 'tools', '103');
     const foldersToUpload = ['header_css', 'header_js', 'img']; // chỉ upload các folder này
@@ -41,8 +42,6 @@ export async function POST(req: Request) {
 
     const list = await client.list('/public_html/tools/103');
     const uploadedFile = list.find((f) => f.name === fileName);
-    client.close();
-
     client.close();
 
     if (uploadedFile) {

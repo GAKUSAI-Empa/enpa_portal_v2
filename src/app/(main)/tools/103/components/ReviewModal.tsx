@@ -101,7 +101,7 @@ const ReviewModal = ({ reviewHtml, handleCloseReviewModal }: ReviewModalProps) =
           </div>
           <div className="flex justify-end space-x-3">
             <Button
-              onClick={() => router.push('/')}
+              onClick={() => router.push('/tools/dashboard')}
               className="bg-gray-300 text-gray-700 hover:bg-gray-400"
             >
               ホームに戻る

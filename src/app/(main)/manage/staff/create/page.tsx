@@ -126,7 +126,6 @@ const page = () => {
                     label={'パスワード'}
                     placeholder=""
                     direction="vertical"
-                    minLength={8}
                   />
                   <TextBox
                     id="retypePassword"
