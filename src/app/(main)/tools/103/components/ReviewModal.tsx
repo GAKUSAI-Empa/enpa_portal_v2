@@ -62,58 +62,56 @@ const ReviewModal = ({ reviewHtml, handleCloseReviewModal }: ReviewModalProps) =
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-[90%]">
-        {!successUpload ? (
-          <>
-            <h2 className="text-lg font-semibold mb-4">プレビュー</h2>
-            <div className="mb-4">
-              <iframe
-                srcDoc={reviewHtml}
-                className="bg-white w-full h-[500px] border rounded-md"
-                sandbox="allow-same-origin allow-scripts allow-popups allow-top-navigation"
-              />
-            </div>
-            <div className="flex justify-end space-x-3">
-              <Button color="grey" onClick={handleCloseReviewModal}>
-                キャンセル
-              </Button>
-              <Button disabled={loading} onClick={uploadToRakutenGold}>
-                {loading ? <IconLoader2 className="animate-spin" /> : <>Rakutenにアップロード</>}
-              </Button>
-            </div>
-          </>
-        ) : (
-          <>
-            <h2 className="text-lg font-semibold mb-4">結果</h2>
-            <div className="mb-4">
-              {/* title */}
-              <h2 className="text-center text-lg font-bold mb-4">ヘッダーの生成が完了しました！</h2>
+      {!successUpload ? (
+        <div className="bg-white rounded-xl shadow-lg w-full max-w-[90%] max-h-[90vh] overflow-auto p-6">
+          <h2 className="text-lg font-semibold mb-4">プレビュー</h2>
+          <div className="mb-4">
+            <iframe
+              srcDoc={reviewHtml}
+              className="bg-white w-full h-[50vh] sm:h-[400px] md:h-[500px] lg:h-[600px] border rounded-md overflow-auto"
+              sandbox="allow-same-origin allow-scripts allow-popups allow-top-navigation"
+            />
+          </div>
+          <div className="flex justify-end space-x-3">
+            <Button color="grey" onClick={handleCloseReviewModal}>
+              キャンセル
+            </Button>
+            <Button disabled={loading} onClick={uploadToRakutenGold}>
+              {loading ? <IconLoader2 className="animate-spin" /> : <>Rakutenにアップロード</>}
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="bg-white rounded-xl shadow-lg w-full max-w-[90%] max-h-[90vh] overflow-auto p-6">
+          <h2 className="text-lg font-semibold mb-4">結果</h2>
+          <div className="mb-4">
+            {/* title */}
+            <h2 className="text-center text-lg font-bold mb-4">ヘッダーの生成が完了しました！</h2>
 
-              {/* description */}
-              <p className="text-center text-sm text-gray-600 mb-4">
-                以下のコードをコピーし、RMSのヘッダー設定画面に貼り付けてください。
-              </p>
-              {/* code box */}
-              <textarea
-                readOnly={true}
-                value={code}
-                className="w-full h-40 p-3 text-sm font-mono whitespace-pre border border-gray-300 rounded resize-none bg-gray-50"
-              />
-            </div>
-            <div className="flex justify-end space-x-3">
-              <Button
-                onClick={() => router.push('/')}
-                className="bg-gray-300 text-gray-700 hover:bg-gray-400"
-              >
-                ホームに戻る
-              </Button>
-              <Button onClick={() => handleCopy()} color="primary">
-                コードをコピー
-              </Button>
-            </div>
-          </>
-        )}
-      </div>
+            {/* description */}
+            <p className="text-center text-sm text-gray-600 mb-4">
+              以下のコードをコピーし、RMSのヘッダー設定画面に貼り付けてください。
+            </p>
+            {/* code box */}
+            <textarea
+              readOnly={true}
+              value={code}
+              className="w-full h-40 p-3 text-sm font-mono whitespace-pre border border-gray-300 rounded resize-none bg-gray-50"
+            />
+          </div>
+          <div className="flex justify-end space-x-3">
+            <Button
+              onClick={() => router.push('/tools/dashboard')}
+              className="bg-gray-300 text-gray-700 hover:bg-gray-400"
+            >
+              ホームに戻る
+            </Button>
+            <Button onClick={() => handleCopy()} color="primary">
+              コードをコピー
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

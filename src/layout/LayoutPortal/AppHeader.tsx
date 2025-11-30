@@ -36,13 +36,13 @@ const AppHeader = ({ isExpandedSideBar }: AppHeaderProps) => {
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
-  const handleLogOut = async () => {
-    router.push('/login');
-    await signOut({ redirect: false });
+  const handleLogOut = () => {
+    setOpenUserDropdown(false);
+    signOut({ callbackUrl: '/login' });
   };
 
   const handleOpenaAdminSite = () => {
-    window.open('/admin', '_blank'); // _blank = mở tab mới
+    window.open('/admin', '_blank');
   };
 
   return (
@@ -127,7 +127,6 @@ const AppHeader = ({ isExpandedSideBar }: AppHeaderProps) => {
                     </Link>
                     <button
                       onClick={() => {
-                        setOpenUserDropdown(false);
                         handleLogOut();
                       }}
                       className="w-full text-left px-4 py-2 hover:bg-gray-100 flex gap-2"
