@@ -1,465 +1,591 @@
 'use client';
 
+import { Alert } from '@/component/common/Alert';
 import { Button } from '@/component/common/Button';
-import { Card, CardContent, CardFooter, CardHeader } from '@/component/common/Card';
-import { Table } from '@/component/common/Table';
-import { IconTrash } from '@tabler/icons-react';
-import { FormikProvider, useFormik } from 'formik';
-import { useSession } from 'next-auth/react';
-import { useRef, useState } from 'react';
-import * as Yup from 'yup';
-import tool10MainteAPI from './tool10_api/tool10_MainteAPI';
-import Slide from './tool10_components/Slide';
+import { IconLoader2, IconRefresh } from '@tabler/icons-react';
+import axios from 'axios';
+import { debounce } from 'lodash';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { toast, Toaster } from 'sonner';
+import { createNewProductRow } from './lib/utils';
+import useTool10API from './tool10_api/useTool10API';
+import EditableProductTable, {
+  EditableProductTableHandle,
+} from './tool10_components/EdittableProductTable';
+import PreviewModal from './tool10_components/PreviewModal';
+import ResetConfirmPopup from './tool10_components/ResetConfirmPopup';
+import RestoreSessionPopup from './tool10_components/RestoreSessionPopup';
+import { useJobPolling } from './tool10_Hooks/useJobPolling';
+import { AllErrors, ProductRow } from './tool10_type';
 
-type TableItem = {
-  id: number;
-  template: string;
-  coupon_message1: string;
-  coupon_message2: string;
-  discount_value: number;
-  discount_unit: string;
-  available_condition: string;
-  start_date: string;
-  end_date: string;
-};
+type SonnerToastId = number | string;
 
-type ImageItem = {
-  file_name: string;
-  image_base64: string;
-};
+const LOCAL_STORAGE_KEY = 'tool10_sesson_data_v2';
+const BATCH_SIZE = 10;
 
-const page = () => {
-  const { generatePreviews } = tool10MainteAPI();
-  const [loading, setLoading] = useState(false);
-  const { data: session } = useSession();
-  const [images, setImages] = useState<ImageItem[]>([]);
+export default function CouponPage() {
+  const tool10API = useTool10API();
+  const tableRef = useRef<EditableProductTableHandle>(null);
 
-  const formik = useFormik({
-    initialValues: {
-      couponList: [
-        {
-          id: 1,
-          template: '',
-          coupon_message1: '',
-          coupon_message2: '',
-          discount_value: 0,
-          discount_unit: '',
-          available_condition: '',
-          start_date: '',
-          end_date: '',
-        },
-      ],
-    },
-    validationSchema: Yup.object({
-      couponList: Yup.array()
-        .of(
-          Yup.object().shape({
-            template: Yup.string().trim().required('テンプレート名を入力してください。'),
-            coupon_message1: Yup.string().trim().required('文言１を入力してください。'),
-            coupon_message2: Yup.string().trim().required('文言１を入力してください。'),
-            discount_value: Yup.number()
-              .typeError('割引は数値で入力してください。')
-              .min(0, '割引は0以上である必要があります。')
-              .required('割引を入力してください。'),
-            discount_unit: Yup.string().trim().required('割引単位を選択してください。'),
-            start_date: Yup.string().trim().required('開始時間を選択してください。'),
-            end_date: Yup.string()
-              .trim()
-              .required('終了時間を選択してください。')
-              .test(
-                'is-after-start',
-                '終了時間は開始時間より後である必要があります。',
-                function (end_date) {
-                  const { start_date } = this.parent;
+  const [isClient, setIsClient] = useState(false);
+  const [selectedImages, setSelectedImages] = useState<string[] | null>(null);
+  const [errors, setErrors] = useState<AllErrors>({});
+  const [showErrors, setShowErrors] = useState(false);
+  const [productRows, setProductRows] = useState<ProductRow[]>([]);
+  const [globalAlert, setGlobalAlert] = useState<string | null>(null);
+  const [modifiedRowIds, setModifiedRowIds] = useState<Set<number>>(new Set());
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+  const [jobId, setJobId] = useState<string | null>(null);
+  const [isApiLoading, setIsApiLoading] = useState(false);
 
-                  if (!start_date || !end_date) return true;
+  const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
 
-                  const start = new Date(start_date);
-                  const end = new Date(end_date);
+  // セッション復元
+  const [showRestorePopup, setShowRestorePopup] = useState(false);
+  const [restoredData, setRestoredData] = useState<ProductRow[] | null>(null);
+  const initialLoadRef = useRef(true);
 
-                  return end > start;
-                },
-              ),
-          }),
-        )
-        .min(1, '商品情報を最低１行入力してください。'),
-    }),
-    onSubmit: async (values) => {
-      setLoading(true);
+  // リセット確認ポップアップ
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const goldUploadToastIdRef = useRef<SonnerToastId | null>(null);
+  const rcabinetUploadToastIdRef = useRef<SonnerToastId | null>(null);
 
-      const imageResult: ImageItem[] = [];
+  // --- FTP用コールバック ---
+  const handleFtpSuccess = useCallback((target: 'gold' | 'rcabinet', message: string) => {
+    const toastIdRef = target === 'gold' ? goldUploadToastIdRef : rcabinetUploadToastIdRef;
+    if (toastIdRef.current) {
+      toast.dismiss(toastIdRef.current);
+      toastIdRef.current = null;
+    }
+    toast.success(message);
+  }, []);
+  const handleFtpError = useCallback((target: 'gold' | 'rcabinet', message: string) => {
+    const toastIdRef = target === 'gold' ? goldUploadToastIdRef : rcabinetUploadToastIdRef;
+    if (toastIdRef.current) {
+      toast.error(message, { id: toastIdRef.current });
+      toastIdRef.current = null;
+    } else {
+      toast.error(message);
+    }
+  }, []);
 
-      for (const item of values.couponList) {
-        try {
-          const result = await generatePreviews(values.couponList);
+  // --- ポーリング用カスタムフック ---
+  const handleJobNotFound = useCallback(() => {
+    setJobId(null);
+    setGlobalAlert('現在のジョブが見つかりませんでした。新しいジョブを開始します。');
+    if (goldUploadToastIdRef.current) {
+      toast.dismiss(goldUploadToastIdRef.current);
+      goldUploadToastIdRef.current = null;
+    }
+    if (rcabinetUploadToastIdRef.current) {
+      toast.dismiss(rcabinetUploadToastIdRef.current);
+      rcabinetUploadToastIdRef.current = null;
+    }
+  }, []);
 
-          if (result && result.images) {
-            imageResult.push(...result.images);
-          } else if (result && result.file_name && result.image_base64) {
-            imageResult.push(result as ImageItem);
-          }
-        } catch (error) {
-          console.error('Error generating preview for item ID:', item.id, error);
-        }
-
-        setImages(imageResult);
-        setLoading(false);
-      }
-    },
+  const {
+    jobStatus,
+    setJobStatus,
+    isLoading: isPollingLoading,
+    stopPolling,
+  } = useJobPolling({
+    jobId,
+    isOpen: isPreviewModalOpen,
+    onJobNotFound: handleJobNotFound,
+    onFtpSuccess: handleFtpSuccess,
+    onFtpError: handleFtpError,
   });
 
-  const handleAddRow = (numberRow: number) => {
-    const currentMaxId =
-      formik.values.couponList.length > 0
-        ? formik.values.couponList[formik.values.couponList.length - 1].id
-        : 0;
+  const saveStateToLocalStorage = useCallback(
+    debounce((rowsToSave: ProductRow[]) => {
+      try {
+        const isDefaultEmptyRow =
+          rowsToSave.length === 1 &&
+          !rowsToSave[0].start_date &&
+          !rowsToSave[0].end_date &&
+          !rowsToSave[0].coupon_message1 &&
+          !rowsToSave[0].discount_value;
 
-    const newRows = Array.from({ length: numberRow }, (_, index) => ({
-      id: currentMaxId + index + 1,
-      template: '',
-      coupon_message1: '',
-      coupon_message2: '',
-      discount_value: 0,
-      discount_unit: '',
-      available_condition: '',
-      start_date: '',
-      end_date: '',
-    }));
+        if (!isDefaultEmptyRow) {
+          console.log('[LocalStorage] 状態を保存中...', `(${rowsToSave.length} 行)`);
+          const dataString = JSON.stringify(rowsToSave);
+          localStorage.setItem(LOCAL_STORAGE_KEY, dataString);
+        } else {
+          console.log('[LocalStorage] デフォルトの空行を検出、ストレージから削除します。');
+          localStorage.removeItem(LOCAL_STORAGE_KEY);
+        }
+      } catch (error) {
+        console.error('localStorage への状態保存エラー:', error);
+        toast.error(
+          'セッションデータの保存中にエラーが発生しました。ストレージがいっぱいかもしれません。',
+        );
+      }
+    }, 1500),
+    [],
+  );
 
-    formik.setFieldValue('couponList', [...formik.values.couponList, ...newRows]);
+  useEffect(() => {
+    if (!initialLoadRef.current && isClient && productRows.length > 0) {
+      saveStateToLocalStorage(productRows);
+    }
+  }, [productRows, saveStateToLocalStorage, isClient]);
+
+  useEffect(() => {
+    setIsClient(true);
+    if (initialLoadRef.current) {
+      try {
+        const savedDataString = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (savedDataString) {
+          const parsedData: ProductRow[] = JSON.parse(savedDataString);
+          if (Array.isArray(parsedData) && parsedData.length > 0) {
+            setRestoredData(parsedData);
+            setShowRestorePopup(true);
+            console.log(
+              '[LocalStorage] 保存されたセッションを発見、復元ポップアップを表示します。',
+            );
+          } else {
+            localStorage.removeItem(LOCAL_STORAGE_KEY);
+            initializeEmptyRow();
+          }
+        } else {
+          initializeEmptyRow();
+        }
+      } catch (error) {
+        console.error('localStorage からの状態読み込みエラー:', error);
+        localStorage.removeItem(LOCAL_STORAGE_KEY);
+        initializeEmptyRow();
+        toast.error('保存されたセッションデータの読み込み中にエラーが発生しました。');
+      }
+    }
+  }, []);
+
+  const initializeEmptyRow = (idPrefix = 'initial-load-empty') => {
+    console.log(`[Session] 空行で初期化します (prefix: ${idPrefix}).`);
+    const initialRow = createNewProductRow(idPrefix);
+    setProductRows([initialRow]);
+    setModifiedRowIds(new Set([initialRow.id]));
+    setJobId(null);
+    setJobStatus(null);
+    setGlobalAlert(null);
+    setShowErrors(false);
+    setErrors({});
+    clearSavedSession();
+    initialLoadRef.current = false;
   };
 
-  const deleteTableRow = (id: number) => {
-    const updateList = formik.values.couponList.filter((item) => item.id !== id);
-    const reindexedList = updateList.map((item, index) => ({
-      ...item,
-      id: index + 1,
-    }));
-    formik.setFieldValue('couponList', reindexedList);
+  const handleRestoreSession = (restore: boolean) => {
+    setShowRestorePopup(false);
+    if (restore && restoredData) {
+      console.log('[LocalStorage] セッションを復元しています...');
+      setProductRows(restoredData);
+      setModifiedRowIds(new Set(restoredData.map((r) => r.id)));
+      toast.success('前のセッションを復元しました。');
+    } else {
+      console.log('[LocalStorage] 新しいセッションを開始します。');
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+      initializeEmptyRow('initial-new-session');
+    }
+    setRestoredData(null);
+    initialLoadRef.current = false;
   };
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const clearSavedSession = useCallback(() => {
+    console.log('[LocalStorage] 保存されたセッションをクリアします。');
+    localStorage.removeItem(LOCAL_STORAGE_KEY);
+  }, []);
 
-  const handleFileButtonClick = () => {
-    fileInputRef.current?.click();
+  // --- handleSetProductRows ロジック ---
+  const handleSetProductRows = useCallback(
+    (newRowsOrFn: ProductRow[] | ((prev: ProductRow[]) => ProductRow[])) => {
+      setProductRows((prevRows) => {
+        let newRows: ProductRow[];
+        let operation: 'set' | 'append' | 'delete' | 'reset' | 'unknown' = 'unknown';
+
+        if (typeof newRowsOrFn !== 'function') {
+          newRows = newRowsOrFn;
+          operation = 'set';
+        } else {
+          newRows = newRowsOrFn(prevRows);
+          if (newRows.length > prevRows.length) {
+            operation = 'append';
+          } else if (
+            prevRows.length === 1 &&
+            newRows.length === 1 &&
+            prevRows[0].id !== newRows[0].id
+          ) {
+            operation = 'reset';
+          } else {
+            operation = 'delete';
+          }
+        }
+
+        const currentIds = new Set(newRows.map((r) => r.id));
+        setModifiedRowIds((prevModified) => {
+          const nextModified = new Set(prevModified);
+
+          prevModified.forEach((id) => {
+            if (!currentIds.has(id)) {
+              nextModified.delete(id);
+            }
+          });
+
+          if (operation === 'set') {
+            nextModified.clear();
+            newRows.forEach((r) => nextModified.add(r.id));
+            setJobId(null);
+            setJobStatus(null);
+            clearSavedSession();
+          } else if (operation === 'append') {
+            const addedRows = newRows.slice(prevRows.length);
+            addedRows.forEach((row) => nextModified.add(row.id));
+          } else if (operation === 'reset') {
+            nextModified.clear();
+            nextModified.add(newRows[0].id);
+            setJobId(null);
+            setJobStatus(null);
+            clearSavedSession();
+          }
+
+          return nextModified;
+        });
+
+        return newRows;
+      });
+    },
+    [setJobStatus, clearSavedSession],
+  );
+
+  const handleCloseModal = useCallback(() => {
+    setIsPreviewModalOpen(false);
+    setIsApiLoading(false);
+    stopPolling();
+    setVisibleCount(BATCH_SIZE);
+    if (goldUploadToastIdRef.current) {
+      toast.dismiss(goldUploadToastIdRef.current);
+      goldUploadToastIdRef.current = null;
+    }
+    if (rcabinetUploadToastIdRef.current) {
+      toast.dismiss(rcabinetUploadToastIdRef.current);
+      rcabinetUploadToastIdRef.current = null;
+    }
+    if (jobStatus?.status === 'COMPLETED') {
+      clearSavedSession();
+    }
+  }, [stopPolling, jobStatus, clearSavedSession]);
+
+  const handleResetClick = () => {
+    if (
+      productRows.length === 1 &&
+      !productRows[0].id &&
+      !productRows[0].start_date &&
+      !productRows[0].discount_value
+    ) {
+      toast.info('テーブルは既に空です。');
+      return;
+    }
+    setShowResetConfirm(true);
   };
 
-  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleResetConfirm = (confirm: boolean) => {
+    setShowResetConfirm(false);
+    if (confirm) {
+      initializeEmptyRow('manual-reset');
+      toast.success('テーブルをリセットしました。');
+    }
+  };
 
-    const fileName = file.name.toLowerCase();
-    const isExcel = fileName.endsWith('.xlsx') || fileName.endsWith('.xls');
-    const isCSV = fileName.endsWith('.csv');
+  const handlePreviewClick = async () => {
+    setGlobalAlert(null);
 
-    if (!isExcel && !isCSV) {
-      alert('CSV または Excel ファイルを選択してください。');
+    // Gọi triggerValidation từ Ref
+    let isValid = false;
+    if (tableRef.current) {
+      isValid = await tableRef.current.triggerValidation();
+    }
+
+    // Kiểm tra kết quả trả về từ triggerValidation
+    if (!isValid) {
+      setGlobalAlert('入力内容にエラーがあります。確認してください。');
       return;
     }
 
-    const headerMapping: { [key: string]: keyof TableItem } = {
-      テンプレート: 'template',
-      クーポン文言１: 'coupon_message1',
-      クーポン文言２: 'coupon_message2',
-      '割引（値）': 'discount_value',
-      '割引（単位）': 'discount_unit',
-      使用可能条件: 'available_condition',
-      開始日時: 'start_date',
-      終了日時: 'end_date',
-    };
+    clearSavedSession();
+    setIsApiLoading(true);
+    setIsPreviewModalOpen(true);
+    setShowErrors(false);
+    setVisibleCount(BATCH_SIZE);
 
-    const parseJapaneseDate = (v: string) => {
-      if (!v) return '';
-      const parts = v.split(/[\/\s:]/);
-      if (parts.length >= 5) {
-        const [y, m, d, h, min] = parts;
-        return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}T${h.padStart(
-          2,
-          '0',
-        )}:${min.padStart(2, '0')}`;
-      }
-      return v.replace(/\//g, '-').replace(' ', 'T');
-    };
+    try {
+      let currentJobId = jobId;
+      if (!currentJobId) {
+        // --- POST ロジック (新規ジョブ作成) ---
+        console.log('>>> [DEBUG][Page] 新規ジョブを作成中 (POST)');
 
-    const newRows: TableItem[] = [];
-    const currentMaxId =
-      formik.values.couponList.length > 0
-        ? formik.values.couponList[formik.values.couponList.length - 1].id
-        : 0;
+        const data = await tool10API.createJob(productRows);
+        const newJobId = data.jobId;
 
-    if (isExcel) {
-      const XLSX = await import('xlsx');
-      const buffer = await file.arrayBuffer();
-      const wb = XLSX.read(buffer, { type: 'array' });
-      const sheet = wb.Sheets[wb.SheetNames[0]];
-      const json = XLSX.utils.sheet_to_json<any>(sheet, { header: 1 });
-
-      const rows = json as string[][];
-
-      if (rows.length < 2) {
-        alert('Excel にデータがありません');
-        return;
-      }
-
-      const headers = rows[0].slice(1);
-
-      rows.slice(1).forEach((row, idx) => {
-        const cols = row.slice(1);
-
-        if (cols.every((v) => !v)) return;
-
-        const item: TableItem = {
-          id: currentMaxId + newRows.length + 1,
-          template: '',
-          coupon_message1: '',
-          coupon_message2: '',
-          discount_value: 0,
-          discount_unit: '',
-          available_condition: '',
-          start_date: '',
-          end_date: '',
-        };
-
-        headers.forEach((h, i) => {
-          const key = headerMapping[h];
-          if (!key) return;
-
-          const value = cols[i] ?? '';
-
-          if (key === 'start_date' || key === 'end_date') {
-            if (typeof value === 'number') {
-              const date = XLSX.SSF.parse_date_code(value);
-              if (date) {
-                const yyyy = date.y;
-                const mm = String(date.m).padStart(2, '0');
-                const dd = String(date.d).padStart(2, '0');
-                const hh = String(date.H).padStart(2, '0');
-                const mi = String(date.M).padStart(2, '0');
-                item[key] = `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
-              }
-            } else {
-              item[key] = parseJapaneseDate(String(value));
-            }
-          } else if (key === 'discount_value') {
-            item[key] = Number(value) || 0;
-          } else {
-            (item as any)[key] = String(value);
-          }
+        setJobId(newJobId);
+        setJobStatus({
+          jobId: newJobId,
+          status: 'PENDING',
+          progress: 0,
+          total: data.totalItems,
+          results: {},
+          startTime: Date.now() / 1000,
+          endTime: null,
+          message: null,
+          ftpUploadStatusGold: 'idle',
+          ftpUploadErrorGold: null,
+          ftpUploadStatusRcabinet: 'idle',
+          ftpUploadErrorRcabinet: null,
         });
+        setIsApiLoading(false);
+        setModifiedRowIds(new Set());
+        console.log('>>> [DEBUG][Page] 新規ジョブ作成完了, Job ID:', newJobId);
+      } else {
+        // --- PATCH ロジック (ジョブ更新) ---
+        console.log('>>> [DEBUG][Page] ジョブを更新中 (PATCH), Job ID:', currentJobId);
+        console.log('>>> [DEBUG] PATCH フィルター前の modifiedRowIds:', modifiedRowIds);
+        const rowsToUpdate = productRows.filter((row) => modifiedRowIds.has(row.id));
+        console.log('>>> [DEBUG] PATCH 対象の rowsToUpdate:', rowsToUpdate);
 
-        newRows.push(item);
-      });
+        if (rowsToUpdate.length > 0) {
+          setJobStatus((prev) => ({
+            jobId: currentJobId!,
+            startTime: prev?.startTime ?? Date.now() / 1000,
+            status: 'Processing',
+            progress: 0,
+            total: productRows.length,
+            results: prev?.results ?? {},
+            message: null,
+            endTime: null,
+            ftpUploadStatusGold: 'idle',
+            ftpUploadErrorGold: null,
+            ftpUploadStatusRcabinet: 'idle',
+            ftpUploadErrorRcabinet: null,
+          }));
+
+          await tool10API.updateJob(currentJobId, rowsToUpdate);
+
+          setIsApiLoading(false);
+          setModifiedRowIds(new Set());
+          console.log(
+            '>>> [DEBUG][Page] ジョブ更新を開始しました。ポーリングが続行/再開されます。',
+          );
+        } else {
+          console.log('>>> [DEBUG][Page] 変更された行がないため、PATCH をスキップします。');
+          setIsApiLoading(false);
+        }
+      }
+    } catch (error) {
+      console.error('ジョブの開始または更新に失敗しました:', error);
+      let errorMessage = '不明なエラー';
+      if (axios.isAxiosError(error) && error.response?.data?.detail) {
+        errorMessage = error.response.data.detail;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      toast.error(`ジョブの開始/更新に失敗しました: ${errorMessage}`);
+      setIsApiLoading(false);
+      setIsPreviewModalOpen(false);
     }
-
-    if (isCSV) {
-      const text = await file.text();
-      const lines = text.split(/\r?\n/).filter((l) => l.trim() !== '');
-
-      const headers = lines[0].split(',').slice(1);
-
-      lines.slice(1).forEach((line) => {
-        const cols = line.split(',').slice(1);
-        if (cols.every((v) => !v)) return;
-
-        const item: TableItem = {
-          id: currentMaxId + newRows.length + 1,
-          template: '',
-          coupon_message1: '',
-          coupon_message2: '',
-          discount_value: 0,
-          discount_unit: '',
-          available_condition: '',
-          start_date: '',
-          end_date: '',
-        };
-
-        headers.forEach((h, i) => {
-          const key = headerMapping[h];
-          if (!key) return;
-
-          const value = cols[i] ?? '';
-
-          if (key === 'start_date' || key === 'end_date') {
-            item[key] = parseJapaneseDate(value);
-          } else if (key === 'discount_value') {
-            item[key] = Number(value) || 0;
-          } else {
-            (item as any)[key] = String(value);
-          }
-        });
-
-        newRows.push(item);
-      });
-    }
-
-    // Merge vào Formik
-    if (newRows.length > 0) {
-      const isFirstRowEmpty = (list: TableItem[]) => {
-        if (list.length !== 1) return false;
-        const { id, ...rest } = list[0]; // loại bỏ id
-        return Object.values(rest).every(
-          (v) => (typeof v === 'string' && v === '') || (typeof v === 'number' && v === 0),
-        );
-      };
-
-      const finalRows = isFirstRowEmpty(formik.values.couponList)
-        ? newRows.map((r, idx) => ({ ...r, id: idx + 1 }))
-        : [...formik.values.couponList, ...newRows];
-
-      formik.setFieldValue('couponList', finalRows);
-
-      alert(`${newRows.length} 件インポートしました。`);
-    }
-
-    e.target.value = '';
   };
 
-  // Import CSV function end
+  const handleDownloadZip = async () => {
+    if (!jobId || jobStatus?.status === 'FAILED') {
+      toast.error('ダウンロードするジョブが見つからないか、失敗しました。');
+      return;
+    }
+
+    const toastId = toast.loading('ダウンロードを準備中...');
+
+    try {
+      const blob = await tool10API.downloadZip(jobId);
+      const url = window.URL.createObjectURL(new Blob([blob]));
+
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      const fileName = `${yyyy}${mm}${dd}_image.zip`;
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
+
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast.dismiss(toastId);
+      toast.success('ダウンロードを開始しました');
+    } catch (error) {
+      console.error('Download error:', error);
+      toast.dismiss(toastId);
+      toast.error('ダウンロードに失敗しました。権限を確認してください。');
+    }
+  };
+
+  const handleUploadFTP = async (target: 'gold' | 'rcabinet') => {
+    if (
+      !jobId ||
+      !jobStatus ||
+      !['COMPLETED', 'COMPLETED_WITH_ERRORS'].includes(jobStatus.status)
+    ) {
+      toast.error('アップロードするジョブが見つからないか、まだ完了していません。');
+      return;
+    }
+    const targetName = target === 'gold' ? 'Rakuten GOLD' : 'R-Cabinet';
+    const toastIdRef = target === 'gold' ? goldUploadToastIdRef : rcabinetUploadToastIdRef;
+    const ftpStatusKey = target === 'gold' ? 'ftpUploadStatusGold' : 'ftpUploadStatusRcabinet';
+    const ftpErrorKey = target === 'gold' ? 'ftpUploadErrorGold' : 'ftpUploadErrorRcabinet';
+
+    if (toastIdRef.current || jobStatus[ftpStatusKey] === 'UPLOADING') {
+      toast.info(`${targetName} へのアップロードは既に進行中です。`);
+      return;
+    }
+
+    setJobStatus((prev) =>
+      prev ? { ...prev, [ftpStatusKey]: 'uploading', [ftpErrorKey]: null } : null,
+    );
+    toastIdRef.current = toast.loading(`${targetName} へのアップロードを開始しています...`);
+
+    try {
+      await tool10API.uploadFTP(jobId, target);
+
+      console.log(
+        `>>> [DEBUG][Page] ${targetName} アップロード開始。ポーリングでステータスを追跡します。`,
+      );
+    } catch (error: any) {
+      console.error(`${target} アップロードの開始に失敗:`, error);
+
+      let errorMessage = '不明なエラー';
+      if (axios.isAxiosError(error)) {
+        if (error.response) {
+          errorMessage =
+            error.response.data?.detail || `HTTPエラー! status: ${error.response.status}`;
+        } else if (error.request) {
+          errorMessage = 'サーバーからの応答がありません。ネットワーク接続を確認してください。';
+        } else {
+          errorMessage = error.message;
+        }
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      if (toastIdRef.current) {
+        toast.error(`${targetName} へのアップロード開始に失敗しました: ${errorMessage}`, {
+          id: toastIdRef.current,
+        });
+        toastIdRef.current = null;
+      }
+      setJobStatus((prev) =>
+        prev ? { ...prev, [ftpStatusKey]: 'failed', [ftpErrorKey]: errorMessage } : null,
+      );
+    }
+  };
+
+  const isModalLoading = isApiLoading || isPollingLoading;
+
+  const isJobRunning = jobStatus?.status === 'Processing' || jobStatus?.status === 'PENDING';
+  const isProcessing = isApiLoading || (isPollingLoading && !jobStatus) || isJobRunning;
+
   return (
-    <>
-      <Card className="truncate pb-5">
-        <CardHeader title="1.テンプレート" />
-        <Slide />
-      </Card>
+    <div className="space-y-6">
+      <h1 className="text-xl font-bold text-gray-800">クーポン画像作成</h1>
+      {isClient && !showRestorePopup && (
+        <EditableProductTable
+          ref={tableRef} // Gắn Ref vào đây
+          rows={productRows}
+          setRows={handleSetProductRows}
+          errors={errors}
+          showErrors={showErrors}
+          setModifiedRowIds={setModifiedRowIds}
+          jobId={jobId}
+          setJobId={setJobId}
+          disabled={isProcessing && isPreviewModalOpen}
+        />
+      )}
+      {isClient && showRestorePopup && (
+        <div className="text-center p-10 text-gray-500">セッションデータを読み込み中...</div>
+      )}
 
-      <FormikProvider value={formik}>
-        <form onSubmit={formik.handleSubmit}>
-          <div className="flex flex-col justify-center w-full">
-            <div className="flex flex-col items-center justify-center h-full flex-1">
-              <div className="w-full xl:max-w-full">
-                <Card>
-                  <CardHeader
-                    isSticky={true}
-                    title="2. 商品情報入力"
-                    buttonGroup={
-                      <>
-                        <Button color="secondary" size="sm" onClick={() => handleAddRow(1)}>
-                          行を追加
-                        </Button>
-                        <Button color="secondary" size="sm" onClick={() => handleAddRow(5)}>
-                          5行追加
-                        </Button>
-                        <label className="inline-block">
-                          <input
-                            type="file"
-                            accept=".xls,.xlsx,.csv"
-                            ref={fileInputRef}
-                            className="hidden"
-                            onChange={(e) => handleImportFile(e)}
-                          />
-                          <Button color="grey" onClick={handleFileButtonClick}>
-                            CSVで一括取り込む
-                          </Button>
-                        </label>
-                      </>
-                    }
-                  />
-                  <CardContent>
-                    <Table.Container>
-                      <Table.Head>
-                        <Table.Row>
-                          <Table.Th width="w-24">ID</Table.Th>
-                          <Table.Th>テンプレート</Table.Th>
-                          <Table.Th>文言１</Table.Th>
-                          <Table.Th>文言２</Table.Th>
-                          <Table.Th>割引</Table.Th>
-                          <Table.Th width="w-[70px]">割引単位</Table.Th>
-                          <Table.Th>使用条件</Table.Th>
-                          <Table.Th>開始時間</Table.Th>
-                          <Table.Th>終了時間</Table.Th>
-                          <Table.Th width="w-10">削除</Table.Th>
-                        </Table.Row>
-                      </Table.Head>
+      {/* グローバルアラート */}
+      {globalAlert && <Alert variant="error">{globalAlert}</Alert>}
 
-                      <Table.Body>
-                        {formik.values.couponList?.map((item, index) => (
-                          <Table.Row key={`coupon-${index}`}>
-                            <Table.Td>{item.id}</Table.Td>
+      {/* ボタン群 (更新) */}
+      {!showRestorePopup && (
+        <div className="flex justify-center items-center space-x-4 pt-4">
+          <Button
+            color="secondary"
+            onClick={handleResetClick}
+            disabled={isProcessing && isPreviewModalOpen}
+            className="inline-flex items-center"
+          >
+            <IconRefresh size={18} className="mr-1.5" />
+            リセット
+          </Button>
+          <Button
+            color="primary"
+            onClick={handlePreviewClick}
+            disabled={isProcessing && isPreviewModalOpen}
+            className="inline-flex items-center"
+          >
+            {isProcessing && isPreviewModalOpen ? (
+              <IconLoader2 className="animate-spin mr-2" />
+            ) : null}
+            画像生成
+          </Button>
+        </div>
+      )}
 
-                            <Table.SelectFormik name={`couponList[${index}].template`}>
-                              {[...Array(18)].map((_, i) => (
-                                <Table.SelectFormikOption key={i} value={`${i + 1}`}>
-                                  テンプレート{i + 1}
-                                </Table.SelectFormikOption>
-                              ))}
-                            </Table.SelectFormik>
-
-                            <Table.InputCellFormik
-                              name={`couponList[${index}].coupon_message1`}
-                              placeholder="特別クーポン"
-                            />
-
-                            <Table.InputCellFormik
-                              name={`couponList[${index}].coupon_message2`}
-                              placeholder="今すぐゲット！"
-                            />
-                            <Table.InputCellFormik name={`couponList[${index}].discount_value`} />
-
-                            <Table.SelectFormik name={`couponList[${index}].discount_unit`}>
-                              <Table.SelectFormikOption value={'円'}>円</Table.SelectFormikOption>
-                              <Table.SelectFormikOption value={'%'}>%</Table.SelectFormikOption>
-                            </Table.SelectFormik>
-
-                            <Table.InputCellFormik
-                              name={`couponList[${index}].available_condition`}
-                              value={item.available_condition}
-                              placeholder="3000円以上"
-                            />
-
-                            <Table.InputCellFormik
-                              name={`couponList[${index}].start_date`}
-                              type="datetime-local"
-                            />
-                            <Table.InputCellFormik
-                              name={`couponList[${index}].end_date`}
-                              type="datetime-local"
-                            />
-
-                            <Table.Button
-                              onClick={() => deleteTableRow(item.id)}
-                              disabled={formik.values.couponList.length === 1}
-                              className={
-                                formik.values.couponList.length === 1
-                                  ? 'opacity-50 cursor-not-allowed'
-                                  : ''
-                              }
-                            >
-                              <IconTrash />
-                            </Table.Button>
-                          </Table.Row>
-                        ))}
-                      </Table.Body>
-                    </Table.Container>
-                  </CardContent>
-                  <CardFooter className="justify-center">
-                    <Button type="submit">プレビュー</Button>
-                  </CardFooter>
-                </Card>
-              </div>
-            </div>
-          </div>
-        </form>
-      </FormikProvider>
-
-      <div className="flex flex-wrap gap-4 mt-5">
-        {images?.length > 0 ? (
-          images.map((imgItem, index) => (
-            <div key={index} className="flex flex-col items-center">
+      {/* テンプレートプレビューモーダル */}
+      {selectedImages && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
+          onClick={() => setSelectedImages(null)}
+        >
+          <div
+            className="flex flex-col md:flex-row items-center justify-center gap-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {selectedImages.map((imgSrc, index) => (
               <img
-                src={`data:image/png;base64,${imgItem.image_base64}`}
-                alt={`Image ${imgItem.file_name}`}
-                className="max-w-[200px] h-auto border"
+                key={index}
+                src={imgSrc}
+                alt={`Template Preview ${index + 1}`}
+                className="max-w-[45vw] max-h-[80vh] object-contain rounded-md"
               />
+            ))}
+          </div>
+        </div>
+      )}
 
-              <span className="mt-1 text-sm">{imgItem.file_name}</span>
-            </div>
-          ))
-        ) : (
-          <p>プレビュー画像はここに表示されます</p>
-        )}
-      </div>
-    </>
+      {/* 生成画像プレビューモーダル */}
+      <PreviewModal
+        isOpen={isPreviewModalOpen}
+        onClose={handleCloseModal}
+        jobStatus={jobStatus}
+        isLoading={isModalLoading}
+        productRows={productRows}
+        onDownLoadZip={handleDownloadZip}
+        onUploadToFtp={handleUploadFTP}
+        isUploadingGold={jobStatus?.ftpUploadStatusGold === 'UPLOADING'}
+        isUploadingRcabinet={jobStatus?.ftpUploadStatusRcabinet === 'UPLOADING'}
+        visibleCount={visibleCount}
+        onLoadMore={() => setVisibleCount((prev) => prev + BATCH_SIZE)}
+      />
+
+      {/* セッション復元ポップアップ */}
+      {showRestorePopup && <RestoreSessionPopup onResponse={handleRestoreSession} />}
+
+      {/* Reset popup */}
+      {showResetConfirm && <ResetConfirmPopup onResponse={handleResetConfirm} />}
+
+      {/* Sonner Toaster */}
+      <Toaster richColors position="top-right" />
+    </div>
   );
-};
-
-export default page;
+}
