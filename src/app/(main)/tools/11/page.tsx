@@ -161,7 +161,8 @@ const Page = () => {
                     <CheckboxGroup
                       id="pc_position"
                       name="pc_position"
-                      label=""
+                      isRequired
+                      label="挿入位置を選択してください"
                       options={[
                         { label: '説明文の前', value: '1' },
                         { label: '説明文の後', value: '2' },
@@ -214,7 +215,8 @@ const Page = () => {
                     <CheckboxGroup
                       id="sp_position"
                       name="sp_position"
-                      label=""
+                      isRequired
+                      label="挿入位置を選択してください"
                       options={[
                         { label: '説明文の前', value: '1' },
                         { label: '説明文の後', value: '2' },

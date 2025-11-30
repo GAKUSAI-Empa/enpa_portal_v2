@@ -319,12 +319,14 @@ const Page = () => {
                       name="saleStartDate"
                       type="datetime-local"
                       direction="vertical"
+                      placeholder="YYYY/MM/DD HH:mm"
                       label="セール開始日時"
                     />
                     <TextBox
                       id="saleEndDate"
                       name="saleEndDate"
                       type="datetime-local"
+                      placeholder="YYYY/MM/DD HH:mm"
                       direction="vertical"
                       label="修了日時（共通）"
                     />
@@ -379,7 +381,7 @@ const Page = () => {
                   <Table.Container>
                     <Table.Head>
                       <Table.Row>
-                        <Table.Th width="w-20">#</Table.Th>
+                        <Table.Th width="w-10">#</Table.Th>
                         <Table.Th>クーポン画像URL</Table.Th>
                         <Table.Th>クーポン取得URL</Table.Th>
                         <Table.Th width="w-24">共通設定</Table.Th>
@@ -427,6 +429,7 @@ const Page = () => {
 
                           <Table.InputCell
                             type="datetime-local"
+                            placeholder="YYYY/MM/DD HH:mm"
                             value={item.startDate1}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                               updateTableCell(item.id, 'startDate1', e.target.value)
@@ -435,6 +438,7 @@ const Page = () => {
 
                           <Table.InputCell
                             type="datetime-local"
+                            placeholder="YYYY/MM/DD HH:mm"
                             value={item.endDate1}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                               updateTableCell(item.id, 'endDate1', e.target.value)
@@ -469,7 +473,7 @@ const Page = () => {
                 />
                 <div className="mb-3">
                   <label className="text-sm font-medium text-gray-700">
-                    セクション（ナビテキスト／セクション見出し／URL）
+                    セールページ内のナビゲーション（目次）と、各セクションのタイトルを設定します。
                   </label>
                 </div>
 
@@ -479,7 +483,7 @@ const Page = () => {
                   <Table.Container>
                     <Table.Head>
                       <Table.Row>
-                        <Table.Th width="w-20">#</Table.Th>
+                        <Table.Th width="w-10">#</Table.Th>
                         <Table.Th>テキスト（ナビ）</Table.Th>
                         <Table.Th>テキスト（セクション）</Table.Th>
                         <Table.Th>セクションURL（任意）</Table.Th>
@@ -548,7 +552,7 @@ const Page = () => {
                     </>
                   }
                 />
-                <div className="flex gap-3 mb-3 mt-2 justify-end">
+                <div className="flex gap-3 mb-3 mt-2 ">
                   <label className="text-sm font-medium text-gray-700 mb-1 block">
                     各セクションに表示する商品を登録・編集します。「セクション」は、上記で設定した「テキスト（ナビ）」と連動します。
                   </label>
@@ -566,14 +570,16 @@ const Page = () => {
                   <Table.Container>
                     <Table.Head>
                       <Table.Row>
-                        <Table.Th width="w-20">#</Table.Th>
+                        <Table.Th width="w-10">#</Table.Th>
                         <Table.Th>セクション</Table.Th>
                         <Table.Th>画像サイズ</Table.Th>
                         <Table.Th>商品名（表示用）</Table.Th>
                         <Table.Th>商品名（SEO用）</Table.Th>
                         <Table.Th>商品説明</Table.Th>
+                        <Table.Th>価格種類</Table.Th>
                         <Table.Th>通常価格</Table.Th>
                         <Table.Th>SALE価格</Table.Th>
+                        <Table.Th>割引表示</Table.Th>
                         <Table.Th>商品URL</Table.Th>
                         <Table.Th>画像URL</Table.Th>
                         <Table.Th width="w-24">削除</Table.Th>
@@ -628,6 +634,17 @@ const Page = () => {
                             }
                           />
 
+                          <Table.SelectBox
+                            value={item.imageSize}
+                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                              updateProductCell(item.id, 'imageSize', e.target.value)
+                            }
+                          >
+                            <Table.Option value="large">当店通常価格</Table.Option>
+                            <Table.Option value="small">メーカ希望小売価格</Table.Option>
+                            <Table.Option value="small">クーポン利用</Table.Option>
+                          </Table.SelectBox>
+
                           <Table.InputCell
                             value={item.normalPrice}
                             placeholder=""
@@ -643,6 +660,15 @@ const Page = () => {
                               updateProductCell(item.id, 'salePrice', e.target.value)
                             }
                           />
+                          <Table.SelectBox
+                            value={item.imageSize}
+                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                              updateProductCell(item.id, 'imageSize', e.target.value)
+                            }
+                          >
+                            <Table.Option value="large">%OFF</Table.Option>
+                            <Table.Option value="small">円OFF</Table.Option>
+                          </Table.SelectBox>
 
                           <Table.InputCell
                             value={item.productURL}
