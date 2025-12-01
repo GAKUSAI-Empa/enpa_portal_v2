@@ -42,8 +42,12 @@ const page = ({ params }: UserPageProps) => {
     },
     validationSchema: Yup.object({
       email: Yup.string()
-        .email('メールアドレスの形式が正しくありません。')
-        .required('メールアドレスを入力してください。'),
+        .trim()
+        .required('メールアドレスを入力してください。')
+        .matches(
+          /^[A-Za-z0-9._%+-]+@(?:(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)\.)+[A-Za-z]{2,63}$/,
+          '有効なメールアドレスを入力してください。',
+        ),
       company_id: Yup.string().trim().required('企業を選択してください。'),
       role_id: Yup.string().trim().required('パーミッションを選択してください。'),
     }),
@@ -98,6 +102,7 @@ const page = ({ params }: UserPageProps) => {
                       label={'メールアドレス'}
                       placeholder="enpaportal@gmail.com"
                       direction="vertical"
+                      maxLength={254}
                     />
                     <SelectBox
                       id="company_id"
