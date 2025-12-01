@@ -1,6 +1,7 @@
 'use client';
 import { Card, CardContent, CardHeader } from '@/component/common/Card';
 import RadioBox from '@/component/common/RadioBox';
+import SelectBox from '@/component/common/SelectBox';
 import { Table } from '@/component/common/Table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/component/common/Tabs';
 import { TextBox } from '@/component/common/TextBox';
@@ -41,6 +42,7 @@ const page = () => {
               <RadioBox.Option value="2">予約</RadioBox.Option>
             </RadioBox.Group>
           </CardContent>
+          <div className="border-t border-gray-200 my-4"></div>
           <CardHeader title="復元設定" />
           <CardContent>
             <RadioBox.Group label="" name="radioboxValue" direction="horizontal">
@@ -54,21 +56,25 @@ const page = () => {
       <TabsContent value="tab3">
         <Card>
           <CardHeader title="公開設定" />
-          <CardContent>
-            <RadioBox.Group label="" name="radioboxValue" direction="horizontal">
-              <RadioBox.Option value="1">即時</RadioBox.Option>
-              <RadioBox.Option value="2">予約</RadioBox.Option>
-            </RadioBox.Group>
-          </CardContent>
 
-          <TextBox
-            id="startDate"
-            name="startDate"
-            type="datetime-local"
-            direction="vertical"
-            label="公開日時"
-            width="sm"
-          />
+          <CardContent>
+            <div className="flex items-center gap-6">
+              <RadioBox.Group label="" name="radioboxValue" direction="horizontal">
+                <RadioBox.Option value="1">即時</RadioBox.Option>
+                <RadioBox.Option value="2">予約</RadioBox.Option>
+              </RadioBox.Group>
+
+              <TextBox
+                id="startDate"
+                name="startDate"
+                type="datetime-local"
+                direction="vertical"
+                label="公開日時"
+                width="md"
+              />
+            </div>
+          </CardContent>
+          <div className="border-t border-gray-200 my-4"></div>
           <CardHeader title="非公開設定" />
           <CardContent>
             <RadioBox.Group label="" name="radioboxValue" direction="horizontal">
@@ -76,6 +82,18 @@ const page = () => {
               <RadioBox.Option value="2">予約</RadioBox.Option>
             </RadioBox.Group>
           </CardContent>
+          <div className="border-t border-gray-200 my-4"></div>
+          <SelectBox
+            id="selectboxValue"
+            label="在庫を同期しますか？"
+            name="selectboxValue"
+            width="sm"
+            options={[
+              { value: '1', label: 'する' },
+              { value: '2', label: 'しない' },
+            ]}
+            isRequired={true}
+          />
         </Card>
       </TabsContent>
 
