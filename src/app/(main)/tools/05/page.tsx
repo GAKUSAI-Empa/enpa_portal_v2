@@ -83,7 +83,6 @@ const Page = () => {
                     <h3 className="text-lg font-semibold text-gray-700 mb-4">
                       ランキング画像のサイズ設定　
                     </h3>
-
                     <div className="flex items-center gap-3   w-full">
                       <div className="min-w-[360px]">
                         <TextBox

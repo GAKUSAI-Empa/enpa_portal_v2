@@ -31,11 +31,11 @@ const UserPage = ({ params }: UserPageProps) => {
     validationSchema: Yup.object({
       password: Yup.string()
         .trim()
+        .min(8, 'パスワードは8文字以上で入力してください。')
         .matches(
-          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/,
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/,
           'パスワードは英大文字・英小文字・数字を含めてください。',
         )
-        .min(8, 'パスワードは8文字以上で入力してください。')
         .required('パスワードを入力してください。'),
       retypePassword: Yup.string()
         .trim()

@@ -21,6 +21,8 @@ const page = () => {
       await confirm({
         title: `削除`,
         description: '削除します。よろしいでしょうか?',
+        confirmationText: 'はい',
+        cancellationText: 'キャンセル',
       });
 
       const resData = await deleteStaff(username);
@@ -37,7 +39,7 @@ const page = () => {
     <>
       <Card>
         <CardHeader
-          title={`${session?.user.company_name ? session.user.company_name : ''}スタッフ一覧`}
+          title={`スタッフ一覧`}
           buttonGroup={
             <Button
               onClick={() => router.push('/manage/staff/create')}
@@ -53,7 +55,7 @@ const page = () => {
           <Table.Container>
             <Table.Head>
               <Table.Row>
-                <Table.Th width="w-16"></Table.Th>
+                <Table.Th width="w-16">NO</Table.Th>
                 <Table.Th width="w-40">ユーザー名 </Table.Th>
                 <Table.Th width="w-40">メールアドレス </Table.Th>
                 <Table.Th width="w-40">企業名</Table.Th>

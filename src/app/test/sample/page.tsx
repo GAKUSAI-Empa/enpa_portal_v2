@@ -3,6 +3,7 @@ import { Button } from '@/component/common/Button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/component/common/Card';
 import { CheckboxGroup } from '@/component/common/CheckboxGroup';
 import { DatePicker } from '@/component/common/DatePicker';
+import { DateTimePicker } from '@/component/common/DateTimePicker';
 import RadioBox from '@/component/common/RadioBox';
 import SelectBox from '@/component/common/SelectBox';
 import { TextArea } from '@/component/common/TextArea';
@@ -17,6 +18,7 @@ const page = () => {
 
   const formik = useFormik({
     initialValues: {
+      dateTimePickerValue: null,
       datePickerValue: null,
       textboxValue: '',
       textareaValue: '',
@@ -62,6 +64,15 @@ const page = () => {
                     error={formik.errors.datePickerValue}
                     touched={formik.touched.datePickerValue}
                   />
+                  <DateTimePicker
+                    id="dateTimePickerValue"
+                    name="dateTimePickerValue"
+                    value={formik.values.dateTimePickerValue}
+                    onChange={(date) => formik.setFieldValue('dateTimePickerValue', date)}
+                    error={formik.errors.dateTimePickerValue}
+                    touched={formik.touched.dateTimePickerValue}
+                  />
+
                   <TextBox
                     id="textboxValue"
                     name="textboxValue"

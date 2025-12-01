@@ -43,12 +43,13 @@ const page = () => {
         .trim()
         .max(20, '店舗名は20文字以内で入力してください。')
         .required('店舗名を入力してください。'),
-      default_tax_rate: Yup.string().trim().required('通常の税率を入力してください。'),
-      tax_rounding: Yup.string().trim().required('消費税1円未満端数を入力してください。'),
+      default_tax_rate: Yup.string().trim().required('通常の税率を選択してください。'),
+      tax_rounding: Yup.string().trim().required('消費税1円未満端数を選択してください。'),
       username: Yup.string()
         .trim()
-        .max(20, 'ユーザー名は20文字以内で入力してください。')
-        .required('ユーザー名を入力してください。'),
+        .required('ユーザー名を入力してください。')
+        .matches(/^[a-zA-Z0-9_]+$/, 'ユーザー名には英数字とアンダースコア（_）のみ使用できます。')
+        .max(20, 'ユーザー名は20文字以内で入力してください。'),
     }),
     onSubmit: async (values) => {
       try {
@@ -136,15 +137,17 @@ const page = () => {
                         placeholder="123456"
                         direction="vertical"
                         disabled={formik.isSubmitting}
+                        maxLength={6}
                       />
                       <TextBox
                         id="store_url"
                         name="store_url"
                         isRequired={true}
                         label={'店舗URL'}
-                        placeholder="empotown"
+                        placeholder="http://empotown.jp"
                         direction="vertical"
                         disabled={formik.isSubmitting}
+                        maxLength={100}
                       />
                       <TextBox
                         id="store_name"
@@ -154,6 +157,7 @@ const page = () => {
                         placeholder="エンパタウン"
                         direction="vertical"
                         disabled={formik.isSubmitting}
+                        maxLength={20}
                       />
                       <SelectBox
                         id="default_tax_rate"
@@ -190,6 +194,7 @@ const page = () => {
                         placeholder="empo-user01"
                         direction="vertical"
                         disabled={formik.isSubmitting}
+                        maxLength={20}
                       />
                     </CardContent>
                     <CardFooter className="flex gap-2">
