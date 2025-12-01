@@ -63,16 +63,18 @@ const ReviewModal = ({ reviewHtml, handleCloseReviewModal }: ReviewModalProps) =
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       {!successUpload ? (
-        <div className="bg-white rounded-xl shadow-lg w-full max-w-[90%] max-h-[90vh] overflow-auto p-6">
+        <div className="bg-white rounded-xl shadow-lg w-full max-w-[90%] h-[50vh] sm:h-[400px] md:h-[500px] lg:h-[600px] flex flex-col p-6">
           <h2 className="text-lg font-semibold mb-4">プレビュー</h2>
-          <div className="mb-4">
+
+          <div className="flex-1">
             <iframe
               srcDoc={reviewHtml}
-              className="bg-white w-full h-[50vh] sm:h-[400px] md:h-[500px] lg:h-[600px] border rounded-md overflow-auto"
+              className="w-full h-full border rounded-md"
               sandbox="allow-same-origin allow-scripts allow-popups allow-top-navigation"
             />
           </div>
-          <div className="flex justify-end space-x-3">
+
+          <div className="flex justify-end space-x-3 mt-4">
             <Button color="grey" onClick={handleCloseReviewModal}>
               キャンセル
             </Button>

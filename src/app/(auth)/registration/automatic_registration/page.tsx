@@ -7,6 +7,7 @@ import { TextArea } from '@/component/common/TextArea';
 import { TextBox } from '@/component/common/TextBox';
 import { IconLoader2 } from '@tabler/icons-react';
 import { FormikProvider, useFormik } from 'formik';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -138,6 +139,9 @@ const page = () => {
                         disabled={formik.isSubmitting}
                         maxLength={100}
                       />
+                      <Link className="text-blue-600 hover:underline" href={'/terms_of_use'}>
+                        利用規約を確認する
+                      </Link>
                       <CheckboxGroup
                         id="terms_of_use_check"
                         name="terms_of_use_check"
@@ -147,6 +151,9 @@ const page = () => {
                         disabled={formik.isSubmitting}
                         isRequired={true}
                       />
+                      <Link className="text-blue-600 hover:underline" href={'/privacy-policy'}>
+                        プライバシーポリシーを確認する
+                      </Link>
                       <CheckboxGroup
                         id="privacy_policy_check"
                         name="privacy_policy_check"
