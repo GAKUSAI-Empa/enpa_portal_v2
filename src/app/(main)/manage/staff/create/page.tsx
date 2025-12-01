@@ -32,8 +32,12 @@ const page = () => {
         .matches(/^[a-zA-Z0-9_]+$/, 'ユーザー名には英数字とアンダースコア（_）のみ使用できます。')
         .max(20, 'ユーザー名は20文字以内で入力してください。'),
       email: Yup.string()
-        .email('メールアドレスの形式が正しくありません。')
-        .required('メールアドレスを入力してください。'),
+        .trim()
+        .required('メールアドレスを入力してください。')
+        .matches(
+          /^[A-Za-z0-9._%+-]+@(?:(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)\.)+[A-Za-z]{2,63}$/,
+          '有効なメールアドレスを入力してください。',
+        ),
       isManager: Yup.string().trim().required('権限を選択してください。'),
       password: Yup.string()
         .trim()
@@ -99,6 +103,7 @@ const page = () => {
                     label={'メールアドレス'}
                     placeholder="enpaportal@gmail.com"
                     direction="vertical"
+                    maxLength={254}
                   />
                   <SelectBox
                     id="isManager"

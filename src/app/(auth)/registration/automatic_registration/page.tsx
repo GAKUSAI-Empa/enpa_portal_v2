@@ -35,7 +35,10 @@ const page = () => {
       email: Yup.string()
         .trim()
         .required('メールアドレスを入力してください。')
-        .matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, '有効なメールアドレスを入力してください。'),
+        .matches(
+          /^[A-Za-z0-9._%+-]+@(?:(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)\.)+[A-Za-z]{2,63}$/,
+          '有効なメールアドレスを入力してください。',
+        ),
       telephoneNumber: Yup.string()
         .trim()
         .matches(/^[0-9]+$/, '電話番号は数字のみで入力してください。')
@@ -108,12 +111,12 @@ const page = () => {
                       <TextBox
                         id="email"
                         name="email"
-                        type="email"
                         isRequired={true}
                         label={'メールアドレス'}
-                        placeholder="xxx@example.com"
+                        placeholder="enpaportal@gmail.com"
                         direction="vertical"
                         disabled={formik.isSubmitting}
+                        maxLength={254}
                       />
                       <TextBox
                         id="telephoneNumber"

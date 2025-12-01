@@ -110,7 +110,10 @@ const page = () => {
               </div>
               {/* Extra links */}
               <div className="flex flex-col items-center">
-                <Link href="#" className="text-sm text-blue-600 hover:underline  my-6">
+                <Link
+                  href={'/legal_disclosure'}
+                  className="text-sm text-blue-600 hover:underline  my-6"
+                >
                   特定商取引法に基づく表記
                 </Link>
                 <Button
@@ -126,9 +129,6 @@ const page = () => {
 
           {/* Footer */}
           <footer className="mt-8 text-xs text-gray-400">©EMPOWERMENT TOWN PORTAL</footer>
-        </div>
-        <div className="items-center hidden w-full h-full lg:w-1/2">
-          <h1>aaaa</h1>
         </div>
       </div>
     </FormikProvider>
