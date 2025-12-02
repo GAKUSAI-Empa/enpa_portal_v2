@@ -90,7 +90,7 @@ const TextBox = React.forwardRef<HTMLInputElement, TextBoxProps>(
             <label
               htmlFor={name}
               className={cn(
-                'block text-sm font-medium text-gray-800',
+                'block text-md font-medium text-gray-800',
                 direction === 'horizontal' && 'whitespace-nowrap',
               )}
             >

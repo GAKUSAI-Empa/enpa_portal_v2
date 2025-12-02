@@ -2,10 +2,11 @@
 
 import { Button } from '@/component/common/Button';
 import { Card, CardContent, CardHeader } from '@/component/common/Card';
+import SelectBox from '@/component/common/SelectBox';
 import { Table } from '@/component/common/Table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/component/common/Tabs';
+import { TextBox } from '@/component/common/TextBox';
 import { useState } from 'react';
-
 const page = () => {
   const [subTab, setSubTab] = useState('A');
 
@@ -72,7 +73,165 @@ const page = () => {
                 <TabsTrigger value="F">編集内容記入F</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="A"></TabsContent>
+              <TabsContent value="A">
+                <TextBox
+                  id="textboxValue"
+                  name="textboxValue"
+                  isRequired={true}
+                  label={'商品名に挿入したい文言'}
+                  placeholder="Text box sample"
+                  direction="vertical"
+                  width="lg"
+                />
+
+                <TextBox
+                  label="PCの画像幅"
+                  id="sp_width"
+                  name="sp_width"
+                  isRequired
+                  width="md"
+                  direction="vertical"
+                  suffix={
+                    <SelectBox
+                      id="sp_unit"
+                      name="sp_unit"
+                      isRequired
+                      width="sm"
+                      classNameParent="mb-0"
+                      options={[
+                        { value: 'px', label: 'px' },
+                        { value: '%', label: '%' },
+                      ]}
+                    />
+                  }
+                />
+
+                <TextBox
+                  label="スマホの画像幅"
+                  id="sp_width"
+                  name="sp_width"
+                  isRequired
+                  width="md"
+                  direction="vertical"
+                  suffix={
+                    <SelectBox
+                      id="sp_unit"
+                      name="sp_unit"
+                      isRequired
+                      width="sm"
+                      classNameParent="mb-0"
+                      options={[
+                        { value: 'px', label: 'px' },
+                        { value: '%', label: '%' },
+                      ]}
+                    />
+                  }
+                />
+                <SelectBox
+                  id="selectBoxValue"
+                  label="販売期間更新方法指定："
+                  name="selectBoxValue"
+                  width="lg"
+                  value=""
+                  options={[
+                    { value: '1', label: '1:販売期間をツールで更新する' },
+                    { value: '2', label: 'banana' },
+                    { value: '3', label: 'orange' },
+                  ]}
+                  isRequired={true}
+                />
+
+                <SelectBox
+                  id="selectBoxValue"
+                  label="復元時の価格更新の指定："
+                  name="selectBoxValue"
+                  width="lg"
+                  value=""
+                  options={[
+                    { value: '1', label: '0:復元時にをツールで更新する' },
+                    { value: '2', label: 'banana' },
+                    { value: '3', label: 'orange' },
+                  ]}
+                  isRequired={true}
+                />
+
+                <div className="flex flex-col">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <TextBox
+                      id="saleStartDate"
+                      name="saleStartDate"
+                      type="datetime-local"
+                      direction="horizontal"
+                      placeholder="YYYY/MM/DD HH:mm"
+                      label="セール開始日時"
+                      width="sm"
+                    />
+                    <TextBox
+                      id="saleEndDate"
+                      name="saleEndDate"
+                      type="datetime-local"
+                      placeholder="YYYY/MM/DD HH:mm"
+                      direction="horizontal"
+                      label="修了日時（共通）"
+                      width="sm"
+                    />
+                  </div>
+                </div>
+                <TextBox
+                  id="textboxValue"
+                  name="textboxValue"
+                  isRequired={true}
+                  label={'二重価格画像を保存したフォルダ'}
+                  placeholder="https://image.rakuten.co.jp/sample/cabinet/campaign/supersale/ss_b"
+                  direction="vertical"
+                  width="lg"
+                />
+                <TextBox
+                  id="textboxValue"
+                  name="textboxValue"
+                  isRequired={true}
+                  label={'全ての商品ページに挿入する共通画像'}
+                  placeholder="Text box sample"
+                  direction="vertical"
+                  width="lg"
+                />
+                <TextBox
+                  id="textboxValue"
+                  name="textboxValue"
+                  isRequired={true}
+                  label={'お気に入り登録案内画像URL'}
+                  placeholder="Text box sample"
+                  direction="vertical"
+                  width="lg"
+                />
+                <TextBox
+                  id="textboxValue"
+                  name="textboxValue"
+                  isRequired={true}
+                  label={'コピーページ案内画像URL'}
+                  placeholder="Text box sample"
+                  direction="vertical"
+                  width="lg"
+                />
+                <TextBox
+                  id="textboxValue"
+                  name="textboxValue"
+                  isRequired={true}
+                  label={'PC用販売説明文'}
+                  placeholder="Text box sample"
+                  direction="vertical"
+                  width="lg"
+                />
+                <TextBox
+                  id="textboxValue"
+                  name="textboxValue"
+                  isRequired={true}
+                  label={'スマートフォン用販売説明文'}
+                  placeholder="Text box sample"
+                  direction="vertical"
+                  width="lg"
+                />
+              </TabsContent>
 
               <TabsContent value="B"></TabsContent>
 

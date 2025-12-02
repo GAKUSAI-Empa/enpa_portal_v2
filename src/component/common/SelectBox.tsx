@@ -69,7 +69,7 @@ const SelectBox = React.forwardRef<HTMLSelectElement, SelectBoxProps>(
           <label
             htmlFor={id}
             className={cn(
-              'block text-sm font-medium text-gray-800',
+              'block text-gray-800 text-md font-medium',
               direction === 'horizontal' && 'whitespace-nowrap',
             )}
           >
