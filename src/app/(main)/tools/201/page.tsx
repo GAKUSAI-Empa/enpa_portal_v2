@@ -32,28 +32,35 @@ const page = () => {
       <TabsContent value="tab1">
         <Card>
           <CardHeader title="" />
-          <CardContent>
-            <div className="p-6">
-              {/* Dòng chứa FilePicker + Button */}
-              <div className="flex items-center gap-3">
-                <FilePicker
-                  accept=".pdf,.jpg,.png"
-                  onChange={(file) => {
-                    console.log('File selected:', file);
-                  }}
-                />
+          <div className="flex justify-center">
+            <CardContent>
+              <div className="p-6">
+                {/* Dòng chứa FilePicker + Button */}
+                <div className="flex items-center gap-3">
+                  <FilePicker
+                    accept=".pdf,.jpg,.png"
+                    onChange={(file) => {
+                      console.log('File selected:', file);
+                    }}
+                  />
 
-                <Button type="submit">実行</Button>
+                  <Button type="submit">実行</Button>
+                </div>
               </div>
-            </div>
-          </CardContent>
+            </CardContent>
+          </div>
         </Card>
       </TabsContent>
       <TabsContent value="tab2">
         <Card>
           <CardHeader title="" />
           <CardContent>
-            <RadioBox.Group label="変更設定" name="radioboxValue" direction="horizontal">
+            <RadioBox.Group
+              label="変更設定"
+              name="radioboxValue"
+              direction="horizontal"
+              className="gap-14"
+            >
               <RadioBox.Option value="1">即時</RadioBox.Option>
               <RadioBox.Option value="2">予約</RadioBox.Option>
             </RadioBox.Group>
@@ -61,41 +68,54 @@ const page = () => {
           <div className="border-t border-gray-200 my-4"></div>
 
           <CardContent>
-            <RadioBox.Group label="復元設定" name="radioboxValue" direction="horizontal">
+            <RadioBox.Group
+              label="復元設定"
+              name="radioboxValue"
+              direction="horizontal"
+              className="gap-14"
+            >
               <RadioBox.Option value="1">即時</RadioBox.Option>
               <RadioBox.Option value="2">予約</RadioBox.Option>
             </RadioBox.Group>
           </CardContent>
 
           <div className="border-t border-gray-200 my-4"></div>
-          <CardContent>
-            <div className="p-6">
-              {/* Dòng chứa FilePicker + Button */}
-              <div className="flex items-center gap-3">
-                <FilePicker
-                  accept=".pdf,.jpg,.png"
-                  onChange={(file) => {
-                    console.log('File selected:', file);
-                  }}
-                />
+          <div className="flex justify-center">
+            <CardContent>
+              <div className="p-6">
+                {/* Dòng chứa FilePicker + Button */}
+                <div className="flex items-center gap-3">
+                  <FilePicker
+                    accept=".pdf,.jpg,.png"
+                    onChange={(file) => {
+                      console.log('File selected:', file);
+                    }}
+                  />
 
-                <Button type="submit">実行</Button>
+                  <Button type="submit">実行</Button>
+                </div>
               </div>
-            </div>
-          </CardContent>
+            </CardContent>
+          </div>
         </Card>
       </TabsContent>
 
       <TabsContent value="tab3">
         <Card>
           <CardHeader title="" />
-          <CardContent>
-            <div className="flex items-center gap-6">
-              <RadioBox.Group label="公開設定" name="radioboxValue" direction="horizontal">
+          <div className="grid grid-cols-4 gap-6">
+            <CardContent>
+              <RadioBox.Group
+                label="公開設定"
+                name="radioboxValue"
+                direction="horizontal"
+                className="gap-14"
+              >
                 <RadioBox.Option value="1">即時</RadioBox.Option>
                 <RadioBox.Option value="2">予約</RadioBox.Option>
               </RadioBox.Group>
-
+            </CardContent>
+            <CardContent>
               <TextBox
                 id="startDate"
                 name="startDate"
@@ -104,12 +124,18 @@ const page = () => {
                 label="公開日時"
                 width="md"
               />
-            </div>
-          </CardContent>
+            </CardContent>
+          </div>
+
           <div className="border-t border-gray-200 my-4"></div>
 
           <CardContent>
-            <RadioBox.Group label="非公開設定" name="radioboxValue" direction="horizontal">
+            <RadioBox.Group
+              label="非公開設定"
+              name="radioboxValue"
+              direction="horizontal"
+              className="gap-14"
+            >
               <RadioBox.Option value="1">即時</RadioBox.Option>
               <RadioBox.Option value="2">予約</RadioBox.Option>
             </RadioBox.Group>
