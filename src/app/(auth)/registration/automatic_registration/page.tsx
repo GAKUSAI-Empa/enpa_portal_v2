@@ -7,6 +7,7 @@ import { TextArea } from '@/component/common/TextArea';
 import { TextBox } from '@/component/common/TextBox';
 import { IconLoader2 } from '@tabler/icons-react';
 import { FormikProvider, useFormik } from 'formik';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -35,7 +36,10 @@ const page = () => {
       email: Yup.string()
         .trim()
         .required('メールアドレスを入力してください。')
-        .matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, '有効なメールアドレスを入力してください。'),
+        .matches(
+          /^[A-Za-z0-9._%+-]+@(?:(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)\.)+[A-Za-z]{2,63}$/,
+          '有効なメールアドレスを入力してください。',
+        ),
       telephoneNumber: Yup.string()
         .trim()
         .matches(/^[0-9]+$/, '電話番号は数字のみで入力してください。')
@@ -108,12 +112,12 @@ const page = () => {
                       <TextBox
                         id="email"
                         name="email"
-                        type="email"
                         isRequired={true}
                         label={'メールアドレス'}
-                        placeholder="xxx@example.com"
+                        placeholder="enpaportal@gmail.com"
                         direction="vertical"
                         disabled={formik.isSubmitting}
+                        maxLength={254}
                       />
                       <TextBox
                         id="telephoneNumber"
@@ -135,6 +139,9 @@ const page = () => {
                         disabled={formik.isSubmitting}
                         maxLength={100}
                       />
+                      <Link className="text-blue-600 hover:underline" href={'/terms_of_use'}>
+                        利用規約を確認する
+                      </Link>
                       <CheckboxGroup
                         id="terms_of_use_check"
                         name="terms_of_use_check"
@@ -144,6 +151,9 @@ const page = () => {
                         disabled={formik.isSubmitting}
                         isRequired={true}
                       />
+                      <Link className="text-blue-600 hover:underline" href={'/privacy-policy'}>
+                        プライバシーポリシーを確認する
+                      </Link>
                       <CheckboxGroup
                         id="privacy_policy_check"
                         name="privacy_policy_check"

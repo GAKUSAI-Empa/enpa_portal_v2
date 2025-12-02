@@ -2,6 +2,7 @@
 
 import { Button } from '@/component/common/Button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/component/common/Card';
+import Hint from '@/component/common/Hint';
 import LoadingData from '@/component/common/LoadingData';
 import SelectBox from '@/component/common/SelectBox';
 import { TextBox } from '@/component/common/TextBox';
@@ -123,7 +124,7 @@ const page = () => {
       {isProvisRegisIdValid && (
         <FormikProvider value={formik}>
           <form onSubmit={formik.handleSubmit}>
-            <div className="flex flex-col justify-center w-full mt-2">
+            <div className="flex flex-col justify-center w-full">
               <div className="flex flex-col items-center justify-center h-full flex-1">
                 <div className="w-full xl:max-w-[50%]">
                   <Card>
@@ -138,6 +139,7 @@ const page = () => {
                         direction="vertical"
                         disabled={formik.isSubmitting}
                         maxLength={6}
+                        suffix={<Hint message="これは楽天の店舗IDです。" />}
                       />
                       <TextBox
                         id="store_url"
@@ -209,22 +211,6 @@ const page = () => {
           </form>
         </FormikProvider>
       )}
-      {/* {!isProvisRegisIdValid && isLoading ? (
-        <LoadingData />
-      ) : (
-        <div className="flex flex-col justify-center w-full mt-2">
-          <div className="flex flex-col items-center justify-center h-full flex-1">
-            <div className="w-full xl:max-w-[50%]">
-              <Card>
-                <CardHeader title="店舗・ユーザー情報登録フォーム" />
-                <CardContent>
-                  <p>無効なURLです。</p>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </div>
-      )} */}
     </>
   );
 };

@@ -168,47 +168,32 @@ export function useJobPolling({
       console.error('[Hook] polling error:', error);
       onPollingErrorRef.current?.(error as Error);
     }
-  }, [stopPolling, api]); // Thêm 'api' vào dependency array
+  }, [stopPolling, api]);
 
+  // FIX lỗi polling liên tục
   useEffect(() => {
-    const shouldPoll =
-      isOpen &&
-      !!jobId &&
-      jobStatus &&
-      (!isJobProcessingFinished(jobStatus.status) ||
-        isFtpUploading(jobStatus.ftpUploadStatusGold) ||
-        isFtpUploading(jobStatus.ftpUploadStatusRcabinet));
-    const initialLoad = isOpen && !!jobId && !jobStatus;
+    const shouldStart = isOpen && !!jobId;
 
-    let firstRunTimeoutId: NodeJS.Timeout | null = null;
-
-    if (shouldPoll || initialLoad) {
+    if (shouldStart) {
       if (!pollingIntervalRef.current) {
-        firstRunTimeoutId = setTimeout(() => {
-          if (latestIsOpenRef.current && latestJobIdRef.current === jobId) {
-            runPollingIteration();
-          }
-          firstRunTimeoutId = null;
-        }, 100);
-        pollingIntervalRef.current = setInterval(runPollingIteration, 3000);
-
         console.log('[Hook] start interval (polling needed)');
+
+        runPollingIteration();
+        pollingIntervalRef.current = setInterval(runPollingIteration, 3000);
       }
     } else {
-      if (firstRunTimeoutId) clearTimeout(firstRunTimeoutId);
       if (pollingIntervalRef.current) {
         stopPolling();
-
         console.log('[Hook] stop interval (polling no longer needed)');
       }
     }
     return () => {
-      if (firstRunTimeoutId) clearTimeout(firstRunTimeoutId);
       stopPolling();
-
       console.log('[Hook] interval cleanup on unmount/deps change');
     };
-  }, [isOpen, jobId, jobStatus, stopPolling, runPollingIteration]);
+  }, [isOpen, jobId, stopPolling, runPollingIteration]);
+
+  //END FIX lỗi polling liên tục
 
   const isLoading =
     (isOpen && !!jobId && !jobStatus) ||
