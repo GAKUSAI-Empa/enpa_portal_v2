@@ -123,9 +123,24 @@ const page = () => {
                     ]}
                     isRequired={true}
                   />
-                  <RadioBox.Group label="Radio box sample" name="radioboxValue">
+                  <RadioBox.Group
+                    direction="horizontal"
+                    label="Radio box sample"
+                    name="radioboxValue"
+                  >
                     <RadioBox.Option value="1">Option 1</RadioBox.Option>
                     <RadioBox.Option value="2">Option 2</RadioBox.Option>
+                    <RadioBox.Option value="3" disabled={true}>
+                      Option 3 (Disabled)
+                    </RadioBox.Option>
+                  </RadioBox.Group>
+                  <RadioBox.Group
+                    direction="horizontal"
+                    label="Radio box sample"
+                    name="radioboxValue"
+                  >
+                    <RadioBox.Option value="1">Option 1cascascac</RadioBox.Option>
+                    <RadioBox.Option value="2">Option 2cascascasc</RadioBox.Option>
                     <RadioBox.Option value="3" disabled={true}>
                       Option 3 (Disabled)
                     </RadioBox.Option>

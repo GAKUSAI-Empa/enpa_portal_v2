@@ -60,8 +60,8 @@ const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
       <div
         ref={ref}
         className={cn(
-          'flex items-center justify-between px-6 py-4 mb-3 border-b border-gray-200 bg-white',
-          isSticky ? 'sticky top-20 z-40' : '',
+          'flex items-center justify-between px-6 py-4 mb-3 border-b border-gray-200',
+          isSticky ? 'sticky top-20 z-40 bg-white rounded-lg' : '',
           classNameHeader,
         )}
         {...props}

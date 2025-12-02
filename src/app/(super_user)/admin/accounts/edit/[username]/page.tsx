@@ -93,6 +93,7 @@ const page = ({ params }: UserPageProps) => {
                       label={'ユーザー名'}
                       placeholder="enpaportal"
                       direction="vertical"
+                      maxLength={20}
                     />
                     <TextBox
                       id="email"

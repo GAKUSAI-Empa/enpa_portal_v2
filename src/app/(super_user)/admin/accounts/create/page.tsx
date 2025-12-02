@@ -97,6 +97,7 @@ const page = () => {
                       label={'ユーザー名'}
                       placeholder="enpaportal"
                       direction="vertical"
+                      maxLength={20}
                     />
                     <SelectBox
                       id="company_id"
@@ -136,6 +137,7 @@ const page = () => {
                       label={'メールアドレス'}
                       placeholder="enpaportal@gmail.com"
                       direction="vertical"
+                      maxLength={254}
                     />
                     <TextBox
                       id="password"
