@@ -8,7 +8,7 @@ import { signIn } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import * as Yup from 'yup';
 
@@ -16,7 +16,7 @@ const page = () => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const isSessionExpired = searchParams ? searchParams.get('isSessionExpired') === 'true' : false;
+  const [isSessionExpired, setIsSessionExpired] = useState(false);
 
   const formik = useFormik({
     initialValues: {
@@ -43,6 +43,16 @@ const page = () => {
       setIsLoading(false);
     },
   });
+
+  // Check session expired
+  useEffect(() => {
+    const expired = sessionStorage.getItem('isSessionExpired') === 'true';
+    setIsSessionExpired(false);
+    if (expired) {
+      sessionStorage.removeItem('isSessionExpired');
+      setIsSessionExpired(true);
+    }
+  }, []);
 
   return (
     <FormikProvider value={formik}>

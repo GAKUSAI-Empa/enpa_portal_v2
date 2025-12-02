@@ -22,7 +22,8 @@ const useAxiosClient = () => {
   //With 401 status error from apis
   //========================================
   const handle401Error = async (error: AxiosError) => {
-    await signOut({ callbackUrl: '/login?isSessionExpired=true' }); // clear session
+    sessionStorage.setItem('isSessionExpired', 'true');
+    await signOut({ callbackUrl: '/login' });
   };
   useEffect(() => {
     //Response interceptor & handle error occur
