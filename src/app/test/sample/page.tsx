@@ -4,6 +4,7 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/component/common/Ca
 import { CheckboxGroup } from '@/component/common/CheckboxGroup';
 import { DatePicker } from '@/component/common/DatePicker';
 import { DateTimePicker } from '@/component/common/DateTimePicker';
+import FilePicker from '@/component/common/FilePicker';
 import RadioBox from '@/component/common/RadioBox';
 import SelectBox from '@/component/common/SelectBox';
 import { TextArea } from '@/component/common/TextArea';
@@ -56,6 +57,14 @@ const page = () => {
                   description="Copy paste sử dụng các component dưới đây"
                 />
                 <CardContent>
+                  <div className="p-6">
+                    <FilePicker
+                      accept=".pdf,.jpg,.png"
+                      onChange={(file) => {
+                        console.log('File selected:', file);
+                      }}
+                    />
+                  </div>
                   <DatePicker
                     id="datePickerValue"
                     name="datePickerValue"
