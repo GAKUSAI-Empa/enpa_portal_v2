@@ -68,13 +68,24 @@ const page = () => {
               </div>
 
               <div>
-                <Button size="md" className="w-full rounded-full mb-2">
+                <Button
+                  size="md"
+                  className="w-full rounded-full mb-2"
+                  onClick={() => router.push('/account/contact_change')}
+                >
                   連絡先の変更
                 </Button>
                 <Button
                   size="md"
+                  className="w-full rounded-full mb-2"
+                  onClick={() => router.push('/account/payment_info')}
+                >
+                  お支払情報
+                </Button>
+                <Button
+                  size="md"
                   color="grey"
-                  className="w-full rounded-full"
+                  className="w-full rounded-full mb-2"
                   onClick={() => router.push('/account/password_change')}
                 >
                   パスワードの変更
