@@ -1,5 +1,4 @@
 'use client';
-import { Alert } from '@/component/common/Alert';
 import { Button } from '@/component/common/Button';
 import { TextBox } from '@/component/common/TextBox';
 import { IconLoader2 } from '@tabler/icons-react';
@@ -7,16 +6,14 @@ import { FormikProvider, useFormik } from 'formik';
 import { signIn } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import * as Yup from 'yup';
 
 const page = () => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const [isSessionExpired, setIsSessionExpired] = useState(false);
 
   const formik = useFormik({
     initialValues: {
@@ -44,16 +41,6 @@ const page = () => {
     },
   });
 
-  // Check session expired
-  useEffect(() => {
-    const expired = sessionStorage.getItem('isSessionExpired') === 'true';
-    setIsSessionExpired(false);
-    if (expired) {
-      sessionStorage.removeItem('isSessionExpired');
-      setIsSessionExpired(true);
-    }
-  }, []);
-
   return (
     <FormikProvider value={formik}>
       <div className="flex flex-col justify-center w-full h-screen lg:flex-row">
@@ -79,11 +66,6 @@ const page = () => {
                 />
               </div>
             </div>
-
-            {isSessionExpired && (
-              <Alert variant="warning">セッションが切れました。再度ログインしてください</Alert>
-            )}
-
             <form onSubmit={formik.handleSubmit}>
               <div className="flex flex-col mb-3">
                 {/* Username */}

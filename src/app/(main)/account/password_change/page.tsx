@@ -25,11 +25,11 @@ const page = () => {
       current_password: Yup.string().trim().required('現在のパスワードを入力してください。'),
       new_password: Yup.string()
         .trim()
-        // .matches(
-        //   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/,
-        //   'パスワードは英大文字・英小文字・数字を含めてください。',
-        // )
         .min(8, 'パスワードは8文字以上で入力してください。')
+        .matches(
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/,
+          'パスワードは英大文字・英小文字・数字を含めてください。',
+        )
         .required('新しいパスワードを入力してください。'),
       retype_password: Yup.string()
         .trim()

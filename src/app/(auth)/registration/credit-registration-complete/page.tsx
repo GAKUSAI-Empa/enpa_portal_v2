@@ -1,3 +1,4 @@
+'use client';
 import { Card, CardContent, CardHeader } from '@/component/common/Card';
 
 const page = () => {
