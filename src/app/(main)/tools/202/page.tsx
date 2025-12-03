@@ -21,6 +21,17 @@ const page = () => {
           status: '予約済み',
           executeDate: '2025-02-02 10:00',
         },
+
+        {
+          fileName: 'sample.jpg',
+          status: '予約済み',
+          executeDate: '2025-02-02 10:00',
+        },
+        {
+          fileName: 'sample.jpg',
+          status: '予約済み',
+          executeDate: '2025-02-02 10:00',
+        },
       ],
     },
 
@@ -52,37 +63,29 @@ const page = () => {
           {/* ================== TAB 1 ================== */}
           <TabsContent value="tab1">
             <Card>
-              <CardHeader title="" />
+              <CardContent className="flex flex-col items-center gap-6 pt-25">
+                <TextBox
+                  id="startDate"
+                  name="startDate"
+                  type="datetime-local"
+                  direction="horizontal"
+                  label="予約日時"
+                  width="md"
+                  value={formik.values.startDate}
+                  onChange={formik.handleChange}
+                />
 
-              <div className="flex justify-center">
-                <CardContent>
-                  <TextBox
-                    id="startDate"
-                    name="startDate"
-                    type="datetime-local"
-                    direction="vertical"
-                    label="予約日時"
-                    width="md"
-                    value={formik.values.startDate}
-                    onChange={formik.handleChange}
+                <div className="flex items-center gap-3">
+                  <FilePicker
+                    accept=".pdf,.jpg,.png"
+                    onChange={(file) => {
+                      formik.setFieldValue('file', file);
+                    }}
                   />
-                </CardContent>
 
-                <CardContent>
-                  <div className="p-6">
-                    <div className="flex items-center gap-3">
-                      <FilePicker
-                        accept=".pdf,.jpg,.png"
-                        onChange={(file) => {
-                          formik.setFieldValue('file', file);
-                        }}
-                      />
-
-                      <Button type="submit">予約を保存</Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </div>
+                  <Button type="submit">予約を保存</Button>
+                </div>
+              </CardContent>
             </Card>
           </TabsContent>
 
