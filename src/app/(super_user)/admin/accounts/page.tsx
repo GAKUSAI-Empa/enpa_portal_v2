@@ -2,12 +2,12 @@
 
 import { Button } from '@/component/common/Button';
 import { Card, CardContent, CardHeader } from '@/component/common/Card';
+import { confirm } from '@/component/common/ConfirmProvider';
 import LoadingData from '@/component/common/LoadingData';
 import Pagination from '@/component/common/Pagination';
 import { Table } from '@/component/common/Table';
 import { TextBox } from '@/component/common/TextBox';
 import { IconEdit, IconPlus, IconTrash } from '@tabler/icons-react';
-import { confirm } from 'material-ui-confirm';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -60,8 +60,7 @@ const AccountManagePage = () => {
   const handleDelete = async (username: string) => {
     try {
       await confirm({
-        title: `削除`,
-        description: '削除します。よろしいでしょうか?',
+        description: '削除します。よろしいですか。',
       });
 
       const resData = await deleteUser(username);
