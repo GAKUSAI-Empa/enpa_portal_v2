@@ -1,6 +1,7 @@
 'use client';
 
-import { Card, CardContent, CardHeader } from '@/component/common/Card';
+import { Button } from '@/component/common/Button';
+import { Card, CardContent, CardFooter, CardHeader } from '@/component/common/Card';
 import SelectBox from '@/component/common/SelectBox';
 import { Table } from '@/component/common/Table';
 import { FormikProvider, useFormik } from 'formik';
@@ -71,7 +72,7 @@ const Page = () => {
     <FormikProvider value={formik}>
       <form onSubmit={formik.handleSubmit}>
         <Card>
-          <CardHeader title="Product Table" />
+          <CardHeader title="" />
           <CardContent>
             <Table.Container className="min-w-[1000px]">
               <Table.Head>
@@ -86,7 +87,7 @@ const Page = () => {
                 <Table.Row>
                   <Table.Th>商品管理番号</Table.Th>
                   <Table.Th>SKU管理番号</Table.Th>
-                  <Table.Th className="min-w-[120px] text-center">表示価格文言</Table.Th>
+                  <Table.Th className="min-w-[160px] text-center">表示価格文言</Table.Th>
                   <Table.Th>表示価格</Table.Th>
                   <Table.Th>
                     <div className="flex items-center gap-1">
@@ -108,7 +109,7 @@ const Page = () => {
                       </label>
                     </div>
                   </Table.Th>
-                  <Table.Th className="min-w-[120px] text-center">表示価格文言</Table.Th>
+                  <Table.Th className="min-w-[160px] text-center">表示価格文言</Table.Th>
                   <Table.Th>表示価格</Table.Th>
                   <Table.Th>販売価格</Table.Th>
                 </Table.Row>
@@ -137,7 +138,7 @@ const Page = () => {
                       />
                     </Table.Td>
 
-                    <Table.Td className="min-w-[120px]">
+                    <Table.Td className="min-w-[160px] text-gray-400">
                       <SelectBox
                         id={`select-${row.id}`}
                         name={`rows.${row.id}.selectBoxValue`}
@@ -161,25 +162,27 @@ const Page = () => {
                       />
                     </Table.Td>
 
-                    <Table.Td className="text-black-500 font-semibold">
+                    <Table.Td className="text-black-500">
                       <input
                         type="number"
-                        className="w-full border border-gray-300 rounded px-1 py-0.5 text-right text-red-500 font-semibold"
+                        className="w-full border border-gray-300 rounded px-1 py-0.5 text-right "
                         value={row.salePrice}
                         onChange={(e) => updateRow(row.id, 'salePrice', Number(e.target.value))}
                       />
                     </Table.Td>
 
-                    <Table.Td className="min-w-[120px]">
+                    <Table.Td className="min-w-[160px]">
                       <SelectBox
                         id={`select2-${row.id}`}
                         name={`rows.${row.id}.selectBoxValue`}
                         value={row.selectBoxValue}
                         options={[
-                          { value: '', label: '当店通常価格' },
-                          { value: 'apple', label: 'apple' },
-                          { value: 'banana', label: 'banana' },
-                          { value: 'orange', label: 'orange' },
+                          { value: '1', label: '1:当店通常価格' },
+                          { value: '2', label: '2:メーカ希望商売参照' },
+                          { value: '3', label: '4:商品価格ナビのデータ参照' },
+                          { value: '4', label: '9:表示しない' },
+                          { value: '5', label: 'A:店論設定に従う' },
+                          { value: '6', label: 'B:メーカー希望小売価格オープン価格' },
                         ]}
                         isRequired
                       />
@@ -211,6 +214,17 @@ const Page = () => {
               </Table.Body>
             </Table.Container>
           </CardContent>
+
+          <CardFooter className="justify-center">
+            <div className="flex justify-center gap-4">
+              <Button type="button" onClick={() => console.log('NO action')}>
+                戻る
+              </Button>
+              <Button type="button" onClick={() => console.log('YES action')}>
+                　チェック
+              </Button>
+            </div>
+          </CardFooter>
         </Card>
       </form>
     </FormikProvider>

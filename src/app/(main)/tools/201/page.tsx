@@ -8,6 +8,20 @@ import { Table } from '@/component/common/Table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/component/common/Tabs';
 import { TextBox } from '@/component/common/TextBox';
 const page = () => {
+  const toolList = [
+    {
+      id: 1,
+      name: 'セール更新　更新',
+      file: 'セール更新2025.01.10.xlsmm',
+      updateDate: '2025-01-10',
+    },
+    {
+      id: 2,
+      name: 'セール更新　復元',
+      file: 'セール更新2025.02.03.xlsm',
+      updateDate: '2025-02-03',
+    },
+  ];
   // const formik = useFormik({
   //   initialValues:{
   //   },
@@ -178,18 +192,40 @@ const page = () => {
       <TabsContent value="tab4">
         <Card>
           <CardContent>
-            <CardHeader title="一覧" />
+            <CardHeader title="" />
             <Table.Container>
               <Table.Head>
                 <Table.Row>
                   <Table.Th width="w-10">#</Table.Th>
-                  <Table.Th width="w-16">ツール名</Table.Th>
+                  <Table.Th width="w-20">ツール名</Table.Th>
                   <Table.Th width="w-48">ファイル名</Table.Th>
                   <Table.Th width="w-32">更新予定日</Table.Th>
                   <Table.Th width="w-40">操作</Table.Th>
                 </Table.Row>
               </Table.Head>
-              <Table.Body></Table.Body>
+              <Table.Body>
+                {toolList.map((tool) => (
+                  <Table.Row key={tool.id}>
+                    <Table.Td>{tool.id}</Table.Td>
+                    <Table.Td>{tool.name}</Table.Td>
+                    <Table.Td>{tool.file}</Table.Td>
+                    <Table.Td>{tool.updateDate}</Table.Td>
+
+                    {/* Cột 操作 */}
+                    <Table.Td>
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          className="bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        >
+                          予約時間変更
+                        </Button>
+                        <Button>キャンセル</Button>
+                      </div>
+                    </Table.Td>
+                  </Table.Row>
+                ))}
+              </Table.Body>
             </Table.Container>
           </CardContent>
         </Card>

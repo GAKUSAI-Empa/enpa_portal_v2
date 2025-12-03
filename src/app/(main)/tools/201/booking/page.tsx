@@ -34,6 +34,32 @@ const page = () => {
               </Table.Head>
 
               <Table.Body>
+                <Table.InputCell name="" value="" placeholder="fragrances" />
+                <Table.SelectBox value="">
+                  <Table.Option value="A">A</Table.Option>
+                  <Table.Option value="B">B</Table.Option>
+                  <Table.Option value="C">C</Table.Option>
+                  <Table.Option value="D">D</Table.Option>
+                  <Table.Option value="E">E</Table.Option>
+                  <Table.Option value="F">F</Table.Option>
+                </Table.SelectBox>
+                <Table.InputCell name="" value="" placeholder="https://sample.favorite.url" />
+                <Table.InputCell name="" value="" placeholder="" />
+              </Table.Body>
+              <Table.Body>
+                <Table.InputCell name="" value="" placeholder="furniture" />
+                <Table.SelectBox value="">
+                  <Table.Option value="A">A</Table.Option>
+                  <Table.Option value="B">B</Table.Option>
+                  <Table.Option value="C">C</Table.Option>
+                  <Table.Option value="D">D</Table.Option>
+                  <Table.Option value="E">E</Table.Option>
+                  <Table.Option value="F">F</Table.Option>
+                </Table.SelectBox>
+                <Table.InputCell name="" value="" placeholder="https://sample.favorite.url" />
+                <Table.InputCell name="" value="" placeholder="" />
+              </Table.Body>
+              <Table.Body>
                 <Table.InputCell name="" value="" placeholder="beauty" />
                 <Table.SelectBox value="">
                   <Table.Option value="A">A</Table.Option>
@@ -48,13 +74,12 @@ const page = () => {
               </Table.Body>
             </Table.Container>
           </CardContent>
+          <div className="flex justify-center my-6">
+            <Button size="lg" type="button">
+              チェック
+            </Button>
+          </div>
         </Card>
-
-        <div className="flex justify-center my-6">
-          <Button size="lg" type="button">
-            チェック
-          </Button>
-        </div>
       </TabsContent>
 
       {/* ========== TAB 2 ========== */}
