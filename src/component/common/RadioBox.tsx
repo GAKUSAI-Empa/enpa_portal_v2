@@ -68,7 +68,7 @@ const Group: React.FC<RadioGroupProps> = ({
       {label && (
         <label
           className={cn(
-            'block text-sm font-medium text-gray-800 mb-2',
+            'block font-medium text-md text-gray-800 mb-2',
             direction === 'horizontal' && 'whitespace-nowrap',
           )}
         >
@@ -79,7 +79,7 @@ const Group: React.FC<RadioGroupProps> = ({
 
       <div
         className={cn(
-          direction === 'horizontal' ? 'flex flex-row space-x-4' : 'flex flex-col space-y-2',
+          direction === 'horizontal' ? 'flex -rowflex space-x-4' : 'flex flex-col space-y-2',
           className,
         )}
       >

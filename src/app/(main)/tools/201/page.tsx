@@ -1,5 +1,7 @@
 'use client';
+import { Button } from '@/component/common/Button';
 import { Card, CardContent, CardHeader } from '@/component/common/Card';
+import FilePicker from '@/component/common/FilePicker';
 import RadioBox from '@/component/common/RadioBox';
 import SelectBox from '@/component/common/SelectBox';
 import { Table } from '@/component/common/Table';
@@ -30,40 +32,90 @@ const page = () => {
       <TabsContent value="tab1">
         <Card>
           <CardHeader title="" />
-          <CardContent></CardContent>
+          <div className="flex justify-center">
+            <CardContent>
+              <div className="p-6">
+                {/* Dòng chứa FilePicker + Button */}
+                <div className="flex items-center gap-3">
+                  <FilePicker
+                    accept=".pdf,.jpg,.png"
+                    onChange={(file) => {
+                      console.log('File selected:', file);
+                    }}
+                  />
+
+                  <Button type="submit">実行</Button>
+                </div>
+              </div>
+            </CardContent>
+          </div>
         </Card>
       </TabsContent>
       <TabsContent value="tab2">
         <Card>
-          <CardHeader title="変更設定" />
+          <CardHeader title="" />
           <CardContent>
-            <RadioBox.Group label="" name="radioboxValue" direction="horizontal">
+            <RadioBox.Group
+              label="変更設定"
+              name="radioboxValue"
+              direction="horizontal"
+              className="gap-14"
+            >
               <RadioBox.Option value="1">即時</RadioBox.Option>
               <RadioBox.Option value="2">予約</RadioBox.Option>
             </RadioBox.Group>
           </CardContent>
           <div className="border-t border-gray-200 my-4"></div>
-          <CardHeader title="復元設定" />
+
           <CardContent>
-            <RadioBox.Group label="" name="radioboxValue" direction="horizontal">
+            <RadioBox.Group
+              label="復元設定"
+              name="radioboxValue"
+              direction="horizontal"
+              className="gap-14"
+            >
               <RadioBox.Option value="1">即時</RadioBox.Option>
               <RadioBox.Option value="2">予約</RadioBox.Option>
             </RadioBox.Group>
           </CardContent>
+
+          <div className="border-t border-gray-200 my-4"></div>
+          <div className="flex justify-center">
+            <CardContent>
+              <div className="p-6">
+                {/* Dòng chứa FilePicker + Button */}
+                <div className="flex items-center gap-3">
+                  <FilePicker
+                    accept=".pdf,.jpg,.png"
+                    onChange={(file) => {
+                      console.log('File selected:', file);
+                    }}
+                  />
+
+                  <Button type="submit">実行</Button>
+                </div>
+              </div>
+            </CardContent>
+          </div>
         </Card>
       </TabsContent>
 
       <TabsContent value="tab3">
         <Card>
-          <CardHeader title="公開設定" />
-
-          <CardContent>
-            <div className="flex items-center gap-6">
-              <RadioBox.Group label="" name="radioboxValue" direction="horizontal">
+          <CardHeader title="" />
+          <div className="grid grid-cols-4 gap-6">
+            <CardContent>
+              <RadioBox.Group
+                label="公開設定"
+                name="radioboxValue"
+                direction="horizontal"
+                className="gap-14"
+              >
                 <RadioBox.Option value="1">即時</RadioBox.Option>
                 <RadioBox.Option value="2">予約</RadioBox.Option>
               </RadioBox.Group>
-
+            </CardContent>
+            <CardContent>
               <TextBox
                 id="startDate"
                 name="startDate"
@@ -72,28 +124,54 @@ const page = () => {
                 label="公開日時"
                 width="md"
               />
-            </div>
-          </CardContent>
+            </CardContent>
+          </div>
+
           <div className="border-t border-gray-200 my-4"></div>
-          <CardHeader title="非公開設定" />
+
           <CardContent>
-            <RadioBox.Group label="" name="radioboxValue" direction="horizontal">
+            <RadioBox.Group
+              label="非公開設定"
+              name="radioboxValue"
+              direction="horizontal"
+              className="gap-14"
+            >
               <RadioBox.Option value="1">即時</RadioBox.Option>
               <RadioBox.Option value="2">予約</RadioBox.Option>
             </RadioBox.Group>
           </CardContent>
           <div className="border-t border-gray-200 my-4"></div>
-          <SelectBox
-            id="selectboxValue"
-            label="在庫を同期しますか？"
-            name="selectboxValue"
-            width="sm"
-            options={[
-              { value: '1', label: 'する' },
-              { value: '2', label: 'しない' },
-            ]}
-            isRequired={true}
-          />
+          <div className="flex justify-center">
+            <SelectBox
+              id="selectboxValue"
+              label="在庫を同期しますか？"
+              name="selectboxValue"
+              width="sm"
+              direction="horizontal"
+              options={[
+                { value: '1', label: 'する' },
+                { value: '2', label: 'しない' },
+              ]}
+              isRequired={true}
+            />
+          </div>
+          <div className="flex justify-center">
+            <CardContent>
+              <div className="p-6">
+                {/* Dòng chứa FilePicker + Button */}
+                <div className="flex items-center gap-3">
+                  <FilePicker
+                    accept=".pdf,.jpg,.png"
+                    onChange={(file) => {
+                      console.log('File selected:', file);
+                    }}
+                  />
+
+                  <Button type="submit">実行</Button>
+                </div>
+              </div>
+            </CardContent>
+          </div>
         </Card>
       </TabsContent>
 
