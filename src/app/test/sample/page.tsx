@@ -3,6 +3,8 @@ import { Button } from '@/component/common/Button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/component/common/Card';
 import { CheckboxGroup } from '@/component/common/CheckboxGroup';
 import { DatePicker } from '@/component/common/DatePicker';
+import { DateTimePicker } from '@/component/common/DateTimePicker';
+import FilePicker from '@/component/common/FilePicker';
 import RadioBox from '@/component/common/RadioBox';
 import SelectBox from '@/component/common/SelectBox';
 import { TextArea } from '@/component/common/TextArea';
@@ -17,6 +19,7 @@ const page = () => {
 
   const formik = useFormik({
     initialValues: {
+      dateTimePickerValue: null,
       datePickerValue: null,
       textboxValue: '',
       textareaValue: '',
@@ -26,6 +29,7 @@ const page = () => {
     },
     validationSchema: Yup.object({
       datePickerValue: Yup.date().required('date Picker Valueを入力してください。'),
+      dateTimePickerValue: Yup.date().required('date Picker Valueを入力してください。'),
       textboxValue: Yup.string().trim().required('Text box sampleを入力してください。'),
       textareaValue: Yup.string().trim().required('Text area sample入力してください。'),
 
@@ -54,29 +58,49 @@ const page = () => {
                   description="Copy paste sử dụng các component dưới đây"
                 />
                 <CardContent>
+                  <div className="p-6">
+                    <FilePicker
+                      accept=".pdf,.jpg,.png"
+                      onChange={(file) => {
+                        console.log('File selected:', file);
+                      }}
+                    />
+                  </div>
                   <DatePicker
                     id="datePickerValue"
                     name="datePickerValue"
+                    label={'datePicker sample'}
                     value={formik.values.datePickerValue}
                     onChange={(date) => formik.setFieldValue('datePickerValue', date)}
                     error={formik.errors.datePickerValue}
                     touched={formik.touched.datePickerValue}
                   />
+                  <DateTimePicker
+                    id="dateTimePickerValue"
+                    name="dateTimePickerValue"
+                    label={'datetimePicker sample'}
+                    width="lg"
+                    value={formik.values.dateTimePickerValue}
+                    onChange={(date) => formik.setFieldValue('dateTimePickerValue', date)}
+                    error={formik.errors.dateTimePickerValue}
+                    touched={formik.touched.dateTimePickerValue}
+                  />
+
                   <TextBox
                     id="textboxValue"
                     name="textboxValue"
                     isRequired={true}
                     label={'Text box sample'}
                     placeholder="Text box sample"
-                    direction="vertical"
+                    width="lg"
                   />
                   <TextArea
                     id="textareaValue"
                     name="textareaValue"
                     label={'Text area sample'}
                     rows={3}
+                    width="lg"
                     placeholder="Text area sample"
-                    direction="vertical"
                   />
                   <CheckboxGroup
                     id="checkboxValue"
@@ -88,13 +112,12 @@ const page = () => {
                       { label: 'Option 3', value: '3' },
                       { label: 'Option 4', value: '4' },
                     ]}
-                    direction="vertical"
                   />
                   <SelectBox
                     id="selectboxValue"
                     label="select box sample"
                     name="selectboxValue"
-                    width="full"
+                    width="lg"
                     options={[
                       { value: '', label: '選んでください' },
                       { value: 'Option 1', label: '1' },
@@ -103,7 +126,11 @@ const page = () => {
                     ]}
                     isRequired={true}
                   />
-                  <RadioBox.Group label="Radio box sample" name="radioboxValue">
+                  <RadioBox.Group
+                    direction="horizontal"
+                    label="Radio box sample"
+                    name="radioboxValue"
+                  >
                     <RadioBox.Option value="1">Option 1</RadioBox.Option>
                     <RadioBox.Option value="2">Option 2</RadioBox.Option>
                     <RadioBox.Option value="3" disabled={true}>

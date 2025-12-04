@@ -1,8 +1,7 @@
 'use client';
-import axios from 'axios';
-import { getSession, signIn, signOut, useSession } from 'next-auth/react';
+import axios, { AxiosError } from 'axios';
+import { signOut, useSession } from 'next-auth/react';
 import { useEffect } from 'react';
-import { AxiosError } from 'axios';
 
 const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_DOMAIN;
 const axiosAuth = axios.create({
@@ -23,7 +22,8 @@ const useAxiosClient = () => {
   //With 401 status error from apis
   //========================================
   const handle401Error = async (error: AxiosError) => {
-    await signOut({ callbackUrl: '/login?isSessionExpired=true' }); // clear session
+    sessionStorage.setItem('isSessionExpired', 'true');
+    await signOut({ callbackUrl: '/login' });
   };
   useEffect(() => {
     //Response interceptor & handle error occur
@@ -40,7 +40,6 @@ const useAxiosClient = () => {
 
     return () => {
       //clean up hook
-      // axiosAuth.interceptors.request.eject(requestIntercept);
       axiosAuth.interceptors.response.eject(responseIntercept);
     };
   }, [session]);

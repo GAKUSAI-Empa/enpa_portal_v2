@@ -1,4 +1,4 @@
-import { APIUserLogin } from '@/app/login/api/accountAPI';
+import { APIUserLogin } from '@/app/(auth)/login/api/accountAPI';
 import NextAuth, { AuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 export const authOptions: AuthOptions = {
@@ -43,7 +43,6 @@ export const authOptions: AuthOptions = {
   debug: true,
   callbacks: {
     async jwt({ token, user, account, trigger, session }) {
-      console.log(token);
       if (trigger === 'update') {
         return { ...token, ...session.user };
       }

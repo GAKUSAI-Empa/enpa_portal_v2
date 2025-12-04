@@ -1,9 +1,10 @@
 'use client';
 
 import React, { ReactNode } from 'react';
-import { Toaster } from 'sonner';
+
+import { ConfirmProvider } from '@/component/common/ConfirmProvider';
 import { SessionProvider } from 'next-auth/react';
-import { ConfirmProvider } from 'material-ui-confirm';
+import { Toaster } from 'sonner';
 
 interface Props {
   children: ReactNode;
