@@ -70,6 +70,7 @@ const page = () => {
                     id="datePickerValue"
                     name="datePickerValue"
                     label={'datePicker sample'}
+                    width="lg"
                     value={formik.values.datePickerValue}
                     onChange={(date) => formik.setFieldValue('datePickerValue', date)}
                     error={formik.errors.datePickerValue}

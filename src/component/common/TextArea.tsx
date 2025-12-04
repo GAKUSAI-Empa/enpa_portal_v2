@@ -76,7 +76,7 @@ const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
             <label
               htmlFor={name}
               className={cn(
-                'block text-md font-medium text-gray-800',
+                'block text-sm font-medium text-gray-800',
                 direction === 'horizontal' && [
                   labelWidthClass[labelWidth ?? 'auto'],
                   'break-words whitespace-normal flex-shrink-0',
