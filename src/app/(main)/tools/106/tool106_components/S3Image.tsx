@@ -2,7 +2,7 @@
 
 import { IconAlertCircle, IconLoader2 } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
-import useTool10API from '../tool10_api/useTool10API';
+import useTool10API from '../tool106_api/useTool10API';
 
 interface S3ImageProps {
   jobId: string;
@@ -19,7 +19,6 @@ export function S3Image({ jobId, filename, className, alt }: S3ImageProps) {
   const [isError, setIsError] = useState(false);
   useEffect(() => {
     let isMounted = true;
-
     const fetchUrl = async () => {
       setIsLoading(true);
       setIsError(false);

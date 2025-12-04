@@ -2,7 +2,7 @@ import useAxiosClient from '@/lib/axios/useAxiosClient';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import { useMemo } from 'react';
-import { ProductRow } from '../tool10_type';
+import { ProductRow } from '../tool106_type';
 
 const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_DOMAIN;
 const API_BASE_URL = 'api-be/tools/106';

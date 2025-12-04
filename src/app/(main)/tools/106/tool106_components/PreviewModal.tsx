@@ -13,7 +13,7 @@ import {
   IconUpload,
 } from '@tabler/icons-react';
 
-import type { JobStatus, ProductRow } from '../tool10_type';
+import type { JobStatus, ProductRow } from '../tool106_type';
 import { S3Image } from './S3Image';
 
 const JOB_STATUS_JP: Record<string, string> = {

@@ -8,7 +8,8 @@ import { debounce } from 'lodash';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast, Toaster } from 'sonner';
 import { createNewProductRow } from './lib/utils';
-import useTool10API from './tool10_api/useTool10API';
+import useTool10API from './tool106_api/useTool10API';
+import { AllErrors, ProductRow } from './tool106_type';
 import EditableProductTable, {
   EditableProductTableHandle,
 } from './tool10_components/EdittableProductTable';
@@ -16,7 +17,6 @@ import PreviewModal from './tool10_components/PreviewModal';
 import ResetConfirmPopup from './tool10_components/ResetConfirmPopup';
 import RestoreSessionPopup from './tool10_components/RestoreSessionPopup';
 import { useJobPolling } from './tool10_Hooks/useJobPolling';
-import { AllErrors, ProductRow } from './tool10_type';
 
 type SonnerToastId = number | string;
 

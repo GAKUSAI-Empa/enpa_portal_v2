@@ -74,86 +74,108 @@ const page = () => {
               </TabsList>
 
               <TabsContent value="A">
-                <TextBox
-                  id="textboxValue"
-                  name="textboxValue"
-                  isRequired={true}
-                  label={'商品名に挿入したい文言'}
-                  placeholder="Text box sample"
-                  direction="vertical"
-                  width="lg"
-                />
+                <form>
+                  <table className="w-full">
+                    <tbody>
+                      <tr className="w-full">
+                        <td className="w-1/2">
+                          <TextBox
+                            id="textboxValue"
+                            name="textboxValue"
+                            isRequired={true}
+                            label={'商品名に挿入したい文言'}
+                            placeholder="Text box sample"
+                            direction="vertical"
+                            className="w-[34rem]"
+                          />
+                        </td>
+                        <td className="w-1/2">
+                          <div className="flex flex-start gap-20">
+                            <TextBox
+                              label="PCの画像幅"
+                              id="sp_width"
+                              name="sp_width"
+                              isRequired
+                              width="sm"
+                              direction="vertical"
+                              suffix={
+                                <SelectBox
+                                  id="sp_unit"
+                                  name="sp_unit"
+                                  isRequired
+                                  classNameParent="mb-0 w-10"
+                                  options={[
+                                    { value: 'px', label: 'px' },
+                                    { value: '%', label: '%' },
+                                  ]}
+                                />
+                              }
+                            />
 
-                <TextBox
-                  label="PCの画像幅"
-                  id="sp_width"
-                  name="sp_width"
-                  isRequired
-                  width="md"
-                  direction="vertical"
-                  suffix={
-                    <SelectBox
-                      id="sp_unit"
-                      name="sp_unit"
-                      isRequired
-                      width="sm"
-                      classNameParent="mb-0"
-                      options={[
-                        { value: 'px', label: 'px' },
-                        { value: '%', label: '%' },
-                      ]}
-                    />
-                  }
-                />
+                            <TextBox
+                              label="スマホの画像幅"
+                              id="sp_width"
+                              name="sp_width"
+                              isRequired
+                              width="sm"
+                              direction="vertical"
+                              suffix={
+                                <SelectBox
+                                  id="sp_unit"
+                                  name="sp_unit"
+                                  isRequired
+                                  classNameParent="mb-0 w-10"
+                                  options={[
+                                    { value: 'px', label: 'px' },
+                                    { value: '%', label: '%' },
+                                  ]}
+                                />
+                              }
+                            />
+                          </div>
+                        </td>
+                      </tr>
 
-                <TextBox
-                  label="スマホの画像幅"
-                  id="sp_width"
-                  name="sp_width"
-                  isRequired
-                  width="md"
-                  direction="vertical"
-                  suffix={
-                    <SelectBox
-                      id="sp_unit"
-                      name="sp_unit"
-                      isRequired
-                      width="sm"
-                      classNameParent="mb-0"
-                      options={[
-                        { value: 'px', label: 'px' },
-                        { value: '%', label: '%' },
-                      ]}
-                    />
-                  }
-                />
-                <SelectBox
-                  id="selectBoxValue"
-                  label="販売期間更新方法指定："
-                  name="selectBoxValue"
-                  width="lg"
-                  value=""
-                  options={[
-                    { value: '1', label: '1:販売期間をツールで更新する' },
-                    { value: '2', label: 'banana' },
-                    { value: '3', label: 'orange' },
-                  ]}
-                  isRequired={true}
-                />
-
-                <SelectBox
-                  id="selectBoxValue"
-                  label="復元時の価格更新の指定："
-                  name="selectBoxValue"
-                  width="lg"
-                  value=""
-                  options={[
-                    { value: '1', label: '0:復元時にをツールで更新する' },
-                    { value: '2', label: 'banana' },
-                    { value: '3', label: 'orange' },
-                  ]}
-                  isRequired={true}
-                />
+                      <tr>
+                        <td className="w-1/2">
+                          <SelectBox
+                            id="selectBoxValue"
+                            label="販売期間更新方法指定："
+                            name="selectBoxValue"
+                            width="full"
+                            classNameParent="w-[34rem]"
+                            value=""
+                            options={[
+                              {
+                                value: '0',
+                                label: '０：現在商品ページに設定されている販売期間を削除する',
+                              },
+                              { value: '1', label: '１：販売期間をツールで更新する' },
+                              { value: '2', label: '２：販売期間をツールで更新しない' },
+                            ]}
+                            isRequired={true}
+                          />
+                        </td>
+                        <td className="w-1/2">
+                          <SelectBox
+                            id="selectBoxValue"
+                            label="復元時の価格更新の指定："
+                            name="selectBoxValue"
+                            width="full"
+                            classNameParent="w-[34rem]"
+                            value=""
+                            options={[
+                              { value: '1', label: '0:復元時にをツールで更新する' },
+                              { value: '2', label: 'banana' },
+                              { value: '3', label: 'orange' },
+                            ]}
+                            isRequired={true}
+                          />
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </form>
 
                 <div className="flex flex-col">
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

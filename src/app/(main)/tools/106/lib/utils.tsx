@@ -8,7 +8,7 @@ import {
   IconX,
 } from '@tabler/icons-react';
 import React from 'react';
-import { FtpUploadStatus, JobStatus, ProductRow } from '../tool10_type';
+import { FtpUploadStatus, JobStatus, ProductRow } from '../tool106_type';
 
 export const createNewProductRow = (idPrefix: string): ProductRow => {
   const uniqueId: number = Date.now() + Math.floor(Math.random() * 1000);

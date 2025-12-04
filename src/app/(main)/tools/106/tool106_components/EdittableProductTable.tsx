@@ -9,7 +9,7 @@ import { FormikProvider, useFormik, useFormikContext } from 'formik';
 import React, { forwardRef, useEffect, useId, useImperativeHandle, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import * as Yup from 'yup';
-import { AllErrors, ProductRow } from '../tool10_type';
+import { AllErrors, ProductRow } from '../tool106_type';
 import Slide from './Slide';
 
 const ValidationSchema = Yup.object({

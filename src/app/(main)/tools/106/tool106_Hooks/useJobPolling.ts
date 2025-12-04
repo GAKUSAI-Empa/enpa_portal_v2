@@ -1,8 +1,8 @@
 // src/app/tools/102/hooks/useJobPolling.ts
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import useTool10API from '../tool10_api/useTool10API';
-import { JobStatus } from '../tool10_type';
+import useTool10API from '../tool106_api/useTool10API';
+import { JobStatus } from '../tool106_type';
 
 interface UseJobPollingProps {
   jobId: string | null;
