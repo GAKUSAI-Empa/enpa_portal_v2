@@ -6,8 +6,8 @@ import { cn } from '../../lib/utils';
 const widthClass: Record<string, string> = {
   // Tailwin css width
   sm: 'w-32',
-  md: 'w-48',
-  lg: 'w-64',
+  md: 'w-64',
+  lg: 'w-96',
   full: 'w-full',
 };
 const labelWidthClass: Record<string, string> = {
@@ -77,7 +77,7 @@ const SelectBox = React.forwardRef<HTMLSelectElement, SelectBoxProps>(
           <label
             htmlFor={id}
             className={cn(
-              'block text-gray-800 text-md font-medium',
+              'block text-gray-800 text-sm font-semibold',
               direction === 'horizontal' && [
                 labelWidthClass[labelWidth ?? 'auto'],
                 'break-words whitespace-normal flex-shrink-0',
