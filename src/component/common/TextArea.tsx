@@ -69,7 +69,7 @@ const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
         <div
           className={cn(
             'flex mb-3',
-            direction === 'vertical' ? 'flex-col gap-1' : 'items-center gap-3',
+            direction === 'vertical' ? 'flex-col gap-1' : 'items-start gap-3',
           )}
         >
           {showLabel && (

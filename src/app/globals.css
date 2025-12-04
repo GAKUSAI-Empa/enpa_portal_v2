@@ -59,6 +59,7 @@ input[type='number'] {
   -moz-appearance: textfield;
 }
 
+/* react date time picker css  */
 .customDatePickerWidthFull,
 .customDatePickerWidthFull > div.react-datepicker-wrapper,
 .customDatePickerWidthFull > div > div.react-datepicker__input-container,
