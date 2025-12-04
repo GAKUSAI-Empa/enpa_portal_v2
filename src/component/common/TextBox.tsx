@@ -7,9 +7,15 @@ import { cn } from '../../lib/utils';
 const widthClass: Record<string, string> = {
   // Tailwin css width
   sm: 'w-32',
-  md: 'w-48',
-  lg: 'w-64',
+  md: 'w-64',
+  lg: 'w-96',
   full: 'w-full',
+};
+const labelWidthClass: Record<string, string> = {
+  sm: 'w-24', // ~96px
+  md: 'w-32', // ~128px
+  lg: 'w-40', // ~160px
+  auto: 'w-auto',
 };
 interface TextBoxProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -20,6 +26,7 @@ interface TextBoxProps extends React.InputHTMLAttributes<HTMLInputElement> {
   width?: 'sm' | 'md' | 'lg' | 'full';
   direction?: 'vertical' | 'horizontal';
   suffix?: React.ReactNode;
+  labelWidth?: 'sm' | 'md' | 'lg' | 'auto';
 }
 const TextBox = React.forwardRef<HTMLInputElement, TextBoxProps>(
   (
@@ -34,6 +41,7 @@ const TextBox = React.forwardRef<HTMLInputElement, TextBoxProps>(
       suffix,
       className = '',
       type,
+      labelWidth = 'md',
       ...props
     },
     ref,
@@ -90,8 +98,11 @@ const TextBox = React.forwardRef<HTMLInputElement, TextBoxProps>(
             <label
               htmlFor={name}
               className={cn(
-                'block text-md font-medium text-gray-800',
-                direction === 'horizontal' && 'whitespace-nowrap',
+                'block text-sm font-semibold text-gray-800',
+                direction === 'horizontal' && [
+                  labelWidthClass[labelWidth ?? 'auto'],
+                  'break-words whitespace-normal flex-shrink-0',
+                ],
               )}
             >
               {label}
@@ -105,7 +116,12 @@ const TextBox = React.forwardRef<HTMLInputElement, TextBoxProps>(
               )}
             </label>
           )}
-          <div className="flex items-center">
+          <div
+            className={cn(
+              'flex items-center',
+              direction === 'horizontal' ? 'flex-1' : widthClass[width],
+            )}
+          >
             <div className={cn('relative ', widthClass[width])}>
               <input
                 id={id}
@@ -133,10 +149,10 @@ const TextBox = React.forwardRef<HTMLInputElement, TextBoxProps>(
                   {showPassword ? <IconEyeOff size={18} /> : <IconEye size={18} />}
                 </button>
               )}
+              {fieldTouched && renderFieldError(fieldError)}
             </div>
             {suffix && <div className="ml-2">{suffix}</div>}
           </div>
-          {fieldTouched && renderFieldError(fieldError)}
         </div>
       </>
     );

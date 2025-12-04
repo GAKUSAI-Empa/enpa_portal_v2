@@ -63,7 +63,7 @@ const CheckboxGroup = ({
               direction === 'horizontal' && 'whitespace-nowrap',
             )}
           >
-            <span className="text-sm font-medium text-gray-800">{label}</span>
+            <span className="text-sm font-semibold text-gray-800">{label}</span>
             {isRequired && <span className="text-red-500">*</span>}
           </div>
         )}

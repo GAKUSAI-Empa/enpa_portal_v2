@@ -4,6 +4,7 @@ import {
   IconBrush,
   IconCalendarEvent,
   IconChartBar,
+  IconMessage2,
   IconSettings,
 } from '@tabler/icons-react';
 
@@ -73,6 +74,11 @@ const toolsNavItemList = [
       { label: 'お気に入り登録URL一括ダウンロード', href: '/29' },
       { label: 'モール接続確認', href: '/30' },
     ],
+  },
+  {
+    label: '問い合わせ',
+    icon: IconMessage2,
+    children: [{ label: '店舗からの問い合わせ', href: '/account/inquiries' }],
   },
 ];
 
