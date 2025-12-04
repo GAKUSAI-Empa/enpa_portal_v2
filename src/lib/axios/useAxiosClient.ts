@@ -2,7 +2,6 @@
 import axios, { AxiosError } from 'axios';
 import { signOut, useSession } from 'next-auth/react';
 import { useEffect } from 'react';
-import { toast } from 'sonner';
 
 const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_DOMAIN;
 const axiosAuth = axios.create({
@@ -23,7 +22,7 @@ const useAxiosClient = () => {
   //With 401 status error from apis
   //========================================
   const handle401Error = async (error: AxiosError) => {
-    toast.warning('セッションが切れました。再度ログインしてください');
+    sessionStorage.setItem('isSessionExpired', 'true');
     await signOut({ callbackUrl: '/login' });
   };
   useEffect(() => {

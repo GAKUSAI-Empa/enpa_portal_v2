@@ -17,6 +17,7 @@ interface DateTimePickerProps {
   className?: string;
   error?: string;
   touched?: boolean;
+  labelWidth?: 'sm' | 'md' | 'lg' | 'auto';
 }
 
 const widthClass: Record<string, string> = {
@@ -25,12 +26,17 @@ const widthClass: Record<string, string> = {
   lg: 'w-64',
   full: 'w-full',
 };
-
+const labelWidthClass: Record<string, string> = {
+  sm: 'w-24', // ~96px
+  md: 'w-32', // ~128px
+  lg: 'w-40', // ~160px
+  auto: 'w-auto',
+};
 export const DateTimePicker: React.FC<DateTimePickerProps> = ({
   id,
   name,
   label,
-  showLabel,
+  showLabel = true,
   isRequired = false,
   width = 'full',
   direction = 'vertical',
@@ -39,46 +45,67 @@ export const DateTimePicker: React.FC<DateTimePickerProps> = ({
   className = '',
   error = '',
   touched = false,
+  labelWidth = 'md',
 }) => {
   return (
-    <div className="mb-3 flex flex-col gap-1">
+    <div
+      className={cn(
+        'flex mb-3',
+        direction === 'vertical' ? 'flex-col gap-1' : 'items-center gap-3',
+      )}
+    >
       {showLabel && (
         <label
           htmlFor={name}
           className={cn(
             'block text-sm font-medium text-gray-800',
-            direction === 'horizontal' && 'whitespace-nowrap',
+            direction === 'horizontal' && [
+              labelWidthClass[labelWidth ?? 'auto'],
+              'break-words whitespace-normal flex-shrink-0',
+            ],
           )}
         >
           {label}
-          {isRequired === true && (
+          {isRequired === true ? (
             <span className="text-red-500 mr-1" aria-hidden="true">
               *
             </span>
+          ) : (
+            <></>
           )}
         </label>
       )}
-
-      <ReactDatePicker
-        id={id}
-        name={name}
-        selected={value}
-        onChange={propOnChange}
-        showTimeSelect
-        timeFormat="HH:mm"
-        timeIntervals={15}
-        dateFormat="yyyy/MM/dd HH:mm"
-        placeholderText="yyyy/MM/dd HH:mm"
+      <div
         className={cn(
-          'h-10 rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm',
-          'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 focus:border-red-500',
-          'disabled:cursor-not-allowed disabled:bg-gray-100',
-          widthClass[width],
-          className,
+          'flex items-center',
+          direction === 'horizontal' ? 'flex-1' : widthClass[width],
         )}
-      />
+      >
+        <div className={cn(widthClass[width])}>
+          <div className={'customDatePickerWidthFull'}>
+            <ReactDatePicker
+              id={id}
+              name={name}
+              selected={value}
+              onChange={propOnChange}
+              showTimeSelect
+              timeFormat="HH:mm"
+              timeIntervals={15}
+              dateFormat="yyyy/MM/dd HH:mm"
+              placeholderText="yyyy/MM/dd HH:mm"
+              className={cn(
+                'h-10 rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm',
+                'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 focus:border-red-500',
+                'disabled:cursor-not-allowed disabled:bg-gray-100',
+                widthClass[width],
+                className,
+              )}
+            />
 
-      {touched && error && <p className="text-red-500 text-sm">{error}</p>}
+            {touched && error && <p className="text-red-500 text-sm">{error}</p>}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

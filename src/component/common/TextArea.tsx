@@ -10,6 +10,12 @@ const widthClass: Record<string, string> = {
   lg: 'w-64',
   full: 'w-full',
 };
+const labelWidthClass: Record<string, string> = {
+  sm: 'w-24', // ~96px
+  md: 'w-32', // ~128px
+  lg: 'w-40', // ~160px
+  auto: 'w-auto',
+};
 interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
   showLabel?: Boolean;
@@ -20,6 +26,7 @@ interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
   rows?: number;
   direction?: 'vertical' | 'horizontal';
   suffix?: React.ReactNode;
+  labelWidth?: 'sm' | 'md' | 'lg' | 'auto';
 }
 const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
   (
@@ -33,6 +40,7 @@ const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
       rows = 3,
       direction = 'vertical',
       suffix,
+      labelWidth = 'md',
       className = '',
       ...props
     },
@@ -68,8 +76,11 @@ const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
             <label
               htmlFor={name}
               className={cn(
-                'block text-sm font-medium text-gray-800',
-                direction === 'horizontal' && 'whitespace-nowrap',
+                'block text-md font-medium text-gray-800',
+                direction === 'horizontal' && [
+                  labelWidthClass[labelWidth ?? 'auto'],
+                  'break-words whitespace-normal flex-shrink-0',
+                ],
               )}
             >
               {label}
@@ -82,7 +93,12 @@ const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
               )}
             </label>
           )}
-          <div className="flex items-center">
+          <div
+            className={cn(
+              'flex items-center',
+              direction === 'horizontal' ? 'flex-1' : widthClass[width],
+            )}
+          >
             <div className="relative w-full">
               <textarea
                 id={id}
@@ -100,10 +116,10 @@ const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
                 ref={ref}
                 {...props}
               />
+              {fieldTouched && fieldError && <p className="text-red-500 text-sm">{fieldError}</p>}
             </div>
             {suffix && <div className="ml-2">{suffix}</div>}
           </div>
-          {fieldTouched && fieldError && <p className="text-red-500 text-sm">{fieldError}</p>}
         </div>
       </>
     );
