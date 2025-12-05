@@ -63,7 +63,7 @@ const page = () => {
           {/* ================== TAB 1 ================== */}
           <TabsContent value="tab1">
             <Card>
-              <CardContent className="flex flex-col items-center gap-6 pt-25">
+              <CardContent className="flex flex-col items-center gap-6 p-6">
                 <TextBox
                   id="startDate"
                   name="startDate"
@@ -71,11 +71,12 @@ const page = () => {
                   direction="horizontal"
                   label="予約日時"
                   width="md"
+                  className="w-[90%]"
                   value={formik.values.startDate}
                   onChange={formik.handleChange}
                 />
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 w-[90%] justify-start">
                   <FilePicker
                     accept=".pdf,.jpg,.png"
                     onChange={(file) => {
