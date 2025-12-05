@@ -6,9 +6,15 @@ import { cn } from '../../lib/utils';
 const widthClass: Record<string, string> = {
   // Tailwin css width
   sm: 'w-32',
-  md: 'w-48',
-  lg: 'w-64',
+  md: 'w-64',
+  lg: 'w-96',
   full: 'w-full',
+};
+const labelWidthClass: Record<string, string> = {
+  sm: 'w-24', // ~96px
+  md: 'w-32', // ~128px
+  lg: 'w-40', // ~160px
+  auto: 'w-auto',
 };
 interface SelectBoxProps extends React.InputHTMLAttributes<HTMLSelectElement> {
   id: string;
@@ -21,6 +27,7 @@ interface SelectBoxProps extends React.InputHTMLAttributes<HTMLSelectElement> {
   classNameSelect?: string;
   classNameParent?: string;
   suffix?: React.ReactNode;
+  labelWidth?: 'sm' | 'md' | 'lg' | 'auto';
 }
 const SelectBox = React.forwardRef<HTMLSelectElement, SelectBoxProps>(
   (
@@ -35,6 +42,7 @@ const SelectBox = React.forwardRef<HTMLSelectElement, SelectBoxProps>(
       classNameSelect = '',
       classNameParent = '',
       suffix,
+      labelWidth = 'md',
       ...props
     },
     ref,
@@ -69,8 +77,11 @@ const SelectBox = React.forwardRef<HTMLSelectElement, SelectBoxProps>(
           <label
             htmlFor={id}
             className={cn(
-              'block text-gray-800 text-md font-medium',
-              direction === 'horizontal' && 'whitespace-nowrap',
+              'block text-gray-800 text-sm font-semibold',
+              direction === 'horizontal' && [
+                labelWidthClass[labelWidth ?? 'auto'],
+                'break-words whitespace-normal flex-shrink-0',
+              ],
             )}
           >
             {label}
@@ -83,29 +94,37 @@ const SelectBox = React.forwardRef<HTMLSelectElement, SelectBoxProps>(
             )}
           </label>
         )}
-        <div className="flex items-center">
-          <select
-            id={id}
-            value={fieldValue}
-            onChange={handleChange}
-            {...props}
-            className={cn(
-              'flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm',
-              'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 focus:border-red-500',
-              'disabled:cursor-not-allowed disabled:bg-gray-100',
-              widthClass[width],
-              classNameSelect,
-            )}
-          >
-            {options.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
+        <div
+          className={cn(
+            'flex items-center',
+            direction === 'horizontal' ? 'flex-1' : widthClass[width],
+          )}
+        >
+          <div className="w-full">
+            <select
+              id={id}
+              value={fieldValue}
+              onChange={handleChange}
+              {...props}
+              className={cn(
+                'flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm',
+                'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 focus:border-red-500',
+                'disabled:cursor-not-allowed disabled:bg-gray-100',
+                widthClass[width],
+                classNameSelect,
+              )}
+            >
+              {options.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+            {fieldTouched && fieldError && <p className="text-red-500 text-sm">{fieldError}</p>}
+          </div>
+
           {suffix && <div className="ml-2">{suffix}</div>}
         </div>
-        {fieldTouched && fieldError && <p className="text-red-500 text-sm">{fieldError}</p>}
       </div>
     );
   },

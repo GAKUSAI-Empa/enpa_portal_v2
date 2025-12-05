@@ -6,9 +6,15 @@ import { cn } from '../../lib/utils';
 const widthClass: Record<string, string> = {
   // Tailwin css width
   sm: 'w-32',
-  md: 'w-48',
-  lg: 'w-64',
+  md: 'w-64',
+  lg: 'w-96',
   full: 'w-full',
+};
+const labelWidthClass: Record<string, string> = {
+  sm: 'w-24', // ~96px
+  md: 'w-32', // ~128px
+  lg: 'w-40', // ~160px
+  auto: 'w-auto',
 };
 interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
@@ -20,6 +26,7 @@ interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
   rows?: number;
   direction?: 'vertical' | 'horizontal';
   suffix?: React.ReactNode;
+  labelWidth?: 'sm' | 'md' | 'lg' | 'auto';
 }
 const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
   (
@@ -33,6 +40,7 @@ const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
       rows = 3,
       direction = 'vertical',
       suffix,
+      labelWidth = 'md',
       className = '',
       ...props
     },
@@ -61,15 +69,18 @@ const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
         <div
           className={cn(
             'flex mb-3',
-            direction === 'vertical' ? 'flex-col gap-1' : 'items-center gap-3',
+            direction === 'vertical' ? 'flex-col gap-1' : 'items-start gap-3',
           )}
         >
           {showLabel && (
             <label
               htmlFor={name}
               className={cn(
-                'block text-sm font-medium text-gray-800',
-                direction === 'horizontal' && 'whitespace-nowrap',
+                'block text-sm font-semibold text-gray-800',
+                direction === 'horizontal' && [
+                  labelWidthClass[labelWidth ?? 'auto'],
+                  'break-words whitespace-normal flex-shrink-0',
+                ],
               )}
             >
               {label}
@@ -82,7 +93,12 @@ const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
               )}
             </label>
           )}
-          <div className="flex items-center">
+          <div
+            className={cn(
+              'flex items-center',
+              direction === 'horizontal' ? 'flex-1' : widthClass[width],
+            )}
+          >
             <div className="relative w-full">
               <textarea
                 id={id}
@@ -100,10 +116,10 @@ const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
                 ref={ref}
                 {...props}
               />
+              {fieldTouched && fieldError && <p className="text-red-500 text-sm">{fieldError}</p>}
             </div>
             {suffix && <div className="ml-2">{suffix}</div>}
           </div>
-          {fieldTouched && fieldError && <p className="text-red-500 text-sm">{fieldError}</p>}
         </div>
       </>
     );
