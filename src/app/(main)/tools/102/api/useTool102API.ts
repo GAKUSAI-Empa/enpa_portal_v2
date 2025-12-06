@@ -3,9 +3,9 @@ import { useSession } from 'next-auth/react';
 import { useMemo } from 'react';
 import type { ProductRow } from '../types';
 
-const BASE_URL = '/api-be/tools/101';
+const BASE_URL = '/api-be/tools/102';
 
-const useTool101API = () => {
+const useTool102API = () => {
   const api = useAxiosClient();
   const { data: session } = useSession();
 
@@ -75,4 +75,4 @@ const useTool101API = () => {
   return service;
 };
 
-export default useTool101API;
+export default useTool102API;
